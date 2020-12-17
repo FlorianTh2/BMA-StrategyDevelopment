@@ -1,16 +1,15 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from "@angular/core/testing";
 
-import { SpiderchartComponent } from './spiderchart.component';
+import { SpiderchartComponent } from "./spiderchart.component";
 
-describe('SpiderchartComponent', () => {
+describe("SpiderchartComponent", () => {
   let component: SpiderchartComponent;
   let fixture: ComponentFixture<SpiderchartComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ SpiderchartComponent ]
-    })
-    .compileComponents();
+      declarations: [SpiderchartComponent]
+    }).compileComponents();
   });
 
   beforeEach(() => {
@@ -19,7 +18,7 @@ describe('SpiderchartComponent', () => {
     fixture.detectChanges();
   });
 
-  it('should create', () => {
+  it("should create", () => {
     expect(component).toBeTruthy();
   });
 });

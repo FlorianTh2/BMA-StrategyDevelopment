@@ -1,16 +1,15 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from "@angular/core/testing";
 
-import { Page404HomeComponentComponent } from './page404-home-component.component';
+import { Page404HomeComponentComponent } from "./page404-home-component.component";
 
-describe('Page404HomeComponentComponent', () => {
+describe("Page404HomeComponentComponent", () => {
   let component: Page404HomeComponentComponent;
   let fixture: ComponentFixture<Page404HomeComponentComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ Page404HomeComponentComponent ]
-    })
-    .compileComponents();
+      declarations: [Page404HomeComponentComponent]
+    }).compileComponents();
   });
 
   beforeEach(() => {
@@ -19,7 +18,7 @@ describe('Page404HomeComponentComponent', () => {
     fixture.detectChanges();
   });
 
-  it('should create', () => {
+  it("should create", () => {
     expect(component).toBeTruthy();
   });
 });

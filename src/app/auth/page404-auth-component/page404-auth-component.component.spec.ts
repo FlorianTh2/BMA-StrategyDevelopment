@@ -1,16 +1,15 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from "@angular/core/testing";
 
-import { Page404AuthComponentComponent } from './page404-auth-component.component';
+import { Page404AuthComponentComponent } from "./page404-auth-component.component";
 
-describe('Page404AuthComponentComponent', () => {
+describe("Page404AuthComponentComponent", () => {
   let component: Page404AuthComponentComponent;
   let fixture: ComponentFixture<Page404AuthComponentComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ Page404AuthComponentComponent ]
-    })
-    .compileComponents();
+      declarations: [Page404AuthComponentComponent]
+    }).compileComponents();
   });
 
   beforeEach(() => {
@@ -19,7 +18,7 @@ describe('Page404AuthComponentComponent', () => {
     fixture.detectChanges();
   });
 
-  it('should create', () => {
+  it("should create", () => {
     expect(component).toBeTruthy();
   });
 });
