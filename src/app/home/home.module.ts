@@ -5,7 +5,7 @@ import { HomeComponent } from "./home.component";
 import { HomeRoutingModule } from "./home-routing.module";
 import { Page404HomeComponentComponent } from "./page404-home-component/page404-home-component.component";
 import { SpiderchartComponent } from "./spiderchart/spiderchart.component";
-import { TestchartComponent } from './testchart/testchart.component';
+import { TestchartComponent } from "./testchart/testchart.component";
 
 @NgModule({
   declarations: [

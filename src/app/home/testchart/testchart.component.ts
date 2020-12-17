@@ -16,7 +16,7 @@ import * as d3 from "d3";
   encapsulation: ViewEncapsulation.None
 })
 export class TestchartComponent implements OnInit {
-  title: string = "Testchart with d3.js";
+  title = "Testchart with d3.js";
   private width: number;
   private height: number;
   private margin = { top: 20, right: 20, bottom: 30, left: 50 };

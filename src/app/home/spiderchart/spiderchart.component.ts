@@ -6,6 +6,8 @@ import {
 } from "@angular/core";
 import * as d3 from "d3";
 
+// good reference
+// http://bl.ocks.org/nbremer/6506614
 @Component({
   selector: "app-spiderchart",
   templateUrl: "./spiderchart.component.html",
@@ -13,7 +15,7 @@ import * as d3 from "d3";
   encapsulation: ViewEncapsulation.None
 })
 export class SpiderchartComponent implements OnInit {
-  title: string = "Spiderchart with d3.js";
+  title = "Spiderchart with d3.js";
   private width: number;
   private height: number;
   private container: any;
