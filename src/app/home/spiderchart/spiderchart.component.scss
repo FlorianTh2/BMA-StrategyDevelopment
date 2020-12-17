@@ -1,13 +1,17 @@
-.bar1
-{
-  background-color: black;
-}
-
-
 .container
 {
   width: 750px;
   height: 500px;
-  display: flex;
-  justify-content: space-around;
+  border: 1px solid black;
+}
+
+.bar
+{
+  fill: black;
+}
+
+#chart {
+  position: absolute;
+  top: 50px;
+  left: 100px;
 }
