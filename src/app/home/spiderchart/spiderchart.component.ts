@@ -6,6 +6,7 @@ import { Component, OnInit } from "@angular/core";
   styleUrls: ["./spiderchart.component.scss"]
 })
 export class SpiderchartComponent implements OnInit {
+  title: string = "Spiderchart with d3.js";
   constructor() {}
 
   ngOnInit(): void {}
