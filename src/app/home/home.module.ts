@@ -7,7 +7,6 @@ import { Page404HomeComponentComponent } from "./page404-home-component/page404-
 import { SpiderchartComponent } from "./spiderchart/spiderchart.component";
 import { TestchartComponent } from "./testchart/testchart.component";
 import { SharedModule } from "../shared/share.module";
-import { MaterialModule } from "../material/material.module";
 
 @NgModule({
   declarations: [
@@ -16,6 +15,6 @@ import { MaterialModule } from "../material/material.module";
     SpiderchartComponent,
     TestchartComponent
   ],
-  imports: [CommonModule, HomeRoutingModule, SharedModule, MaterialModule]
+  imports: [CommonModule, HomeRoutingModule, SharedModule]
 })
 export class HomeModule {}
