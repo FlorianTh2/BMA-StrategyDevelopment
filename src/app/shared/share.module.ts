@@ -6,6 +6,6 @@ import { MaterialModule } from "../material/material.module";
 @NgModule({
   declarations: [SafeHtmlPipe],
   imports: [CommonModule, MaterialModule],
-  exports: [SafeHtmlPipe]
+  exports: [SafeHtmlPipe, MaterialModule]
 })
 export class SharedModule {}

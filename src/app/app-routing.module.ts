@@ -9,11 +9,10 @@ const routes: Routes = [
   {
     path: "auth",
     loadChildren: () => import(`./auth/auth.module`).then((m) => m.AuthModule)
-  }
+  },
+  // default
+  { path: "", redirectTo: "/home", pathMatch: "full" }
 ];
-
-// default
-// { path: '', redirectTo: '/dashboard', pathMatch: 'full' },
 
 @NgModule({
   imports: [RouterModule.forRoot(routes)],
