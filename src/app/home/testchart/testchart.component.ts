@@ -6,6 +6,9 @@ import {
 } from "@angular/core";
 import * as d3 from "d3";
 
+// other typescript specific example
+// e.g. https://github.com/karllhughes/angular-d3/blob/main/src/app/bar/bar.component.ts
+
 @Component({
   selector: "app-testchart",
   templateUrl: "./testchart.component.html",

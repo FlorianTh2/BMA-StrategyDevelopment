@@ -6,6 +6,7 @@ import { HomeRoutingModule } from "./home-routing.module";
 import { Page404HomeComponentComponent } from "./page404-home-component/page404-home-component.component";
 import { SpiderchartComponent } from "./spiderchart/spiderchart.component";
 import { TestchartComponent } from "./testchart/testchart.component";
+import { SharedModule } from "../shared/share.module";
 
 @NgModule({
   declarations: [
@@ -14,6 +15,6 @@ import { TestchartComponent } from "./testchart/testchart.component";
     SpiderchartComponent,
     TestchartComponent
   ],
-  imports: [CommonModule, HomeRoutingModule]
+  imports: [CommonModule, HomeRoutingModule, SharedModule]
 })
 export class HomeModule {}

@@ -5,6 +5,10 @@ import {
   ViewEncapsulation
 } from "@angular/core";
 import * as d3 from "d3";
+import { data as externalData } from "../../../assets/js/exampleData";
+import { RadarChart } from "../../../assets/js/RadarChart";
+import { DomSanitizer } from "@angular/platform-browser";
+import { style } from "@angular/animations";
 
 // good reference
 // http://bl.ocks.org/nbremer/6506614
@@ -15,29 +19,98 @@ import * as d3 from "d3";
   encapsulation: ViewEncapsulation.None
 })
 export class SpiderchartComponent implements OnInit {
-  title = "Spiderchart with d3.js";
-  private width: number;
-  private height: number;
+  // general chart settings
+  private width: number = 750;
+  private additionalWidth: number = 300;
+  private height: number = 750;
   private container: any;
   hostElement: any;
-  private data = [
-    { id: "d1", value: 10, region: "USA" },
-    { id: "d2", value: 11, region: "India" },
-    { id: "d3", value: 12, region: "China" },
-    { id: "d4", value: 6, region: "Germany" }
-  ];
+  private svg: any;
+  private margin = 100;
+
+  // data settings
+  private data: any = externalData;
+  private maxValue: number = 0.6;
+  private levels: number = 5;
+  private config: any;
+  private colorscale = d3.scaleOrdinal(d3.schemeCategory10);
+  private legendOptions = ["Smartphone", "Tablet"];
+
   constructor(private elRef: ElementRef) {
     this.hostElement = this.elRef.nativeElement;
   }
 
   ngOnInit(): void {
-    this.container = d3
+    this.config = {
+      w: this.width,
+      h: this.height,
+      maxValue: this.maxValue,
+      levels: this.levels,
+      ExtraWidthX: this.additionalWidth
+    };
+    this.svg = d3
       .select(this.hostElement)
-      .select("svg")
-      .classed("container", true);
+      .append("svg")
+      .attr("width", this.width + this.additionalWidth)
+      .attr("height", this.height);
+
+    RadarChart.draw("#chart", this.data, this.config);
 
     this.renderChart();
   }
 
-  private renderChart() {}
+  renderChart() {
+    var colorscale = this.colorscale;
+
+    //Create the title for the legend
+    var text = this.svg
+      .append("text")
+      .attr("class", "title")
+      .attr("transform", "translate(90,0)")
+      .attr("x", this.width - 70)
+      .attr("y", 10)
+      .attr("font-size", "12px")
+      .attr("fill", "#404040")
+      .text("What % of owners use a specific service in a week");
+
+    //Initiate Legend
+    var legend = this.svg
+      .append("g")
+      .attr("class", "legend")
+      .attr("height", 100)
+      .attr("width", 200)
+      .attr("transform", "translate(90,20)");
+
+    //Create colour squares
+    legend
+      .selectAll("rect")
+      .data(this.legendOptions)
+      .enter()
+      .append("rect")
+      .attr("x", this.width - 65)
+      .attr("y", function (d, i) {
+        return i * 20;
+      })
+      .attr("width", 10)
+      .attr("height", 10)
+      .style("fill", function (d, i) {
+        return colorscale(i);
+      });
+
+    //Create text next to squares
+    legend
+      .selectAll("text")
+      .data(this.legendOptions)
+      .enter()
+      .append("text")
+      .attr("x", this.width - 52)
+      .attr("y", function (d, i) {
+        return i * 20 + 9;
+      })
+      .attr("font-size", "11px")
+      .attr("fill", "#737373")
+      .text(function (d) {
+        return d;
+      });
+  }
 }
