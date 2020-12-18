@@ -20,9 +20,9 @@ import { style } from "@angular/animations";
 })
 export class SpiderchartComponent implements OnInit {
   // general chart settings
-  private width: number = 750;
+  private width: number = 500;
   private additionalWidth: number = 300;
-  private height: number = 750;
+  private height: number = 500;
   private container: any;
   hostElement: any;
   private svg: any;
@@ -48,13 +48,19 @@ export class SpiderchartComponent implements OnInit {
       levels: this.levels,
       ExtraWidthX: this.additionalWidth
     };
+
+    RadarChart.draw("#chart", this.data, this.config);
+
     this.svg = d3
       .select(this.hostElement)
+      .select("#body")
+      .style("width", (this.width + this.additionalWidth).toString() + "px")
+      // +100 since the legend i guess
+      .style("height", (this.height + 100).toString() + "px")
+      .selectAll("svg")
       .append("svg")
       .attr("width", this.width + this.additionalWidth)
       .attr("height", this.height);
-
-    RadarChart.draw("#chart", this.data, this.config);
 
     this.renderChart();
   }
