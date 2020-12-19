@@ -7,6 +7,8 @@ import { Page404HomeComponentComponent } from "./page404-home-component/page404-
 import { SpiderchartComponent } from "./spiderchart/spiderchart.component";
 import { TestchartComponent } from "./testchart/testchart.component";
 import { SharedModule } from "../shared/share.module";
+import { StoreModule } from "@ngrx/store";
+import * as fromHome from "./store/reducers";
 
 @NgModule({
   declarations: [
@@ -15,6 +17,11 @@ import { SharedModule } from "../shared/share.module";
     SpiderchartComponent,
     TestchartComponent
   ],
-  imports: [CommonModule, HomeRoutingModule, SharedModule]
+  imports: [
+    CommonModule,
+    HomeRoutingModule,
+    SharedModule,
+    StoreModule.forFeature(fromHome.homeFeatureKey, fromHome.reducers)
+  ]
 })
 export class HomeModule {}
