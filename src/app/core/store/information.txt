@@ -1,0 +1,3 @@
+- core/store used for components overlapping state
+- example: https://github.com/FabianGosebrink/ASPNETCore-Angular-Ngrx/tree/master/client/src/app/core/store
+- used for signalR there

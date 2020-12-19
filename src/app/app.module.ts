@@ -5,7 +5,7 @@ import { AppComponent } from "./app.component";
 import { BrowserAnimationsModule } from "@angular/platform-browser/animations";
 import { AppRoutingModule } from "./app-routing.module";
 import { StoreModule } from "@ngrx/store";
-import { reducers, metaReducers } from "./reducers";
+// import { reducers, metaReducers } from "./store/reducers";
 import { CoreModule } from "./core/core.module";
 
 @NgModule({
