@@ -1,34 +1,35 @@
 import { createReducer, on } from "@ngrx/store";
 import { increment, decrement, reset } from "../actions/counter.action";
+import * as fromRoot from "../../../store/reducers/root.reducer";
 
 export const homeFeatureKey = "home";
 
-export interface HomeReducerState {
+export interface State {
   counter: number;
 }
 
-export const initialState: HomeReducerState = {
+export const initialState: State = {
   counter: 0
 };
 
 const internalHomeReducer = createReducer(
   initialState,
 
-  on(increment, (state: HomeReducerState) => {
+  on(increment, (state: State) => {
     return {
       ...state,
       counter: state.counter + 1
     };
   }),
 
-  on(decrement, (state: HomeReducerState) => {
+  on(decrement, (state: State) => {
     return {
       ...state,
       counter: state.counter - 1
     };
   }),
 
-  on(reset, (state: HomeReducerState) => {
+  on(reset, (state: State) => {
     return {
       ...state,
       counter: 0

@@ -1,8 +1,8 @@
 import { Component, OnInit } from "@angular/core";
 import { Observable } from "rxjs";
-import { Store } from "@ngrx/store";
+import { select, Store } from "@ngrx/store";
 import * as fromHome from "./store/reducers";
-import { HomeReducerState } from "./store/reducers/home.reducer";
+import { getHomeState } from "./store/reducers";
 
 @Component({
   selector: "app-home",
@@ -10,10 +10,10 @@ import { HomeReducerState } from "./store/reducers/home.reducer";
   styleUrls: ["./home.component.scss"]
 })
 export class HomeComponent implements OnInit {
-  home$: Observable<HomeReducerState>;
+  home$: Observable<fromHome.HomeState>;
 
-  constructor(private store: Store<fromHome.HomeState>) {
-    this.home$ = store.select("home") as Observable<HomeReducerState>;
+  constructor(private state$: Store<fromHome.State>) {
+    this.home$ = state$.select(getHomeState);
   }
 
   ngOnInit(): void {}
