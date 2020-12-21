@@ -1,4 +1,4 @@
-enum Sender {
+export enum Sender {
   System,
   User
 }

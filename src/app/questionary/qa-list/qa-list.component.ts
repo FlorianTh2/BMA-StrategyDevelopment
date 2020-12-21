@@ -1,5 +1,6 @@
 import { Component, OnInit } from "@angular/core";
 import { Message } from "../shared/models/message.model";
+import { Sender } from "../shared/enums/senderEnum";
 
 @Component({
   selector: "app-qa-list",
