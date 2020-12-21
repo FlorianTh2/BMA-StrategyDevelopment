@@ -1,3 +1,14 @@
+// this reducer/index is the standartize interface / abstraction to use the reducer in this module
+//  - if you want to use a reducer of this module (from inside oder outside of this module) you MUST call
+//    this file
+//  - the idea: every interaction with the reducer of this module happens though this abstraction
+//  - so if a selector returns a state -> this state has to be configured in this reducer/index.ts file
+//    since a reference to the actual reducer is not allowed
+//  - question:a selector returns a "State"-Interface but you are not allowed to reference the actual reducer?
+//    answer: a (final) selector of this module should in best case never return a state of the reducer
+//      ->  for sure we have partial selectors with a somehow intermediate state, yea okay, but there should
+//          there should be so specific selectors to enable a reducer-reference-free usage of this index.ts - file
+
 import {
   Action,
   combineReducers,
