@@ -33,7 +33,6 @@ export interface HomeState {
   [fromCounter.counterFeatureKey]: fromCounter.State;
 }
 
-/** Provide reducer in AoT-compilation happy way */
 export function reducers(state: HomeState | undefined, action: Action) {
   return combineReducers({
     [fromCounter.counterFeatureKey]: fromCounter.counterReducer
