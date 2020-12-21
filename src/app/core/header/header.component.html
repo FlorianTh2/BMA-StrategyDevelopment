@@ -1,9 +1,9 @@
 <mat-toolbar color="grey">
   <h1>
-    <a href="">Digital Business Model</a>
+    <a routerLink="" routerLinkActive="active">Digital Business Model</a>
   </h1>
   <div class="nav-items">
-    <a mat-button [routerLink]="'/about'"> About </a>
-    <a mat-button [routerLink]="'/impressum'"> Impressum </a>
-    <a mat-button [routerLink]="''"> Datenschutzerklärung </a>
+    <a mat-button routerLink="about" routerLinkActive="active"> About </a>
+    <a mat-button routerLink="impressum" routerLinkActive="active"> Impressum </a>
+    <a mat-button routerLink="privacy" routerLinkActive="active"> Datenschutzerklärung </a>
 </div></mat-toolbar>
