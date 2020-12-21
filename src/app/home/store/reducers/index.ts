@@ -18,6 +18,7 @@ import {
 
 import * as fromHome from "./home.reducer";
 import * as fromRoot from "../../../store/reducers/root.reducer";
+import { Counter } from "../../shared/models/counter";
 
 export const homeFeatureKey = "home";
 
@@ -38,6 +39,8 @@ export function reducers(state: HomeState | undefined, action: Action) {
   })(state, action);
 }
 
+// pay attention to the name-pattern -> each selector is build on top of the other
+
 // maps from overall-State to this part of the state that this module needs (HomeState)
 // gets: State
 // returns HomeState
@@ -51,4 +54,13 @@ export const selectHomeState = createFeatureSelector<State, HomeState>(
 export const selectHomeReducerState = createSelector(
   selectHomeState,
   (state) => state.home as fromHome.State
+);
+
+// maps from one-reducer-of-the-module-state to the model class
+// why? -> so we dont have to include the reducer-state-reference in the view angular-component (the view)
+// somehow useless but in like normal szenarios we have this abstraction to map from the ReducerState
+// to the actual property (see more in homeReducer)
+export const selectHomeReducerStateCounter = createSelector(
+  selectHomeReducerState,
+  (state) => state as Counter
 );
