@@ -1,0 +1,8 @@
+<div *ngIf="counter$ | async as counter">
+  <h3>Current Value:  {{ counter.currentNumber }}</h3>
+  <button (click)="increment()">Increment</button>
+
+  <button (click)="decrement()">Decrement</button>
+
+  <button (click)="reset()">Reset Counter</button>
+</div>

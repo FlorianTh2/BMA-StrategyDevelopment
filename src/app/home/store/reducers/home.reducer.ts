@@ -24,21 +24,21 @@ const internalHomeReducer = createReducer(
   on(increment, (state: State) => {
     return {
       ...state,
-      counter: state.currentNumber + 1
+      currentNumber: state.currentNumber + 1
     };
   }),
 
   on(decrement, (state: State) => {
     return {
       ...state,
-      counter: state.currentNumber - 1
+      currentNumber: state.currentNumber - 1
     };
   }),
 
   on(reset, (state: State) => {
     return {
       ...state,
-      counter: 0
+      currentNumber: 0
     };
   })
 );

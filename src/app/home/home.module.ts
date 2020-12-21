@@ -9,13 +9,15 @@ import { TestchartComponent } from "./testchart/testchart.component";
 import { SharedModule } from "../shared/share.module";
 import { StoreModule } from "@ngrx/store";
 import * as fromHome from "./store/reducers";
+import { CounterComponent } from './counter/counter.component';
 
 @NgModule({
   declarations: [
     HomeComponent,
     Page404HomeComponentComponent,
     SpiderchartComponent,
-    TestchartComponent
+    TestchartComponent,
+    CounterComponent
   ],
   imports: [
     CommonModule,

@@ -10,11 +10,7 @@ import { Counter } from "./shared/models/counter";
   styleUrls: ["./home.component.scss"]
 })
 export class HomeComponent implements OnInit {
-  counter$: Observable<Counter>;
-
-  constructor(private store$: Store<fromHome.State>) {
-    this.counter$ = store$.select(fromHome.selectHomeReducerStateCounter);
-  }
+  constructor() {}
 
   ngOnInit(): void {}
 }
