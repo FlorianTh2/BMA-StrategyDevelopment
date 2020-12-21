@@ -1,4 +1,4 @@
-// this reducer/index is the standartize interface / abstraction to use the reducer in this module
+// this reducer/index is the standartize interface / abstraction to use the reducers in this module
 //  - if you want to use a reducer of this module (from inside oder outside of this module) you MUST call
 //    this file
 //  - the idea: every interaction with the reducer of this module happens though this abstraction
@@ -16,7 +16,7 @@ import {
   createSelector
 } from "@ngrx/store";
 
-import * as fromHome from "./home.reducer";
+import * as fromCounter from "./counter.reducer";
 import * as fromRoot from "../../../store/reducers/root.reducer";
 import { Counter } from "../../shared/models/counter";
 
@@ -28,14 +28,15 @@ export interface State extends fromRoot.State {
   [homeFeatureKey]: HomeState;
 }
 
+// state of this modules reducers in general
 export interface HomeState {
-  [fromHome.homeFeatureKey]: fromHome.State;
+  [fromCounter.counterFeatureKey]: fromCounter.State;
 }
 
 /** Provide reducer in AoT-compilation happy way */
 export function reducers(state: HomeState | undefined, action: Action) {
   return combineReducers({
-    [fromHome.homeFeatureKey]: fromHome.homeReducer
+    [fromCounter.counterFeatureKey]: fromCounter.counterReducer
   })(state, action);
 }
 
@@ -53,13 +54,13 @@ export const selectHomeState = createFeatureSelector<State, HomeState>(
 // returns: State of the specific home-reducer-state
 export const selectHomeReducerState = createSelector(
   selectHomeState,
-  (state) => state.home as fromHome.State
+  (state) => state.counter as fromCounter.State
 );
 
 // maps from one-reducer-of-the-module-state to the model class
 // why? -> so we dont have to include the reducer-state-reference in the view angular-component (the view)
 // somehow useless but in like normal szenarios we have this abstraction to map from the ReducerState
-// to the actual property (see more in homeReducer)
+// to the actual property (see more in counterReducer)
 export const selectHomeReducerStateCounter = createSelector(
   selectHomeReducerState,
   (state) => state as Counter

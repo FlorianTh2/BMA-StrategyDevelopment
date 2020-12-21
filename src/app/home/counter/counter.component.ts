@@ -2,6 +2,8 @@ import { Component, OnInit } from "@angular/core";
 import { Observable } from "rxjs";
 import { Counter } from "../shared/models/counter";
 import { Store } from "@ngrx/store";
+// namen fromHome since in includes all reducers of the module home
+// (currently there is only one reducer: counterReducer)
 import * as fromHome from "../store/reducers";
 import { CounterActions } from "../store/actions";
 

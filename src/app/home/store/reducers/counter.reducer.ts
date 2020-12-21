@@ -4,7 +4,7 @@ import * as fromRoot from "../../../store/reducers/root.reducer";
 import { Counter } from "../../shared/models/counter";
 import { EntityState } from "@ngrx/entity";
 
-export const homeFeatureKey = "home";
+export const counterFeatureKey = "counter";
 
 // with actual model (like books or users) often used like
 // export interface State extends EntityState<Book>
@@ -18,7 +18,7 @@ export const initialState: State = {
   currentNumber: 0
 };
 
-const internalHomeReducer = createReducer(
+const internalCounterReducer = createReducer(
   initialState,
 
   on(increment, (state: State) => {
@@ -43,6 +43,6 @@ const internalHomeReducer = createReducer(
   })
 );
 
-export function homeReducer(state, action) {
-  return internalHomeReducer(state, action);
+export function counterReducer(state, action) {
+  return internalCounterReducer(state, action);
 }
