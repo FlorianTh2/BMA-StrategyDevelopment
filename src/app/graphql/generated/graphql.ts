@@ -203,6 +203,30 @@ export type EvaluationMetric = {
   updater: Scalars['String'];
 };
 
+export type PartialModelQueryVariables = Exact<{
+  partialModelId: Scalars['ID'];
+}>;
+
+
+export type PartialModelQuery = (
+  { __typename?: 'Query' }
+  & { partialModel?: Maybe<(
+    { __typename?: 'PartialModel' }
+    & Pick<PartialModel, 'name' | 'weight'>
+  )> }
+);
+
+export type PartialModelsQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type PartialModelsQuery = (
+  { __typename?: 'Query' }
+  & { partialModels: Array<(
+    { __typename?: 'PartialModel' }
+    & Pick<PartialModel, 'name' | 'weight'>
+  )> }
+);
+
 export type RegisterMutationVariables = Exact<{
   email: Scalars['String'];
   password: Scalars['String'];
@@ -216,6 +240,44 @@ export type RegisterMutation = (
   & Pick<Mutation, 'register'>
 );
 
+export const PartialModelDocument = gql`
+    query PartialModel($partialModelId: ID!) {
+  partialModel(id: $partialModelId) {
+    name
+    weight
+  }
+}
+    `;
+
+  @Injectable({
+    providedIn: 'root'
+  })
+  export class PartialModelGQL extends Apollo.Query<PartialModelQuery, PartialModelQueryVariables> {
+    document = PartialModelDocument;
+    
+    constructor(apollo: Apollo.Apollo) {
+      super(apollo);
+    }
+  }
+export const PartialModelsDocument = gql`
+    query PartialModels {
+  partialModels {
+    name
+    weight
+  }
+}
+    `;
+
+  @Injectable({
+    providedIn: 'root'
+  })
+  export class PartialModelsGQL extends Apollo.Query<PartialModelsQuery, PartialModelsQueryVariables> {
+    document = PartialModelsDocument;
+    
+    constructor(apollo: Apollo.Apollo) {
+      super(apollo);
+    }
+  }
 export const RegisterDocument = gql`
     mutation Register($email: String!, $password: String!, $firstname: String!, $lastname: String!) {
   register(

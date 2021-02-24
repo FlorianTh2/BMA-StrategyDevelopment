@@ -1,0 +1,6 @@
+query PartialModel($partialModelId: ID!){
+  partialModel(id: $partialModelId){
+    name
+    weight
+  }
+}

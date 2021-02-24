@@ -1,0 +1,6 @@
+query PartialModels{
+  partialModels{
+    name
+    weight
+  }
+}

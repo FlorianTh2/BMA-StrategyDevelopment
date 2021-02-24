@@ -5,6 +5,14 @@
     <app-spiderchart></app-spiderchart>
   </div>
   <div>
+    service-output:
+    <ul>
+      <li *ngFor="let partialModel of partialModels | async">
+        {{partialModel.name}} with a weight of {{partialModel.weight}}
+      </li>
+    </ul>
+  </div>
+  <div>
     <h3>Counter-Component</h3>
     <app-counter></app-counter>
   </div>

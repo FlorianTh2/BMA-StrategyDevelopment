@@ -3,6 +3,8 @@ import { Observable } from "rxjs";
 import { Store } from "@ngrx/store";
 import * as fromHome from "./store/reducers";
 import { Counter } from "./shared/models/counter";
+import { map } from "rxjs/operators";
+import { PartialModel, PartialModelsGQL } from "../graphql/generated/graphql";
 
 @Component({
   selector: "app-home",
@@ -10,7 +12,15 @@ import { Counter } from "./shared/models/counter";
   styleUrls: ["./home.component.scss"]
 })
 export class HomeComponent implements OnInit {
-  constructor() {}
+  partialModels: Observable<PartialModel[]>;
+
+  constructor(private partialModelsGQL: PartialModelsGQL) {
+    this.partialModels = this.partialModelsGQL
+      .watch()
+      .valueChanges.pipe(
+        map((result) => result.data.partialModels as PartialModel[])
+      );
+  }
 
   ngOnInit(): void {}
 }
