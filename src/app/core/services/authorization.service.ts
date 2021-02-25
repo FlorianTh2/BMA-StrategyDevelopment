@@ -58,6 +58,8 @@ export class AuthorizationService {
   }
 
   logoutUser(): void {
+    localStorage.removeItem("token");
+    localStorage.clear();
     this.userSource.next(null);
   }
 
@@ -68,6 +70,15 @@ export class AuthorizationService {
   isUserLoggedIn(): Boolean {
     const token = localStorage.getItem("token");
     return Boolean(token);
+  }
+
+  tryCreationOfUserFromJwtAfterPageReload() {
+    const token = localStorage.getItem("token");
+    let decodedToken: JwtPayload = jwtDecode(token);
+    const user: User = decodedToken.user as User;
+    if (decodedToken && user) {
+      this.updateLoggedInUser(user, token);
+    }
   }
 
   setTokenToLocalStorage(token: string): void {
