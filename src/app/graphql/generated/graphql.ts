@@ -272,6 +272,30 @@ export type PartialModelsQuery = (
   )> }
 );
 
+export type ProjectOfUserQueryVariables = Exact<{
+  projectOfUserId: Scalars['ID'];
+}>;
+
+
+export type ProjectOfUserQuery = (
+  { __typename?: 'Query' }
+  & { projectOfUser?: Maybe<(
+    { __typename?: 'Project' }
+    & Pick<Project, 'name' | 'description' | 'created' | 'updated'>
+  )> }
+);
+
+export type ProjectsOfUserQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type ProjectsOfUserQuery = (
+  { __typename?: 'Query' }
+  & { projectsOfUser?: Maybe<Array<(
+    { __typename?: 'Project' }
+    & Pick<Project, 'name' | 'description' | 'created' | 'updated'>
+  )>> }
+);
+
 export type LoginMutationVariables = Exact<{
   email: Scalars['String'];
   password: Scalars['String'];
@@ -366,6 +390,48 @@ export const PartialModelsDocument = gql`
   })
   export class PartialModelsGQL extends Apollo.Query<PartialModelsQuery, PartialModelsQueryVariables> {
     document = PartialModelsDocument;
+    
+    constructor(apollo: Apollo.Apollo) {
+      super(apollo);
+    }
+  }
+export const ProjectOfUserDocument = gql`
+    query ProjectOfUser($projectOfUserId: ID!) {
+  projectOfUser(id: $projectOfUserId) {
+    name
+    description
+    created
+    updated
+  }
+}
+    `;
+
+  @Injectable({
+    providedIn: 'root'
+  })
+  export class ProjectOfUserGQL extends Apollo.Query<ProjectOfUserQuery, ProjectOfUserQueryVariables> {
+    document = ProjectOfUserDocument;
+    
+    constructor(apollo: Apollo.Apollo) {
+      super(apollo);
+    }
+  }
+export const ProjectsOfUserDocument = gql`
+    query ProjectsOfUser {
+  projectsOfUser {
+    name
+    description
+    created
+    updated
+  }
+}
+    `;
+
+  @Injectable({
+    providedIn: 'root'
+  })
+  export class ProjectsOfUserGQL extends Apollo.Query<ProjectsOfUserQuery, ProjectsOfUserQueryVariables> {
+    document = ProjectsOfUserDocument;
     
     constructor(apollo: Apollo.Apollo) {
       super(apollo);

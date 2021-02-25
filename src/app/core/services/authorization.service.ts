@@ -5,6 +5,7 @@ import { map, switchMap, takeUntil } from "rxjs/operators";
 import { Apollo } from "apollo-angular";
 import { LoginGQL, RegisterGQL, User } from "../../graphql/generated/graphql";
 import jwtDecode from "jwt-decode";
+import { JwtPayload } from "../../shared/models/jwtPayload";
 @Injectable({
   providedIn: "root"
 })
@@ -25,9 +26,10 @@ export class AuthorizationService {
     return this.loginGQL.mutate({ email: email, password: password }).pipe(
       map((a) => {
         let token = a.data.login as string;
-        let possibleUser: User = jwtDecode(token);
-        if (token && possibleUser) {
-          this.updateLoggedInUser(possibleUser, token);
+        let decodedToken: JwtPayload = jwtDecode(token);
+        const user: User = decodedToken.user as User;
+        if (decodedToken && user) {
+          this.updateLoggedInUser(user, token);
         }
       })
     );

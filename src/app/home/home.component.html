@@ -6,11 +6,9 @@
   </div>
   <div>
     service-output:
-    <ul>
-      <li *ngIf="{maturityModel: maturityModel$ | async} as data">
-        {{data.maturityModel.name}}
-      </li>
-    </ul>
+    <ng-container *ngIf="{maturityModel: maturityModel$ | async} as data">
+      {{data.maturityModel?.name}}
+    </ng-container>
   </div>
   <div>
     <h3>Counter-Component</h3>

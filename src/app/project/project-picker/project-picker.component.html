@@ -1,1 +1,15 @@
-<p>project-picker works!</p>
+<div class="projects-picker-frame">
+  <h3>Select Your Project</h3>
+
+  <div class="selector-container">
+    <ng-container *ngIf="projects$ | async as projects, else loading">
+      <div *ngFor="let project of projects" class="selector-item">
+        <app-project-picker-card [project] = "project"></app-project-picker-card>
+      </div>
+    </ng-container>
+  </div>
+</div>
+
+<ng-template #loading>
+  <mat-spinner></mat-spinner>
+</ng-template>

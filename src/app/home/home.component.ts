@@ -1,15 +1,7 @@
 import { Component, OnInit } from "@angular/core";
 import { Observable } from "rxjs";
-import { Store } from "@ngrx/store";
-import * as fromHome from "./store/reducers";
-import { Counter } from "./shared/models/counter";
 import { map } from "rxjs/operators";
-import {
-  MaturityModel,
-  MaturityModelGQL,
-  PartialModel,
-  PartialModelsGQL
-} from "../graphql/generated/graphql";
+import { MaturityModel, MaturityModelGQL } from "../graphql/generated/graphql";
 import { ID_OF_MATURITYMODEL } from "../shared/constants/constants";
 
 @Component({

@@ -1,0 +1,8 @@
+query ProjectOfUser($projectOfUserId: ID!){
+  projectOfUser(id: $projectOfUserId){
+    name
+    description
+    created
+    updated
+  }
+}

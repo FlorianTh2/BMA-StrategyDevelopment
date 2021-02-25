@@ -1,1 +1,13 @@
-<p>project-picker-card works!</p>
+<div class="projects-picker-card" routerLink="/projects/{{project.id}}">
+  <div class="projects-picker-card-container">
+    <div class="projects-picker-card-container-header">
+      {{project.name}}
+      <hr>
+    </div>
+    <div class="projects-picker-card-container-footer">
+      <div>
+        Updated: {{project.updated | customDate}}
+      </div>
+    </div>
+  </div>
+</div>

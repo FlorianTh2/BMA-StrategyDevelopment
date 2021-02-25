@@ -1,0 +1,8 @@
+query ProjectsOfUser{
+  projectsOfUser{
+    name
+    description
+    created
+    updated
+  }
+}
