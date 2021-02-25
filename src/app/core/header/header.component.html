@@ -2,9 +2,20 @@
   <h1>
     <a routerLink="" routerLinkActive="active">Digital Business Model</a>
   </h1>
-  <div class="nav-items">
-    <a mat-button routerLink="questionary" routerLinkActive="active"> Questionary </a>
-    <a mat-button routerLink="about" routerLinkActive="active"> About </a>
-    <a mat-button routerLink="impressum" routerLinkActive="active"> Impressum </a>
-    <a mat-button routerLink="privacy" routerLinkActive="active"> Datenschutzerklärung </a>
-</div></mat-toolbar>
+
+  <ng-container *ngIf="!user">
+    <div class="nav-items">
+      <a mat-button routerLink="questionary" routerLinkActive="active"> Questionary </a>
+      <a mat-button routerLink="auth/login" routerLinkActive="active"> Login </a>
+      <a mat-button routerLink="auth/register" routerLinkActive="active"> Register</a>
+    </div>
+  </ng-container>
+
+  <ng-container *ngIf="user">
+    <div class="nav-items">
+      <a mat-button routerLink="home" routerLinkActive="active"> Test1</a>
+      <a mat-button routerLink="home" routerLinkActive="active"> Test2 </a>
+      <a mat-button routerLink="home" routerLinkActive="active"> Test3 </a>
+    </div>
+  </ng-container>
+</mat-toolbar>

@@ -25,10 +25,11 @@ export type Query = {
   user?: Maybe<User>;
   users?: Maybe<Array<User>>;
   profileOfUser: User;
-  maturityModel?: Maybe<MaturityModel>;
-  maturityModels?: Maybe<Array<MaturityModel>>;
-  maturityModelOfUser?: Maybe<MaturityModel>;
-  maturityModelsOfUser?: Maybe<Array<MaturityModel>>;
+  checkEmailAddress: Scalars['Boolean'];
+  userMaturityModel?: Maybe<UserMaturityModel>;
+  userMaturityModels?: Maybe<Array<UserMaturityModel>>;
+  userMaturityModelOfUser?: Maybe<UserMaturityModel>;
+  userMaturityModelsOfUser?: Maybe<Array<UserMaturityModel>>;
   userPartialModel?: Maybe<UserPartialModel>;
   userPartialModels?: Maybe<Array<UserPartialModel>>;
   userEvaluationMetric?: Maybe<UserEvaluationMetric>;
@@ -37,6 +38,7 @@ export type Query = {
   partialModels: Array<PartialModel>;
   evaluationMetric?: Maybe<EvaluationMetric>;
   evaluationMetrics: Array<EvaluationMetric>;
+  maturityModel: MaturityModel;
 };
 
 
@@ -55,12 +57,17 @@ export type QueryUserArgs = {
 };
 
 
-export type QueryMaturityModelArgs = {
+export type QueryCheckEmailAddressArgs = {
+  emailAddress?: Maybe<Scalars['String']>;
+};
+
+
+export type QueryUserMaturityModelArgs = {
   id: Scalars['ID'];
 };
 
 
-export type QueryMaturityModelOfUserArgs = {
+export type QueryUserMaturityModelOfUserArgs = {
   id: Scalars['ID'];
 };
 
@@ -81,6 +88,11 @@ export type QueryPartialModelArgs = {
 
 
 export type QueryEvaluationMetricArgs = {
+  id: Scalars['ID'];
+};
+
+
+export type QueryMaturityModelArgs = {
   id: Scalars['ID'];
 };
 
@@ -130,13 +142,13 @@ export type Project = {
   name: Scalars['String'];
   description?: Maybe<Scalars['String']>;
   user: User;
-  maturityModels: Array<MaturityModel>;
+  userMaturityModels: Array<UserMaturityModel>;
   created: Scalars['String'];
   updated: Scalars['String'];
 };
 
-export type MaturityModel = {
-  __typename?: 'MaturityModel';
+export type UserMaturityModel = {
+  __typename?: 'UserMaturityModel';
   id: Scalars['ID'];
   name?: Maybe<Scalars['String']>;
   maturityLevel?: Maybe<Scalars['Float']>;
@@ -152,7 +164,7 @@ export type UserPartialModel = {
   __typename?: 'UserPartialModel';
   id: Scalars['ID'];
   maturityLevelEvaluationMetrics?: Maybe<Scalars['Float']>;
-  maturityModel: MaturityModel;
+  userMaturityModel: UserMaturityModel;
   superUserPartialModel?: Maybe<UserPartialModel>;
   subUserPartialModels: Array<Maybe<UserPartialModel>>;
   userEvaluationMetrics: Array<UserEvaluationMetric>;
@@ -203,6 +215,39 @@ export type EvaluationMetric = {
   updater: Scalars['String'];
 };
 
+export type MaturityModel = {
+  __typename?: 'MaturityModel';
+  id: Scalars['ID'];
+  name: Scalars['String'];
+  version: Scalars['Int'];
+  partialModels: Array<PartialModel>;
+  created: Scalars['String'];
+  creator: Scalars['String'];
+  updated: Scalars['String'];
+  updater: Scalars['String'];
+};
+
+export type MaturityModelQueryVariables = Exact<{
+  maturityModelId: Scalars['ID'];
+}>;
+
+
+export type MaturityModelQuery = (
+  { __typename?: 'Query' }
+  & { maturityModel: (
+    { __typename?: 'MaturityModel' }
+    & Pick<MaturityModel, 'name' | 'version'>
+    & { partialModels: Array<(
+      { __typename?: 'PartialModel' }
+      & Pick<PartialModel, 'name' | 'weight'>
+      & { subPartialModels?: Maybe<Array<(
+        { __typename?: 'PartialModel' }
+        & Pick<PartialModel, 'name' | 'weight'>
+      )>> }
+    )> }
+  ) }
+);
+
 export type PartialModelQueryVariables = Exact<{
   partialModelId: Scalars['ID'];
 }>;
@@ -227,6 +272,17 @@ export type PartialModelsQuery = (
   )> }
 );
 
+export type LoginMutationVariables = Exact<{
+  email: Scalars['String'];
+  password: Scalars['String'];
+}>;
+
+
+export type LoginMutation = (
+  { __typename?: 'Mutation' }
+  & Pick<Mutation, 'login'>
+);
+
 export type RegisterMutationVariables = Exact<{
   email: Scalars['String'];
   password: Scalars['String'];
@@ -240,6 +296,43 @@ export type RegisterMutation = (
   & Pick<Mutation, 'register'>
 );
 
+export type CheckEmailAddressQueryVariables = Exact<{
+  email: Scalars['String'];
+}>;
+
+
+export type CheckEmailAddressQuery = (
+  { __typename?: 'Query' }
+  & Pick<Query, 'checkEmailAddress'>
+);
+
+export const MaturityModelDocument = gql`
+    query MaturityModel($maturityModelId: ID!) {
+  maturityModel(id: $maturityModelId) {
+    name
+    version
+    partialModels {
+      name
+      weight
+      subPartialModels {
+        name
+        weight
+      }
+    }
+  }
+}
+    `;
+
+  @Injectable({
+    providedIn: 'root'
+  })
+  export class MaturityModelGQL extends Apollo.Query<MaturityModelQuery, MaturityModelQueryVariables> {
+    document = MaturityModelDocument;
+    
+    constructor(apollo: Apollo.Apollo) {
+      super(apollo);
+    }
+  }
 export const PartialModelDocument = gql`
     query PartialModel($partialModelId: ID!) {
   partialModel(id: $partialModelId) {
@@ -278,6 +371,22 @@ export const PartialModelsDocument = gql`
       super(apollo);
     }
   }
+export const LoginDocument = gql`
+    mutation Login($email: String!, $password: String!) {
+  login(userLoginRequest: {email: $email, password: $password})
+}
+    `;
+
+  @Injectable({
+    providedIn: 'root'
+  })
+  export class LoginGQL extends Apollo.Mutation<LoginMutation, LoginMutationVariables> {
+    document = LoginDocument;
+    
+    constructor(apollo: Apollo.Apollo) {
+      super(apollo);
+    }
+  }
 export const RegisterDocument = gql`
     mutation Register($email: String!, $password: String!, $firstname: String!, $lastname: String!) {
   register(
@@ -291,6 +400,22 @@ export const RegisterDocument = gql`
   })
   export class RegisterGQL extends Apollo.Mutation<RegisterMutation, RegisterMutationVariables> {
     document = RegisterDocument;
+    
+    constructor(apollo: Apollo.Apollo) {
+      super(apollo);
+    }
+  }
+export const CheckEmailAddressDocument = gql`
+    query CheckEmailAddress($email: String!) {
+  checkEmailAddress(emailAddress: $email)
+}
+    `;
+
+  @Injectable({
+    providedIn: 'root'
+  })
+  export class CheckEmailAddressGQL extends Apollo.Query<CheckEmailAddressQuery, CheckEmailAddressQueryVariables> {
+    document = CheckEmailAddressDocument;
     
     constructor(apollo: Apollo.Apollo) {
       super(apollo);

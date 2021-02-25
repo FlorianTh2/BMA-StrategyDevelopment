@@ -1,0 +1,14 @@
+query MaturityModel($maturityModelId: ID!){
+  maturityModel(id: $maturityModelId){
+    name
+    version
+    partialModels {
+      name
+      weight
+      subPartialModels{
+        name
+        weight
+      }
+    }
+  }
+}

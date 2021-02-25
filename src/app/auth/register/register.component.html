@@ -1,0 +1,56 @@
+<h1>Registrieren</h1>
+
+
+
+<form class="ui form" [formGroup]="registerForm" (ngSubmit)="registrate()">
+
+
+  <div class="field">
+    <div class="ui left icon input">
+      <input type="text" placeholder="firstname" formControlName="firstname">
+      <i class="envelope icon"></i>
+      <app-form-messages [control]="registerForm.get('firstname')" controlName="firstname"></app-form-messages>
+    </div>
+  </div>
+
+
+  <div class="field">
+    <div class="ui left icon input">
+      <input type="text" placeholder="lastname" formControlName="lastname">
+      <i class="envelope icon"></i>
+      <app-form-messages [control]="registerForm.get('lastname')" controlName="lastname"></app-form-messages>
+    </div>
+  </div>
+
+  <div class="field">
+    <div class="ui left icon input">
+      <input type="text" placeholder="E-Mail" formControlName="email">
+      <i class="envelope icon"></i>
+      <app-form-messages [control]="registerForm.get('email')" controlName="email"></app-form-messages>
+    </div>
+  </div>
+
+  <div formGroupName="passwords">
+    <div class="field">
+      <div class="ui left icon input">
+        <input type="password" placeholder="Passwort" formControlName="password">
+        <i class="lock icon"></i>
+        <app-form-messages [control]="registerForm.get('passwords').get('password')" controlName="password"></app-form-messages>
+      </div>
+    </div>
+
+
+    <div class="field">
+      <div class="ui left icon input">
+        <input type="password" placeholder="Passwort wiederholen" formControlName="passwordRepeat">
+        <i class="lock icon"></i>
+        <app-form-messages [control]="registerForm.get('passwords')" controlName="passwords"></app-form-messages>
+      </div>
+    </div>
+
+
+  </div>
+  <br>
+  <button class="ui button" type="submit" [disabled]="registerForm.invalid">Registrieren</button>
+
+</form>

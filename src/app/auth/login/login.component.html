@@ -1,0 +1,31 @@
+<h1>Anmeldung</h1>
+<form class="ui form" [formGroup]="loginForm" (ngSubmit)="login()">
+
+
+  <div class="field">
+    <div class="ui left icon input">
+      <input type="text" placeholder="Email" formControlName="email">
+      <i class="user icon"></i>
+      <app-form-messages [control]="loginForm.get('email')" controlName="email"></app-form-messages>
+
+    </div>
+  </div>
+
+
+
+  <div class="field">
+    <div class="ui left icon input">
+      <input type="password" placeholder="Passwort" formControlName="password">
+      <i class="lock icon"></i>
+      <app-form-messages [control]="loginForm.get('password')" controlName="password"></app-form-messages>
+    </div>
+  </div>
+  <button class="ui button" type="submit" [disabled]="loginForm.invalid">Anmelden</button>
+
+
+</form>
+
+
+<div>
+  <label>Noch nicht registriert? <a routerLink="/auth/register">Hier registrieren</a> </label>
+</div>

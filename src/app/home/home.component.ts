@@ -4,7 +4,13 @@ import { Store } from "@ngrx/store";
 import * as fromHome from "./store/reducers";
 import { Counter } from "./shared/models/counter";
 import { map } from "rxjs/operators";
-import { PartialModel, PartialModelsGQL } from "../graphql/generated/graphql";
+import {
+  MaturityModel,
+  MaturityModelGQL,
+  PartialModel,
+  PartialModelsGQL
+} from "../graphql/generated/graphql";
+import { ID_OF_MATURITYMODEL } from "../shared/constants/constants";
 
 @Component({
   selector: "app-home",
@@ -12,13 +18,13 @@ import { PartialModel, PartialModelsGQL } from "../graphql/generated/graphql";
   styleUrls: ["./home.component.scss"]
 })
 export class HomeComponent implements OnInit {
-  partialModels: Observable<PartialModel[]>;
+  maturityModel$: Observable<MaturityModel>;
 
-  constructor(private partialModelsGQL: PartialModelsGQL) {
-    this.partialModels = this.partialModelsGQL
-      .watch()
+  constructor(private maturityModelGQL: MaturityModelGQL) {
+    this.maturityModel$ = this.maturityModelGQL
+      .watch({ maturityModelId: ID_OF_MATURITYMODEL })
       .valueChanges.pipe(
-        map((result) => result.data.partialModels as PartialModel[])
+        map((result) => result.data.maturityModel as MaturityModel)
       );
   }
 

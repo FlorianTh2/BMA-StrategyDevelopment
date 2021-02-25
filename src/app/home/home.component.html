@@ -7,8 +7,8 @@
   <div>
     service-output:
     <ul>
-      <li *ngFor="let partialModel of partialModels | async">
-        {{partialModel.name}} with a weight of {{partialModel.weight}}
+      <li *ngIf="{maturityModel: maturityModel$ | async} as data">
+        {{data.maturityModel.name}}
       </li>
     </ul>
   </div>

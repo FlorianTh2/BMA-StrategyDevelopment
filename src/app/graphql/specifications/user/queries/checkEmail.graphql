@@ -1,0 +1,3 @@
+query CheckEmailAddress($email: String!){
+  checkEmailAddress(emailAddress: $email)
+}
