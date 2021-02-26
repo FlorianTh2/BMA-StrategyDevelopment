@@ -1,5 +1,6 @@
 query ProjectOfUser($projectOfUserId: ID!){
   projectOfUser(id: $projectOfUserId){
+    id
     name
     description
     created

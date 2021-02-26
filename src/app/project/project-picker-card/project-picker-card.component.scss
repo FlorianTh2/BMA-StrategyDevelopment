@@ -1,67 +1,9 @@
-.projects-picker-card {
-  border: grey solid;
-  border-width: 1px;
-  border-radius: 5px;
-  background: lightgrey;
-  box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
-  transition: 0.3s;
-  width: 300px;
-
+.example-card {
+  max-width: 500rem;
+  min-width: 15rem;
 }
 
-.projects-picker-card:hover {
-  box-shadow: 0 8px 16px 0 rgba(0,0,0,0.2);
-}
-
-.projects-picker-card-container {
-  display: grid;
-  /* grid-template-columns: minmax(300px, auto); */
-  grid-template-columns: minmax(300px, auto);
-  grid-gap: 0.1em;
-  /* since we have no content at the moment, the second row got deleted */
-  /* grid-template-rows: 50px minmax(200px, auto) 50px; */
-  grid-template-rows: 50px 50px;
-}
-
-.projects-picker-card-container > div {
-  padding: 1em;
-}
-
-
-
-
-.projects-picker-card-container-header {
-  text-align:center;
-}
-
-.projects-picker-card-container-content{
-
-}
-
-.projects-picker-card-container-footer{
-  display: flex;
-  flex-direction: row;
-  justify-content: flex-start;
-  font-size: 17px;
-}
-
-
-
-
-
-ul {
-  padding-left: 2em;
-  /* list-style-type: none; */
-}
-
-a { color: inherit; }
-
-
-
-hr {
-  border: none;
-  height: 1px;
-  /* Set the hr color */
-  color: #333; /* old IE */
-  background-color: #333; /* Modern Browsers */
+.align-left{
+  position: absolute;
+  left: 5px;
 }

@@ -281,7 +281,7 @@ export type ProjectOfUserQuery = (
   { __typename?: 'Query' }
   & { projectOfUser?: Maybe<(
     { __typename?: 'Project' }
-    & Pick<Project, 'name' | 'description' | 'created' | 'updated'>
+    & Pick<Project, 'id' | 'name' | 'description' | 'created' | 'updated'>
   )> }
 );
 
@@ -292,7 +292,7 @@ export type ProjectsOfUserQuery = (
   { __typename?: 'Query' }
   & { projectsOfUser?: Maybe<Array<(
     { __typename?: 'Project' }
-    & Pick<Project, 'name' | 'description' | 'created' | 'updated'>
+    & Pick<Project, 'id' | 'name' | 'description' | 'created' | 'updated'>
   )>> }
 );
 
@@ -328,6 +328,50 @@ export type CheckEmailAddressQueryVariables = Exact<{
 export type CheckEmailAddressQuery = (
   { __typename?: 'Query' }
   & Pick<Query, 'checkEmailAddress'>
+);
+
+export type UserMaturityModelOfUserQueryVariables = Exact<{
+  userMaturityModelId: Scalars['ID'];
+}>;
+
+
+export type UserMaturityModelOfUserQuery = (
+  { __typename?: 'Query' }
+  & { userMaturityModelOfUser?: Maybe<(
+    { __typename?: 'UserMaturityModel' }
+    & Pick<UserMaturityModel, 'id' | 'name' | 'created' | 'updated'>
+    & { userPartialModels: Array<(
+      { __typename?: 'UserPartialModel' }
+      & { partialModel: (
+        { __typename?: 'PartialModel' }
+        & Pick<PartialModel, 'id'>
+      ), subUserPartialModels: Array<Maybe<(
+        { __typename?: 'UserPartialModel' }
+        & { partialModel: (
+          { __typename?: 'PartialModel' }
+          & Pick<PartialModel, 'id'>
+        ), userEvaluationMetrics: Array<(
+          { __typename?: 'UserEvaluationMetric' }
+          & Pick<UserEvaluationMetric, 'valueEvaluationMetric'>
+          & { evaluationMetric: (
+            { __typename?: 'EvaluationMetric' }
+            & Pick<EvaluationMetric, 'id'>
+          ) }
+        )> }
+      )>> }
+    )> }
+  )> }
+);
+
+export type UserMaturityModelsOfUserQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type UserMaturityModelsOfUserQuery = (
+  { __typename?: 'Query' }
+  & { userMaturityModelsOfUser?: Maybe<Array<(
+    { __typename?: 'UserMaturityModel' }
+    & Pick<UserMaturityModel, 'id' | 'name' | 'created' | 'updated'>
+  )>> }
 );
 
 export const MaturityModelDocument = gql`
@@ -398,6 +442,7 @@ export const PartialModelsDocument = gql`
 export const ProjectOfUserDocument = gql`
     query ProjectOfUser($projectOfUserId: ID!) {
   projectOfUser(id: $projectOfUserId) {
+    id
     name
     description
     created
@@ -419,6 +464,7 @@ export const ProjectOfUserDocument = gql`
 export const ProjectsOfUserDocument = gql`
     query ProjectsOfUser {
   projectsOfUser {
+    id
     name
     description
     created
@@ -482,6 +528,64 @@ export const CheckEmailAddressDocument = gql`
   })
   export class CheckEmailAddressGQL extends Apollo.Query<CheckEmailAddressQuery, CheckEmailAddressQueryVariables> {
     document = CheckEmailAddressDocument;
+    
+    constructor(apollo: Apollo.Apollo) {
+      super(apollo);
+    }
+  }
+export const UserMaturityModelOfUserDocument = gql`
+    query UserMaturityModelOfUser($userMaturityModelId: ID!) {
+  userMaturityModelOfUser(id: $userMaturityModelId) {
+    id
+    name
+    created
+    updated
+    userPartialModels {
+      partialModel {
+        id
+      }
+      subUserPartialModels {
+        partialModel {
+          id
+        }
+        userEvaluationMetrics {
+          valueEvaluationMetric
+          evaluationMetric {
+            id
+          }
+        }
+      }
+    }
+  }
+}
+    `;
+
+  @Injectable({
+    providedIn: 'root'
+  })
+  export class UserMaturityModelOfUserGQL extends Apollo.Query<UserMaturityModelOfUserQuery, UserMaturityModelOfUserQueryVariables> {
+    document = UserMaturityModelOfUserDocument;
+    
+    constructor(apollo: Apollo.Apollo) {
+      super(apollo);
+    }
+  }
+export const UserMaturityModelsOfUserDocument = gql`
+    query UserMaturityModelsOfUser {
+  userMaturityModelsOfUser {
+    id
+    name
+    created
+    updated
+  }
+}
+    `;
+
+  @Injectable({
+    providedIn: 'root'
+  })
+  export class UserMaturityModelsOfUserGQL extends Apollo.Query<UserMaturityModelsOfUserQuery, UserMaturityModelsOfUserQueryVariables> {
+    document = UserMaturityModelsOfUserDocument;
     
     constructor(apollo: Apollo.Apollo) {
       super(apollo);

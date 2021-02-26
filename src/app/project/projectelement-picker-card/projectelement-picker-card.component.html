@@ -1,20 +1,10 @@
 <div>
-  <mat-card routerLink="/project/{{project.id}}" class="example-card">
+  <mat-card routerLink="/project/{{projectId}}/projectelements/maturitymodel/{{userMaturityModel.id}}" class="example-card">
     <mat-card-header>
-      <mat-card-title>{{project.name}}</mat-card-title>
+      <mat-card-title>{{userMaturityModel.name}}</mat-card-title>
     </mat-card-header>
     <mat-card-content>
       <mat-grid-list cols="2" rowHeight="3:1">
-        <mat-grid-tile class="">
-          <div class="align-left">
-            Description:
-          </div>
-        </mat-grid-tile>
-        <mat-grid-tile class="">
-          <div class="align-left">
-              {{project.description.split(" ").shift()}}...
-          </div>
-        </mat-grid-tile>
         <mat-grid-tile class="">
           <div class="align-left">
             Updated:
@@ -22,7 +12,7 @@
         </mat-grid-tile>
         <mat-grid-tile class="">
           <div class="align-left">
-            {{project.updated | customDate}}
+            {{userMaturityModel.updated | customDate}}
           </div>
         </mat-grid-tile>
         <mat-grid-tile class="">
@@ -32,7 +22,7 @@
         </mat-grid-tile>
         <mat-grid-tile class="">
           <div class="align-left">
-            {{project.created | customDate}}
+            {{userMaturityModel.created | customDate}}
           </div>
         </mat-grid-tile>
       </mat-grid-list>

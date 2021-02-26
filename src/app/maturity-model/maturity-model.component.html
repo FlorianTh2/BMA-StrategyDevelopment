@@ -1,0 +1,16 @@
+<div>
+  <h1>
+    Maturity Model
+  </h1>
+
+  <div>
+    <h3>Spiderchart</h3>
+    <app-spiderchart></app-spiderchart>
+  </div>
+
+  service-output:
+    <ng-container *ngIf="{maturityModel: maturityModel$ | async} as data">
+      {{data.maturityModel?.name}}
+    </ng-container>
+
+</div>

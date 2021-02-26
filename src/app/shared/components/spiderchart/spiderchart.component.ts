@@ -5,13 +5,13 @@ import {
   ViewEncapsulation
 } from "@angular/core";
 import * as d3 from "d3";
-import { data as externalData } from "../../../assets/js/exampleData";
-import { RadarChart } from "../../../assets/js/RadarChart";
+import { data as externalData } from "../../../../assets/js/exampleData";
+import { RadarChart } from "../../../../assets/js/RadarChart";
 import { Observable } from "rxjs";
 import {
   PartialModel,
   PartialModelsGQL
-} from "../../graphql/generated/graphql";
+} from "../../../graphql/generated/graphql";
 // good reference
 // http://bl.ocks.org/nbremer/6506614
 @Component({

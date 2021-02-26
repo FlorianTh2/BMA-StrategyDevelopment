@@ -1,0 +1,24 @@
+query UserMaturityModelOfUser($userMaturityModelId: ID!){
+  userMaturityModelOfUser(id: $userMaturityModelId) {
+    id
+    name
+    created
+    updated
+    userPartialModels {
+      partialModel {
+        id
+      }
+      subUserPartialModels {
+        partialModel {
+          id
+        }
+        userEvaluationMetrics {
+          valueEvaluationMetric
+          evaluationMetric {
+            id
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,8 @@
+query UserMaturityModelsOfUser{
+  userMaturityModelsOfUser{
+    id
+    name
+    created
+    updated
+  }
+}
