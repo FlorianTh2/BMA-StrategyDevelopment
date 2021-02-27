@@ -60,8 +60,11 @@ export class MaturityModelComponent implements OnInit {
         name: userMaturityModel.name,
         userPartialModels: userMaturityModel.userPartialModels.map((a) => {
           return {
+            // will be determined after this first iteration
+            maturityLevelEvaluationMetrics: 0,
+            maxMaturityLevelEvaluationMetrics: 0,
+
             partialModel: a.partialModel,
-            maturityLevelEvaluationMetrics: 5,
             subUserPartialModel: a.subUserPartialModels.map((b) => {
               return {
                 maturityLevelEvaluationMetrics:
@@ -80,6 +83,16 @@ export class MaturityModelComponent implements OnInit {
         })
       }
     };
+    tmp.maturityModel.userPartialModels.map((a) => {
+      a.maxMaturityLevelEvaluationMetrics =
+        a.subUserPartialModel[0].maxMaturityLevelEvaluationMetrics *
+        a.subUserPartialModel.length;
+      a.maturityLevelEvaluationMetrics = a.subUserPartialModel.reduce(
+        (b, c) => b + c.maturityLevelEvaluationMetrics,
+        0
+      );
+      return a;
+    });
     return tmp;
   }
 }

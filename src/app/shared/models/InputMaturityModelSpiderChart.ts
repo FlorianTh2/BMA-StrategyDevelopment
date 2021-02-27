@@ -12,6 +12,7 @@ export interface InputSubUserPartialModelSpiderChart {
 
 export interface InputUserPartialModelSpiderChart {
   maturityLevelEvaluationMetrics: number;
+  maxMaturityLevelEvaluationMetrics: number;
   partialModel: PartialModel;
   subUserPartialModel: InputSubUserPartialModelSpiderChart[];
 }
