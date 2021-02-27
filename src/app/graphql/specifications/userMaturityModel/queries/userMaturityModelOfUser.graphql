@@ -7,15 +7,24 @@ query UserMaturityModelOfUser($userMaturityModelId: ID!){
     userPartialModels {
       partialModel {
         id
+        name
+        weight
       }
       subUserPartialModels {
         partialModel {
           id
+          name
+          weight
         }
         userEvaluationMetrics {
+          id
+          valueEvaluationMetric
           valueEvaluationMetric
           evaluationMetric {
             id
+            name
+            weight
+            maxValue
           }
         }
       }

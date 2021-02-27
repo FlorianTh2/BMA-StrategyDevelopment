@@ -1,6 +1,7 @@
 import {
   Component,
   ElementRef,
+  Input,
   OnInit,
   ViewEncapsulation
 } from "@angular/core";
@@ -12,6 +13,7 @@ import {
   PartialModel,
   PartialModelsGQL
 } from "../../../graphql/generated/graphql";
+import { InputMaturityModelSpiderChart } from "../../models/InputMaturityModelSpiderChart";
 // good reference
 // http://bl.ocks.org/nbremer/6506614
 @Component({
@@ -21,6 +23,9 @@ import {
   encapsulation: ViewEncapsulation.None
 })
 export class SpiderchartComponent implements OnInit {
+  @Input()
+  inputData: InputMaturityModelSpiderChart;
+
   // general chart settings
   private width: number = 500;
   private additionalWidth: number = 300;
@@ -51,7 +56,12 @@ export class SpiderchartComponent implements OnInit {
       ExtraWidthX: this.additionalWidth
     };
 
-    RadarChart.draw("#chart", this.data, this.config);
+    RadarChart.draw(
+      "#chart",
+      // data
+      [this.transformPartialModels(this.inputData)],
+      this.config
+    );
 
     this.svg = d3
       .select(this.hostElement)
@@ -65,6 +75,17 @@ export class SpiderchartComponent implements OnInit {
       .attr("height", this.height);
 
     this.renderChart();
+  }
+
+  transformPartialModels(inputDataPara: InputMaturityModelSpiderChart) {
+    console.log("hi");
+    console.log(inputDataPara);
+    return inputDataPara.maturityModel.userPartialModels.map((a) => {
+      return {
+        axis: a.partialModel.name,
+        value: a.maturityLevelEvaluationMetrics
+      };
+    });
   }
 
   renderChart() {

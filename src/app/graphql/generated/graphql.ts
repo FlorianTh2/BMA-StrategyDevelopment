@@ -208,6 +208,7 @@ export type EvaluationMetric = {
   name: Scalars['String'];
   description?: Maybe<Scalars['String']>;
   weight?: Maybe<Scalars['Float']>;
+  maxValue: Scalars['Int'];
   partialModel?: Maybe<PartialModel>;
   created: Scalars['String'];
   creator: Scalars['String'];
@@ -344,18 +345,18 @@ export type UserMaturityModelOfUserQuery = (
       { __typename?: 'UserPartialModel' }
       & { partialModel: (
         { __typename?: 'PartialModel' }
-        & Pick<PartialModel, 'id'>
+        & Pick<PartialModel, 'id' | 'name' | 'weight'>
       ), subUserPartialModels: Array<Maybe<(
         { __typename?: 'UserPartialModel' }
         & { partialModel: (
           { __typename?: 'PartialModel' }
-          & Pick<PartialModel, 'id'>
+          & Pick<PartialModel, 'id' | 'name' | 'weight'>
         ), userEvaluationMetrics: Array<(
           { __typename?: 'UserEvaluationMetric' }
-          & Pick<UserEvaluationMetric, 'valueEvaluationMetric'>
+          & Pick<UserEvaluationMetric, 'id' | 'valueEvaluationMetric'>
           & { evaluationMetric: (
             { __typename?: 'EvaluationMetric' }
-            & Pick<EvaluationMetric, 'id'>
+            & Pick<EvaluationMetric, 'id' | 'name' | 'weight' | 'maxValue'>
           ) }
         )> }
       )>> }
@@ -543,15 +544,24 @@ export const UserMaturityModelOfUserDocument = gql`
     userPartialModels {
       partialModel {
         id
+        name
+        weight
       }
       subUserPartialModels {
         partialModel {
           id
+          name
+          weight
         }
         userEvaluationMetrics {
+          id
+          valueEvaluationMetric
           valueEvaluationMetric
           evaluationMetric {
             id
+            name
+            weight
+            maxValue
           }
         }
       }

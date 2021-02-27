@@ -5,7 +5,9 @@
 
   <div>
     <h3>Spiderchart</h3>
-    <app-spiderchart></app-spiderchart>
+    <ng-container *ngIf="userMaturityModel$ | async as userMaturityModel, else loading">
+        <app-spiderchart [inputData]="transformGraphQlInputUserMaturityModelToSpiderChartDataContract(userMaturityModel)"></app-spiderchart>
+    </ng-container>
   </div>
 
   service-output:
@@ -14,3 +16,8 @@
     </ng-container>
 
 </div>
+
+
+<ng-template #loading>
+  <mat-spinner></mat-spinner>
+</ng-template>
