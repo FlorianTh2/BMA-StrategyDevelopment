@@ -41,7 +41,7 @@ export class SpiderchartComponent implements OnInit {
   private levels: number = 5;
   private config: any;
   private colorscale = d3.scaleOrdinal(d3.schemeCategory10);
-  private legendOptions = ["Smartphone", "Tablet"];
+  private legendOptions = ["Reifegrad (ungewichtet)"];
 
   constructor(private elRef: ElementRef) {
     this.hostElement = this.elRef.nativeElement;
@@ -78,12 +78,21 @@ export class SpiderchartComponent implements OnInit {
   }
 
   transformPartialModels(inputDataPara: InputMaturityModelSpiderChart) {
-    console.log("hi");
     console.log(inputDataPara);
     return inputDataPara.maturityModel.userPartialModels.map((a) => {
       return {
-        axis: a.partialModel.name,
-        value: a.maturityLevelEvaluationMetrics
+        "top-level-userPartialModel": {
+          axis: a.partialModel.name,
+          value: a.maturityLevelEvaluationMetrics,
+          maxValue: a.maxMaturityLevelEvaluationMetrics,
+          "sub-level-userPartialModel:": a.subUserPartialModel.map((b) => {
+            return {
+              axis: b.partialModel.name,
+              value: b.maturityLevelEvaluationMetrics,
+              maxValue: b.maxMaturityLevelEvaluationMetrics
+            };
+          })
+        }
       };
     });
   }
