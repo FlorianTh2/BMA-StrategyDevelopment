@@ -59,7 +59,7 @@ export class SpiderchartComponent implements OnInit {
     RadarChart.draw(
       "#chart",
       // data
-      [this.transformPartialModels(this.inputData)],
+      this.transformPartialModels(this.inputData),
       this.config
     );
 
@@ -79,7 +79,7 @@ export class SpiderchartComponent implements OnInit {
 
   transformPartialModels(inputDataPara: InputMaturityModelSpiderChart) {
     console.log(inputDataPara);
-    return inputDataPara.maturityModel.userPartialModels.map((a) => {
+    const result1 = inputDataPara.maturityModel.userPartialModels.map((a) => {
       return {
         "top-level-userPartialModel": {
           axis: a.partialModel.name,
@@ -95,6 +95,9 @@ export class SpiderchartComponent implements OnInit {
         }
       };
     });
+    console.log("1");
+    console.log(result1);
+    return result1;
   }
 
   renderChart() {

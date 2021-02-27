@@ -23,16 +23,9 @@ export const RadarChart = {
     };
 
     // set maxValue to the actual max value in case it is higher than cfg.maxValue
-    cfg.maxValue = Math.max(
-      cfg.maxValue,
-      d3.max(data, function (i) {
-        return d3.max(
-          i.map(function (o) {
-            return o.value;
-          })
-        );
-      })
-    );
+    cfg.maxValue = data[0]["top-level-userPartialModel"].maxValue;
+
+    data = [data.map((a) => a["top-level-userPartialModel"])];
 
     // init svg
     var allAxis = data[0].map(function (i, j) {
@@ -40,7 +33,7 @@ export const RadarChart = {
     });
     var total = allAxis.length;
     var radius = cfg.factor * Math.min(cfg.w / 2, cfg.h / 2);
-    var Format = d3.format(".1%");
+    var Format = d3.format(".1f");
     d3.select(tag_id_to_attach_to).select("svg").remove();
 
     // create svg
