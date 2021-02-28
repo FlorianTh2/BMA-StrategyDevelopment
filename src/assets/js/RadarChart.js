@@ -73,7 +73,8 @@ export const RadarChart = {
           return (
             levelFactor *
             (1 -
-              cfg.factor * Math.sin((i * cfg.radians) / number_sub_level_axis))
+              cfg.factor *
+                Math.sin(((i + 0.5) * cfg.radians) / number_sub_level_axis))
           );
         })
         // first y-point of the svg:line
@@ -81,7 +82,8 @@ export const RadarChart = {
           return (
             levelFactor *
             (1 -
-              cfg.factor * Math.cos((i * cfg.radians) / number_sub_level_axis))
+              cfg.factor *
+                Math.cos(((i + 0.5) * cfg.radians) / number_sub_level_axis))
           );
         })
         // second x-point of the svg:line
@@ -90,7 +92,8 @@ export const RadarChart = {
             levelFactor *
             (1 -
               cfg.factor *
-                Math.sin(((i + 1) * cfg.radians) / number_sub_level_axis))
+                // 1 = distance between two radar-lines, 1 = drawing line goes from one to another 2 = line skippes one radar line and connects two radar lines which arent side by side
+                Math.sin(((i + 0.5 + 1) * cfg.radians) / number_sub_level_axis))
           );
         })
         // second y-point of the svg:line
@@ -99,7 +102,7 @@ export const RadarChart = {
             levelFactor *
             (1 -
               cfg.factor *
-                Math.cos(((i + 1) * cfg.radians) / number_sub_level_axis))
+                Math.cos(((i + 0.5 + 1) * cfg.radians) / number_sub_level_axis))
           );
         })
         .attr("class", "line")
