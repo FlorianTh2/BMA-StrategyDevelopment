@@ -1,9 +1,21 @@
 // http://bl.ocks.org/nbremer/6506614
+// http://bl.ocks.org/tezzutezzu/c9d8706587e8f5b5d72084b083b502f8
+// https://stackoverflow.com/a/42643557
+//
+// https://medium.com/analytics-vidhya/the-mathematics-behind-radar-charts-8a4cbc1f14ee
+// https://de.wikipedia.org/wiki/Kreisbogen#:~:text=Der%20zu%20einem%20Kreissektor%20geh%C3%B6rende,den%20beiden%20Radien%20als%20Mittelpunktswinkel.
+//  Kreisumfang/ Gesamtkreisbogen = 2*r*pi (unter Annahme, dass r=1 [wie im Einheitskreis] bleibt: = 2*pi)
+// https://de.wikipedia.org/wiki/Einheitskreis
+// https://de.wikipedia.org/wiki/Radiant_(Einheit)
+//  1 Kreis = 2 pi = 260°
+// https://www.lernhelfer.de/schuelerlexikon/mathematik/artikel/bogenmass
+// https://de.wikipedia.org/wiki/Sinus_und_Kosinus
 import * as d3 from "d3";
 
 export const RadarChart = {
   draw: function (tag_id_to_attach_to, data, options) {
     var cfg = {
+      shiftFromCenter: 0.5,
       radius: 5,
       w: 600,
       h: 600,
@@ -74,7 +86,10 @@ export const RadarChart = {
             levelFactor *
             (1 -
               cfg.factor *
-                Math.sin(((i + 0.5) * cfg.radians) / number_sub_level_axis))
+                Math.sin(
+                  ((i + cfg.shiftFromCenter) * cfg.radians) /
+                    number_sub_level_axis
+                ))
           );
         })
         // first y-point of the svg:line
@@ -83,7 +98,10 @@ export const RadarChart = {
             levelFactor *
             (1 -
               cfg.factor *
-                Math.cos(((i + 0.5) * cfg.radians) / number_sub_level_axis))
+                Math.cos(
+                  ((i + cfg.shiftFromCenter) * cfg.radians) /
+                    number_sub_level_axis
+                ))
           );
         })
         // second x-point of the svg:line
@@ -92,8 +110,10 @@ export const RadarChart = {
             levelFactor *
             (1 -
               cfg.factor *
-                // 1 = distance between two radar-lines, 1 = drawing line goes from one to another 2 = line skippes one radar line and connects two radar lines which arent side by side
-                Math.sin(((i + 0.5 + 1) * cfg.radians) / number_sub_level_axis))
+                Math.sin(
+                  ((i + cfg.shiftFromCenter + 1) * cfg.radians) /
+                    number_sub_level_axis
+                ))
           );
         })
         // second y-point of the svg:line
@@ -102,7 +122,10 @@ export const RadarChart = {
             levelFactor *
             (1 -
               cfg.factor *
-                Math.cos(((i + 0.5 + 1) * cfg.radians) / number_sub_level_axis))
+                Math.cos(
+                  ((i + cfg.shiftFromCenter + 1) * cfg.radians) /
+                    number_sub_level_axis
+                ))
           );
         })
         .attr("class", "line")
@@ -172,7 +195,7 @@ export const RadarChart = {
       })
       .attr("class", "line")
       .style("stroke", "grey")
-      .style("stroke-width", "1px");
+      .style("stroke-width", "2px");
 
     // for sub-level-partial-models create lines from core to outside based on setup
     var axis2 = g
@@ -188,13 +211,23 @@ export const RadarChart = {
       .attr("x2", function (d, i) {
         return (
           (cfg.w / 2) *
-          (1 - cfg.factor * Math.sin((i * cfg.radians) / number_sub_level_axis))
+          (1 -
+            cfg.factor *
+              Math.sin(
+                ((i + cfg.shiftFromCenter) * cfg.radians) /
+                  number_sub_level_axis
+              ))
         );
       })
       .attr("y2", function (d, i) {
         return (
           (cfg.h / 2) *
-          (1 - cfg.factor * Math.cos((i * cfg.radians) / number_sub_level_axis))
+          (1 -
+            cfg.factor *
+              Math.cos(
+                ((i + cfg.shiftFromCenter) * cfg.radians) /
+                  number_sub_level_axis
+              ))
         );
       })
       .attr("class", "line")
