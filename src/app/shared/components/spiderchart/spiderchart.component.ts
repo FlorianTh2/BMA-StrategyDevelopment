@@ -56,6 +56,20 @@ export class SpiderchartComponent implements OnInit {
       ExtraWidthX: this.additionalWidth
     };
 
+    // const top_level = this.transformPartialModels(this.inputData).map(
+    //   (a) => a["top-level-userPartialModel"]
+    // );
+    //
+    // const sub_level = top_level.map((a) => {
+    //   return a["sub-level-userPartialModel"];
+    // });
+    //
+    // // flatten array
+    // const newSub = [].concat(...sub_level);
+    //
+    // console.log("sub-levle");
+    // console.log(newSub);
+
     RadarChart.draw(
       "#chart",
       // data
@@ -85,7 +99,7 @@ export class SpiderchartComponent implements OnInit {
           axis: a.partialModel.name,
           value: a.maturityLevelEvaluationMetrics,
           maxValue: a.maxMaturityLevelEvaluationMetrics,
-          "sub-level-userPartialModel:": a.subUserPartialModel.map((b) => {
+          "sub-level-userPartialModel": a.subUserPartialModel.map((b) => {
             return {
               axis: b.partialModel.name,
               value: b.maturityLevelEvaluationMetrics,
