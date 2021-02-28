@@ -1,7 +1,14 @@
+// diagram sources
+// https://www.visualcinnamon.com/2013/09/making-d3-radar-chart-look-bit-better/
 // http://bl.ocks.org/nbremer/6506614
 // http://bl.ocks.org/tezzutezzu/c9d8706587e8f5b5d72084b083b502f8
 // https://stackoverflow.com/a/42643557
+// https://github.com/alangrafu/radar-chart-d3/blob/ea5d63a9472086dbb9aa2d8cdf317d5177b731e9/src/radar-chart.js#L94
 //
+// d3.js basics
+// g-Element: http://tutorials.jenkov.com/svg/g-element.html
+//
+// math basics
 // https://medium.com/analytics-vidhya/the-mathematics-behind-radar-charts-8a4cbc1f14ee
 // https://de.wikipedia.org/wiki/Kreisbogen#:~:text=Der%20zu%20einem%20Kreissektor%20geh%C3%B6rende,den%20beiden%20Radien%20als%20Mittelpunktswinkel.
 //  Kreisumfang/ Gesamtkreisbogen = 2*r*pi (unter Annahme, dass r=1 [wie im Einheitskreis] bleibt: = 2*pi)
@@ -10,6 +17,7 @@
 //  1 Kreis = 2 pi = 260°
 // https://www.lernhelfer.de/schuelerlexikon/mathematik/artikel/bogenmass
 // https://de.wikipedia.org/wiki/Sinus_und_Kosinus
+
 import * as d3 from "d3";
 
 export const RadarChart = {
@@ -25,56 +33,53 @@ export const RadarChart = {
       maxValue: 4,
       radians: 2 * Math.PI,
       opacityArea: 0.5,
-      ToRight: 5,
-      TranslateX: 80,
-      TranslateY: 30,
-      ExtraWidthX: 100,
-      ExtraWidthY: 100,
-      color: d3.scaleOrdinal(d3.schemeCategory10)
-      // ...options
+      toRight: 5,
+      extraWidthX: 250,
+      extraWidthY: 100,
+      translateX: 100,
+      translateY: 30,
+      color: d3.scaleOrdinal(d3.schemeCategory10),
+      ...options
     };
 
     // set maxValue to the actual max value in case it is higher than cfg.maxValue
     cfg.maxValue = data[0]["top-level-userPartialModel"].maxValue;
 
-    // data = [data.map((a) => a["top-level-userPartialModel"])];
-
-    // init svg
-    console.log(data);
+    // initial things for svg (delete possible created svg, createsvg, how many elements do we have, ...)
     var top_level_axis = data.map((a) => {
       return a["top-level-userPartialModel"].axis;
     });
-
     var sub_level_axis_tmp = data.map((a) => {
       return a["top-level-userPartialModel"]["sub-level-userPartialModel"].map(
-        (b) => {
-          return b.axis;
-        }
+        (b) => b.axis
       );
     });
     var sub_level_axis = [].concat(...sub_level_axis_tmp);
-
     var number_top_level_axis = top_level_axis.length;
     var number_sub_level_axis = sub_level_axis.length;
-
     var radius = cfg.factor * Math.min(cfg.w / 2, cfg.h / 2);
     var Format = d3.format(".1f");
     d3.select(tag_id_to_attach_to).select("svg").remove();
 
-    // create svg
+    // create svg and a g
     var g = d3
       .select(tag_id_to_attach_to)
       .append("svg")
-      .attr("width", cfg.w + cfg.ExtraWidthX)
-      .attr("height", cfg.h + cfg.ExtraWidthY)
+      // extra width needed to create more space
+      // (for additional things like labels which width isnt considers in the first place and so on)
+      .attr("width", cfg.w + cfg.extraWidthX)
+      .attr("height", cfg.h + cfg.extraWidthY)
       .append("g")
+      // move g-element (which will have all elements attached) down + to right
+      // to fill up the ExtraWidthX and ExtraWithY which is specified above
       .attr(
         "transform",
-        "translate(" + cfg.TranslateX + "," + cfg.TranslateY + ")"
+        "translate(" + cfg.translateX + "," + cfg.translateY + ")"
       );
 
     // create "spider net"
-    for (var j = 0; j < cfg.levels - 1; j++) {
+    // -1: dont render most outer circle
+    for (var j = 0; j < cfg.levels; j++) {
       var levelFactor = cfg.factor * radius * ((j + 1) / cfg.levels);
       g.selectAll(".levels")
         .data(sub_level_axis)
@@ -111,6 +116,7 @@ export const RadarChart = {
             (1 -
               cfg.factor *
                 Math.sin(
+                  // +1 since the endpoint of the line should be the startpoint of the next line
                   ((i + cfg.shiftFromCenter + 1) * cfg.radians) /
                     number_sub_level_axis
                 ))
@@ -157,11 +163,11 @@ export const RadarChart = {
         })
         .attr("class", "legend")
         .style("font-family", "sans-serif")
-        .style("font-size", "10px")
+        .style("font-size", "12px")
         .attr(
           "transform",
           "translate(" +
-            (cfg.w / 2 - levelFactor + cfg.ToRight) +
+            (cfg.w / 2 - levelFactor + cfg.toRight) +
             ", " +
             (cfg.h / 2 - levelFactor) +
             ")"
@@ -184,13 +190,21 @@ export const RadarChart = {
       .attr("x2", function (d, i) {
         return (
           (cfg.w / 2) *
-          (1 - cfg.factor * Math.sin((i * cfg.radians) / number_top_level_axis))
+          (1 -
+            cfg.factor *
+              // to make top-level-partial-model-lines 1 level higher
+              (1 + 1 / cfg.levels) *
+              Math.sin((i * cfg.radians) / number_top_level_axis))
         );
       })
       .attr("y2", function (d, i) {
         return (
           (cfg.h / 2) *
-          (1 - cfg.factor * Math.cos((i * cfg.radians) / number_top_level_axis))
+          (1 -
+            cfg.factor *
+              // to make top-level-partial-model-lines 1 level higher
+              (1 + 1 / cfg.levels) *
+              Math.cos((i * cfg.radians) / number_top_level_axis))
         );
       })
       .attr("class", "line")
@@ -245,10 +259,8 @@ export const RadarChart = {
       .style("font-size", "11px")
       .attr("text-anchor", "middle")
       .attr("dy", "1.0em")
-      .attr("transform", function (d, i) {
-        return "translate(0, -10)";
-      })
       // adjust x-position of diagram labels
+      // pay attention to the multiplier constants (80 and 50)
       .attr("x", function (d, i) {
         return (
           (cfg.w / 2) *
@@ -263,7 +275,7 @@ export const RadarChart = {
         return (
           (cfg.h / 2) *
             (1 - Math.cos((i * cfg.radians) / number_top_level_axis)) -
-          20 * Math.cos((i * cfg.radians) / number_top_level_axis)
+          50 * Math.cos((i * cfg.radians) / number_top_level_axis)
         );
       });
 
@@ -295,47 +307,30 @@ export const RadarChart = {
     //
     //
     //
-    //
-    //
-    // 2 main for-loops:
-    //  1. draw data-"area"
-    //  2. draw data-"area"-edge points (data area is there, but this will draw proper points at each edge)
-    //
-    //y = value of current element
-    // x = index / number of current iteration
-    // var data = [[3,4], [7,8]]
-    //
-    // data.forEach(function(y,x){
-    // 	console.log(y, " ", x)
-    // })
-    // [3, 4], " ", 0
-    // [7, 8], " ", 1
-    var series = 0;
-    var dataValues = [];
-    g.selectAll(".nodes").data(data, function (j, i) {
-      console.log(j["top-level-userPartialModel"]);
-      dataValues.push([
-        (cfg.w / 2) *
-          (1 -
-            (parseFloat(Math.max(j["top-level-userPartialModel"].value, 0)) /
-              cfg.maxValue) *
-              cfg.factor *
-              Math.sin((i * cfg.radians) / number_top_level_axis)),
-        (cfg.h / 2) *
-          (1 -
-            (parseFloat(Math.max(j["top-level-userPartialModel"].value, 0)) /
-              cfg.maxValue) *
-              cfg.factor *
-              Math.cos((i * cfg.radians) / number_top_level_axis))
-      ]);
-    });
-    dataValues.push(dataValues[0]);
+    // calculate coordinates from data to be later drawn
+    // j = element, i = index
+    var dataValues = data.map((j, i) => [
+      (cfg.w / 2) *
+        (1 -
+          (parseFloat(Math.max(j["top-level-userPartialModel"].value, 0)) /
+            cfg.maxValue) *
+            cfg.factor *
+            Math.sin((i * cfg.radians) / number_top_level_axis)),
+      (cfg.h / 2) *
+        (1 -
+          (parseFloat(Math.max(j["top-level-userPartialModel"].value, 0)) /
+            cfg.maxValue) *
+            cfg.factor *
+            Math.cos((i * cfg.radians) / number_top_level_axis))
+    ]);
+
+    // draw data-"area" from coordinates
     g.selectAll(".area")
       .data([dataValues])
       .enter()
       .append("polygon")
       .attr("class", "radar-chart-serie")
-      .style("stroke-width", "2px")
+      .style("stroke-width", "px")
       .style("stroke", cfg.color(0))
       .attr("points", function (d) {
         var str = "";
@@ -360,7 +355,12 @@ export const RadarChart = {
       });
 
     // draw single edge-points for each datapoint (in data) and related things (e.g. tooltip)
-    var tooltip;
+    // since edgepoints have hover-effect (open tooltip) we have to init tooltip at first
+    var tooltip = g
+      .append("text")
+      .style("opacity", 1)
+      .style("font-size", "23px");
+
     g.selectAll(".nodes")
       .data(data)
       .enter()
@@ -371,21 +371,6 @@ export const RadarChart = {
         return Math.max(j["top-level-userPartialModel"].value, 0);
       })
       .attr("cx", function (j, i) {
-        var dataValues = [];
-        dataValues.push([
-          (cfg.w / 2) *
-            (1 -
-              (parseFloat(Math.max(j["top-level-userPartialModel"].value, 0)) /
-                cfg.maxValue) *
-                cfg.factor *
-                Math.sin((i * cfg.radians) / number_top_level_axis)),
-          (cfg.h / 2) *
-            (1 -
-              (parseFloat(Math.max(j["top-level-userPartialModel"].value, 0)) /
-                cfg.maxValue) *
-                cfg.factor *
-                Math.cos((i * cfg.radians) / number_top_level_axis))
-        ]);
         return (
           (cfg.w / 2) *
           (1 -
@@ -409,15 +394,19 @@ export const RadarChart = {
         return j["top-level-userPartialModel"].axis;
       })
       .style("fill", cfg.color(0))
-      .style("fill-opacity", 0.9)
+      // start tooltip effect creation
+      // d is mouseover-event
       .on("mouseover", function (d) {
         var newX = parseFloat(d3.select(this).attr("cx")) - 10;
         var newY = parseFloat(d3.select(this).attr("cy")) - 5;
 
+        // console.log("here33");
+        // console.log(d);
         // create tooltip for datapoints (if you hover over them)
         tooltip
           .attr("x", newX)
           .attr("y", newY)
+          // result currently: NaN, why this should be possible on mouseoverevent: idk
           .text(Format(d.value))
           .transition(200)
           .style("opacity", 0.5);
@@ -431,17 +420,6 @@ export const RadarChart = {
         g.selectAll("polygon")
           .transition(200)
           .style("fill-opacity", cfg.opacityArea);
-      })
-      .append("svg:title")
-      .text(function (j) {
-        return Math.max(j["top-level-userPartialModel"].value, 0);
       });
-
-    // adjust tooltip for data-edge-points
-    tooltip = g
-      .append("text")
-      .style("opacity", 0)
-      .style("font-family", "sans-serif")
-      .style("font-size", "23px");
   }
 };

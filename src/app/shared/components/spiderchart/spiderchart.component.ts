@@ -26,20 +26,15 @@ export class SpiderchartComponent implements OnInit {
   @Input()
   inputData: InputMaturityModelSpiderChart;
 
-  // general chart settings
-  private width: number = 500;
-  private additionalWidth: number = 300;
-  private height: number = 500;
-  private container: any;
   hostElement: any;
   private svg: any;
-  private margin = 100;
-
-  // data settings
-  private data: any = externalData;
-  private maxValue: number = 0.6;
-  private levels: number = 5;
-  private config: any;
+  private height: number = 500;
+  private width: number = 500;
+  private extraWidthX: number = 300;
+  private extraWidthY: number = 300;
+  private translateX: number = 100;
+  private translateY: number = 100;
+  private levels: number = 8;
   private colorscale = d3.scaleOrdinal(d3.schemeCategory10);
   private legendOptions = ["Reifegrad (ungewichtet)"];
 
@@ -48,51 +43,22 @@ export class SpiderchartComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.config = {
+    let chartConfig = {
       w: this.width,
       h: this.height,
-      maxValue: this.maxValue,
       levels: this.levels,
-      ExtraWidthX: this.additionalWidth
+      extraWidthX: this.extraWidthX,
+      extraWidthY: this.extraWidthY,
+      translateX: this.translateX,
+      translateY: this.translateY
     };
+    let data = this.transformPartialModels(this.inputData);
 
-    // const top_level = this.transformPartialModels(this.inputData).map(
-    //   (a) => a["top-level-userPartialModel"]
-    // );
-    //
-    // const sub_level = top_level.map((a) => {
-    //   return a["sub-level-userPartialModel"];
-    // });
-    //
-    // // flatten array
-    // const newSub = [].concat(...sub_level);
-    //
-    // console.log("sub-levle");
-    // console.log(newSub);
-
-    RadarChart.draw(
-      "#chart",
-      // data
-      this.transformPartialModels(this.inputData),
-      this.config
-    );
-
-    this.svg = d3
-      .select(this.hostElement)
-      .select("#body")
-      .style("width", (this.width + this.additionalWidth).toString() + "px")
-      // +100 since the legend i guess
-      .style("height", (this.height + 100).toString() + "px")
-      .selectAll("svg")
-      .append("svg")
-      .attr("width", this.width + this.additionalWidth)
-      .attr("height", this.height);
-
-    this.renderChart();
+    RadarChart.draw("#chart", data, chartConfig);
+    this.createChartLegend();
   }
 
   transformPartialModels(inputDataPara: InputMaturityModelSpiderChart) {
-    console.log(inputDataPara);
     const result1 = inputDataPara.maturityModel.userPartialModels.map((a) => {
       return {
         "top-level-userPartialModel": {
@@ -109,12 +75,12 @@ export class SpiderchartComponent implements OnInit {
         }
       };
     });
-    console.log("1");
-    console.log(result1);
     return result1;
   }
 
-  renderChart() {
+  createChartLegend() {
+    this.svg = d3.select(this.hostElement).select("#body").selectAll("svg");
+
     var colorscale = this.colorscale;
 
     //Create the title for the legend
