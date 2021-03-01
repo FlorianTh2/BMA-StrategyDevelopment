@@ -6,7 +6,7 @@
   <div>
     <h3>Spiderchart</h3>
     <ng-container *ngIf="userMaturityModel$ | async as userMaturityModel, else loading">
-        <app-spiderchart [inputData]="transformGraphQlInputUserMaturityModelToSpiderChartDataContract(userMaturityModel)"></app-spiderchart>
+        <app-spiderchart [inputMaturityModel]="transformGraphQlInputUserMaturityModelToSpiderChartDataContract(userMaturityModel)"></app-spiderchart>
     </ng-container>
   </div>
 

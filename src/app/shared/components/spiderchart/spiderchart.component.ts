@@ -24,17 +24,24 @@ import { InputMaturityModelSpiderChart } from "../../models/InputMaturityModelSp
 })
 export class SpiderchartComponent implements OnInit {
   @Input()
-  inputData: InputMaturityModelSpiderChart;
-
+  inputMaturityModel: InputMaturityModelSpiderChart;
   hostElement: any;
   private svg: any;
+  private factor: number = 1;
   private height: number = 500;
-  private width: number = 500;
+  private width: number = this.height;
+  private radius: number =
+    this.factor * Math.min(this.width / 2, this.height / 2);
+  private factorLegend: number = 0.85;
+  private maxValue: number = 4;
   private extraWidthX: number = 300;
   private extraWidthY: number = 300;
   private translateX: number = 100;
   private translateY: number = 100;
   private levels: number = 8;
+  private shiftFromCenter: number = 0.0;
+  private opacityArea: number = 0.5;
+  private toRight: number = 5;
   private colorscale = d3.scaleOrdinal(d3.schemeCategory10);
   private legendOptions = ["Reifegrad (ungewichtet)"];
 
@@ -43,39 +50,184 @@ export class SpiderchartComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    let chartConfig = {
-      w: this.width,
-      h: this.height,
-      levels: this.levels,
-      extraWidthX: this.extraWidthX,
-      extraWidthY: this.extraWidthY,
-      translateX: this.translateX,
-      translateY: this.translateY
-    };
-    let data = this.transformPartialModels(this.inputData);
-
-    RadarChart.draw("#chart", data, chartConfig);
-    this.createChartLegend();
+    this.createRadarChart();
   }
 
-  transformPartialModels(inputDataPara: InputMaturityModelSpiderChart) {
-    const result1 = inputDataPara.maturityModel.userPartialModels.map((a) => {
-      return {
-        "top-level-userPartialModel": {
-          axis: a.partialModel.name,
-          value: a.maturityLevelEvaluationMetrics,
-          maxValue: a.maxMaturityLevelEvaluationMetrics,
-          "sub-level-userPartialModel": a.subUserPartialModel.map((b) => {
-            return {
-              axis: b.partialModel.name,
-              value: b.maturityLevelEvaluationMetrics,
-              maxValue: b.maxMaturityLevelEvaluationMetrics
-            };
-          })
-        }
-      };
-    });
-    return result1;
+  createRadarChart() {
+    console.log(this.inputMaturityModel);
+
+    const top_level_axis = this.inputMaturityModel.userPartialModels;
+    const number_top_level_axis: number = top_level_axis.length;
+
+    const sub_level_axis = this.flattenArray(
+      this.inputMaturityModel.userPartialModels.map(
+        (a) => a.subUserPartialModel
+      )
+    );
+
+    const number_sub_level_axis: number = sub_level_axis.length;
+
+    this.svg = d3
+      .select("#chart")
+      .append("svg")
+      .attr("width", this.width)
+      .attr("height", this.height);
+
+    const g1 = this.svg.append("g");
+
+    for (var level = 0; level < this.levels; level++) {
+      const spiderNet = g1
+        .selectAll(".levels")
+        .data(sub_level_axis)
+        .enter()
+        .append("svg:line")
+        .attr("x1", (a, b) =>
+          this.getXPosition(
+            b,
+            number_sub_level_axis,
+            this.shiftFromCenter,
+            level / this.levels
+          )
+        )
+        .attr("y1", (a, b) =>
+          this.getYPosition(
+            b,
+            number_sub_level_axis,
+            this.shiftFromCenter,
+            level / this.levels
+          )
+        )
+        .attr("x2", (a, b) =>
+          this.getXPosition(
+            b + 1,
+            number_sub_level_axis,
+            this.shiftFromCenter,
+            level / this.levels
+          )
+        )
+        .attr("y2", (a, b) =>
+          this.getYPosition(
+            b + 1,
+            number_sub_level_axis,
+            this.shiftFromCenter,
+            level / this.levels
+          )
+        )
+        .attr("class", "line")
+        .style("stroke", "grey")
+        .style("stroke-width", "0.75px")
+        .attr(
+          "transform",
+          "translate(" +
+            (1 - level / this.levels) * this.radius +
+            ", " +
+            (1 - level / this.levels) * this.radius +
+            ")"
+        );
+    }
+  }
+
+  flattenArray(array: any[]): any[] {
+    return [].concat.apply([], array);
+  }
+
+  // Nebenbemerkung
+  // Länge Kreisbogen im Gradmaß = b = 2*r*pi*(winkel/360)
+  // Umrechnung von GradMaß in Bogenmaß = Bogenmaß = 2*pi/360*winkel
+  // radian = default in math + programming-lenguages (important if you use Math.sin())
+  // 360° gradmaß entspricht einer Länge des kreisbogens von 2 pi bogenmaß
+  // https://de.wikipedia.org/wiki/Kreisbogen
+
+  // Prozess
+  // 0 alle angaben im Bogenmaß
+  // 1. Umfang eines Kreises (gebraucht, da über Dreiecksgleichung später gegangen wird und dafür der Winkel benötigt wird)
+  // 1.1 Umfang eines beliebigen Kreises = u = circumference = 2*r*pi
+  //    - Return u ist in der Einheit des radiuses (somit weder Bogenmaß noch Gradmaß)
+  // 1.2 Umfang eines Einheitskreises = u = circumference = 2*pi (r=1: u=2*1*pi=2*pi=u)
+  //    - Return u ist in der Einheit rad (radiant)
+  //      - d.h. Radiant bezieht sich auf Einheitskreis d.h.
+  //    - hier wird (erstmal) von einem Einheitskreis ausgegangen
+  //    - hier wird folgend im Bogenmaß (Radiant) weitergerechnet
+  //      - nicht verwechseln: hier wird zwar damit r "ausgelassen" (da r=1), später wird aber nochmal
+  //        mit dem radius multipliziert um aus dem -Einheitskreis/der Einheit Radiant- herauszukommen
+  // 2. Winkel zwischen verschiedenen Kategorien = Länge eines Kreisbogens = u/anzahlKreisbögen = u/anzahlKategorien
+  // 3. Aufstellen von Dreiecken zu jeder imaginären Kategory, damit man
+  //    durch Dreiecksgleichungen/Trigonometrische Funktionen die Dreiecksseiten berechnen kann
+  //  - siehe: https://medium.com/analytics-vidhya/the-mathematics-behind-radar-charts-8a4cbc1f14ee
+  //      - Aufpassen: dort wird das dreieck anders kreiert als hier folgend
+  //  - Gegeben:
+  //      - winkel alpha zwischen den kategorien
+  //      - Hypothenuse (= radius des kreises)
+  //  - Gesucht:
+  //      - Länge Gegenkathese (= x-position)
+  //      - Länge Ankathese (= y-position)
+  //  - Lösung:
+  //      - Gegenkathese = x-position:
+  //          - betrachten der Formel zur Berechnung sinus(alpha) (da wir alpha + hypothese haben und diese Formel die Gegenkathese beinhaltet, nach der man umstellen kann)
+  //          - sinus(alpha) = Gegenkathese/Hypothenuse
+  //          - d.h. Gegenkathete = sinus(alpha) * Hypothenuse
+  //            - alpha wird im bogenmaß übergeben (wird so von Math.sin und Math.cos erwartet)
+  //      - Berechnung Ankathete = y-position
+  //          - betrachten der Formel zur Berechnung cos(alpha) (da wir alpha + hypothese haben und diese Formel die Ankathese beinhaltet, nach der man umstellen kann)
+  //          - cos(alpha) = ankathete/Hypothenuse
+  //          - d.h. Ankathete = cos(alpha) * hypothenuse
+  //            - = y-position
+  //              - alpha wird im bogenmaß übergeben (wird so von Math.sin und Math.cos erwartet)
+  //
+  // 4. Problem: wir wollen nicht nur den ersten (rechts neben der Mittelsenkrechten)
+  //    Punkt berechnen, sondern alle benötigten Punkte des Kreisen rings herum
+  //    Lösung: bei der berechnung des ersten (rechten) Punktes startet man mit dem winkel zwischen der mittelsenkrechten
+  //            und eben des ersten bisher noch imaginären Punktes und zur berechnung startet man einfach immer wieder
+  //            von besagter mittelsenkrechten (den gesamten kreis herum). Durch den Sinus/Cosinus werden die jeweiligen
+  //            Werte größer und wieder kleiner und ...
+  //            - sieht man auch sehr schön in https://medium.com/analytics-vidhya/the-mathematics-behind-radar-charts-8a4cbc1f14ee
+  //              -> also dass man immer wieder von der mittelsenkrechten startet
+  // 5. Problem: der Koordinatenursprung von d3.js ist oben links, d.h. ohne adjustments sieht man nur den Kreis unten rechts
+  //    Lösung: Es gibt u.a. 2 Lösungen:
+  //      1. man translatiert einfach alle Punkte/Striche innerhalb eines transform-elementes via attribute in d3.js
+  //      2. mathematisch: man geht in die Rechnung, während man noch innerhalb des Einheitskreises rechnet
+  //         - da man nun im Einheitskreis ist, ist bekannt, dass der radius 1 ist, d.h. man muss den Kreis nur um
+  //            diesen radius einerseits nach rechts verschieben und andererseteis (mathematisch nach oben in den positiven Berech) nach unten
+  //            (positives y heißt ja in d3.js nach unten) bewegen.
+  //            - d.h. man einfach "1 - die Koordinate" rechnen, wenn dann z.B. Sinus negativ wird, kommt 1- -Zahl und damit
+  //              wird man wieder positiv und die niedrigste Zahl ist 1-1 (da radius=1=der max radius) = 0 und damit hat man
+  //              Kreis je nach Koordinate um 1 Radius nach rechts oder nach oben verschoben
+  //               - spiegelt den Kreis
+  //            - ähnlich funktioniert es wenn man rechnet "die Koordinate + 1"
+  //                - spiegelt den Kreis nicht
+  // 6. Problem: wenn man nun mehrere ineinander-verschachtelte Kreise haben möchte (eine art Level) ist zwar
+  //             nach der Lösung des vorrangegangenen Problems jeder Kreis vollersichtlich, da um r=1 in den ersten
+  //             Quadranten translatiert wurde, aber nicht alle Kreise sind mittig, der größte ist mittig, alle
+  //             anderen nicht, diese "hängen" alle leicht verschoben in der linken oberen Ecke
+  //    Lösung: einfach translatieren mit (1-level/levels) * radius in x+y-richtung
+
+  // UC=unit circle = hint for calculations/results in the measurements of a unit circle
+  // fraction = a possibility to introduce some levels
+  //  - without levels = max = 1/1 = without levels, min=0
+  //  - e.g. draw a circle with 1/2 the radius: fraction=0.5
+  getXPosition(currentIndex, totalNumber, shiftFromCenter, fraction): number {
+    const circumferenceUC: number = 2 * Math.PI;
+    const angleBetweenUC = circumferenceUC / totalNumber;
+    const resultYPosUC =
+      this.factor * Math.sin((currentIndex + shiftFromCenter) * angleBetweenUC);
+    const resultYPosShiftedUC = 1 - resultYPosUC;
+
+    const radiusFactor = this.factor * this.radius * fraction;
+    const resultYPosShifted = radiusFactor * resultYPosShiftedUC;
+    return resultYPosShifted;
+  }
+
+  getYPosition(currentIndex, totalNumber, shiftFromCenter, fraction): number {
+    const circumferenceUC: number = 2 * Math.PI;
+    const angleBetweenSectorsUC = circumferenceUC / totalNumber;
+    const resultXPosUC =
+      this.factor *
+      Math.cos((currentIndex + shiftFromCenter) * angleBetweenSectorsUC);
+    const resultXPosShiftedUC = 1 - resultXPosUC;
+
+    const radiusFactor = this.factor * this.radius * fraction;
+    const resultXPosShifted = radiusFactor * resultXPosShiftedUC;
+    return resultXPosShifted;
   }
 
   createChartLegend() {

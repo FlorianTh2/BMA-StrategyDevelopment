@@ -25,8 +25,8 @@ export const RadarChart = {
     var cfg = {
       shiftFromCenter: 0.5,
       radius: 5,
-      w: 600,
-      h: 600,
+      width: 600,
+      height: 600,
       factor: 1,
       factorLegend: 0.85,
       levels: 8,
@@ -57,7 +57,7 @@ export const RadarChart = {
     var sub_level_axis = [].concat(...sub_level_axis_tmp);
     var number_top_level_axis = top_level_axis.length;
     var number_sub_level_axis = sub_level_axis.length;
-    var radius = cfg.factor * Math.min(cfg.w / 2, cfg.h / 2);
+    var radius = cfg.factor * Math.min(cfg.width / 2, cfg.height / 2);
     var Format = d3.format(".1f");
     d3.select(tag_id_to_attach_to).select("svg").remove();
 
@@ -67,8 +67,8 @@ export const RadarChart = {
       .append("svg")
       // extra width needed to create more space
       // (for additional things like labels which width isnt considers in the first place and so on)
-      .attr("width", cfg.w + cfg.extraWidthX)
-      .attr("height", cfg.h + cfg.extraWidthY)
+      .attr("width", cfg.width + cfg.extraWidthX)
+      .attr("height", cfg.height + cfg.extraWidthY)
       .append("g")
       // move g-element (which will have all elements attached) down + to right
       // to fill up the ExtraWidthX and ExtraWithY which is specified above
@@ -141,9 +141,9 @@ export const RadarChart = {
         .attr(
           "transform",
           "translate(" +
-            (cfg.w / 2 - levelFactor) +
+            (cfg.width / 2 - levelFactor) +
             ", " +
-            (cfg.h / 2 - levelFactor) +
+            (cfg.height / 2 - levelFactor) +
             ")"
         );
     }
@@ -167,9 +167,9 @@ export const RadarChart = {
         .attr(
           "transform",
           "translate(" +
-            (cfg.w / 2 - levelFactor + cfg.toRight) +
+            (cfg.width / 2 - levelFactor + cfg.toRight) +
             ", " +
-            (cfg.h / 2 - levelFactor) +
+            (cfg.height / 2 - levelFactor) +
             ")"
         )
         .attr("fill", "#737373")
@@ -185,11 +185,11 @@ export const RadarChart = {
       .attr("class", "axis");
     axis
       .append("line")
-      .attr("x1", cfg.w / 2)
-      .attr("y1", cfg.h / 2)
+      .attr("x1", cfg.width / 2)
+      .attr("y1", cfg.height / 2)
       .attr("x2", function (d, i) {
         return (
-          (cfg.w / 2) *
+          (cfg.width / 2) *
           (1 -
             cfg.factor *
               // to make top-level-partial-model-lines 1 level higher
@@ -199,7 +199,7 @@ export const RadarChart = {
       })
       .attr("y2", function (d, i) {
         return (
-          (cfg.h / 2) *
+          (cfg.height / 2) *
           (1 -
             cfg.factor *
               // to make top-level-partial-model-lines 1 level higher
@@ -220,11 +220,11 @@ export const RadarChart = {
       .attr("class", "axis2");
     axis2
       .append("line")
-      .attr("x1", cfg.w / 2)
-      .attr("y1", cfg.h / 2)
+      .attr("x1", cfg.width / 2)
+      .attr("y1", cfg.height / 2)
       .attr("x2", function (d, i) {
         return (
-          (cfg.w / 2) *
+          (cfg.width / 2) *
           (1 -
             cfg.factor *
               Math.sin(
@@ -235,7 +235,7 @@ export const RadarChart = {
       })
       .attr("y2", function (d, i) {
         return (
-          (cfg.h / 2) *
+          (cfg.height / 2) *
           (1 -
             cfg.factor *
               Math.cos(
@@ -263,7 +263,7 @@ export const RadarChart = {
       // pay attention to the multiplier constants (80 and 50)
       .attr("x", function (d, i) {
         return (
-          (cfg.w / 2) *
+          (cfg.width / 2) *
             (1 -
               cfg.factorLegend *
                 Math.sin((i * cfg.radians) / number_top_level_axis)) -
@@ -273,7 +273,7 @@ export const RadarChart = {
       // adjust y-position of diagram labels
       .attr("y", function (d, i) {
         return (
-          (cfg.h / 2) *
+          (cfg.height / 2) *
             (1 - Math.cos((i * cfg.radians) / number_top_level_axis)) -
           50 * Math.cos((i * cfg.radians) / number_top_level_axis)
         );
@@ -310,19 +310,36 @@ export const RadarChart = {
     // calculate coordinates from data to be later drawn
     // j = element, i = index
     var dataValues = data.map((j, i) => [
-      (cfg.w / 2) *
+      (cfg.width / 2) *
         (1 -
           (parseFloat(Math.max(j["top-level-userPartialModel"].value, 0)) /
             cfg.maxValue) *
             cfg.factor *
             Math.sin((i * cfg.radians) / number_top_level_axis)),
-      (cfg.h / 2) *
+      (cfg.height / 2) *
         (1 -
           (parseFloat(Math.max(j["top-level-userPartialModel"].value, 0)) /
             cfg.maxValue) *
             cfg.factor *
             Math.cos((i * cfg.radians) / number_top_level_axis))
     ]);
+
+    var dataValues2 = data.map((j, i) => [
+      (cfg.width / 2) *
+        (1 -
+          (parseFloat(Math.max(j["top-level-userPartialModel"].value, 0)) /
+            cfg.maxValue) *
+            cfg.factor *
+            Math.sin((i * cfg.radians) / number_top_level_axis)),
+      (cfg.height / 2) *
+        (1 -
+          (parseFloat(Math.max(j["top-level-userPartialModel"].value, 0)) /
+            cfg.maxValue) *
+            cfg.factor *
+            Math.cos((i * cfg.radians) / number_top_level_axis))
+    ]);
+
+    // ["sub-level-userPartialModel"]
 
     // draw data-"area" from coordinates
     g.selectAll(".area")
@@ -372,7 +389,7 @@ export const RadarChart = {
       })
       .attr("cx", function (j, i) {
         return (
-          (cfg.w / 2) *
+          (cfg.width / 2) *
           (1 -
             (Math.max(j["top-level-userPartialModel"].value, 0) /
               cfg.maxValue) *
@@ -382,7 +399,7 @@ export const RadarChart = {
       })
       .attr("cy", function (j, i) {
         return (
-          (cfg.h / 2) *
+          (cfg.height / 2) *
           (1 -
             (Math.max(j["top-level-userPartialModel"].value, 0) /
               cfg.maxValue) *

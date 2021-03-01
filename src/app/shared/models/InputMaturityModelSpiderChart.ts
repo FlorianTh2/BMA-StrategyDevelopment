@@ -19,8 +19,6 @@ export interface InputUserPartialModelSpiderChart {
 
 // needed to get exactly 1 level of partialModels 1 level of subPartialModels
 export interface InputMaturityModelSpiderChart {
-  maturityModel: {
-    name: string;
-    userPartialModels: InputUserPartialModelSpiderChart[];
-  };
+  nameMaturityModel: string;
+  userPartialModels: InputUserPartialModelSpiderChart[];
 }
