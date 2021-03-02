@@ -34,14 +34,19 @@ export class SpiderchartComponent implements OnInit {
     this.factor * Math.min(this.width / 2, this.height / 2);
   private factorLegend: number = 0.85;
   private maxValue: number = 4;
-  private extraWidthX: number = 300;
-  private extraWidthY: number = 300;
+  // needed since all scales with height but for external things like label
+  // we need extra Width or Height, but if we increase width or hight
+  // directly -> all increases/shrinks and we need a way to just increase
+  // the base svg (only applied to that)
+  private extraWidth: number = 0;
+  private extraHeight: number = 20;
   private translateX: number = 100;
   private translateY: number = 100;
   private levels: number = 8;
   private shiftFromCenter: number = 0.0;
   private opacityArea: number = 0.5;
   private toRight: number = 5;
+  private customFormat = d3.format(".1f");
   private colorscale = d3.scaleOrdinal(d3.schemeCategory10);
   private legendOptions = ["Reifegrad (ungewichtet)"];
 
@@ -70,10 +75,15 @@ export class SpiderchartComponent implements OnInit {
     this.svg = d3
       .select("#chart")
       .append("svg")
-      .attr("width", this.width)
-      .attr("height", this.height);
+      .attr("width", this.width + this.extraWidth)
+      .attr("height", this.height + this.extraHeight);
 
-    const g1 = this.svg.append("g");
+    const g1 = this.svg
+      .append("g")
+      .attr(
+        "transform",
+        "translate(" + this.extraWidth / 2 + "," + this.extraHeight / 2 + ")"
+      );
 
     for (var level = 0; level < this.levels; level++) {
       const spiderNet = g1
@@ -124,6 +134,45 @@ export class SpiderchartComponent implements OnInit {
             (1 - level / this.levels) * this.radius +
             ")"
         );
+    }
+
+    // for (var level = 0; level < this.levels; level++) {
+    //   g1.selectAll(".levels")
+    //     .data([1])
+    //     .enter()
+    //     .append("svg:text")
+    //     .attr("x", (a) => this.getXPosition(1, 1, 0, 1 / 1))
+    //     .attr("y", (a) => this.getYPosition(1, 1, 0, (level + 1) / this.levels))
+    //     .attr("class", "legend")
+    //     .style("font-size", "12px")
+    //     .text(this.customFormat((level * this.maxValue) / this.levels));
+    // }
+
+    for (var j = 0; j < this.levels; j++) {
+      var levelFactor = this.factor * this.radius * ((j + 1) / this.levels);
+      g1.selectAll(".levels")
+        .data([1]) //dummy data
+        .enter()
+        .append("svg:text")
+        .attr("x", (d) => {
+          return levelFactor * (1 - this.factor * Math.sin(0));
+        })
+        .attr("y", (d) => {
+          return levelFactor * (1 - this.factor * Math.cos(0));
+        })
+        .attr("class", "legend")
+        .style("font-family", "sans-serif")
+        .style("font-size", "12px")
+        .attr(
+          "transform",
+          "translate(" +
+            (this.width / 2 - levelFactor + this.toRight) +
+            ", " +
+            (this.height / 2 - levelFactor) +
+            ")"
+        )
+        .attr("fill", "#737373")
+        .text(this.customFormat(((j + 1) * this.maxValue) / this.levels));
     }
   }
 
@@ -200,6 +249,8 @@ export class SpiderchartComponent implements OnInit {
   //             Quadranten translatiert wurde, aber nicht alle Kreise sind mittig, der größte ist mittig, alle
   //             anderen nicht, diese "hängen" alle leicht verschoben in der linken oberen Ecke
   //    Lösung: einfach translatieren mit (1-level/levels) * radius in x+y-richtung
+  //            -> * radius geht nur, wenn höhe und breite gleich sein sollen, andernfalls müssen beide einzelnd
+  //                spezifiziert werden
 
   // UC=unit circle = hint for calculations/results in the measurements of a unit circle
   // fraction = a possibility to introduce some levels
@@ -208,9 +259,9 @@ export class SpiderchartComponent implements OnInit {
   getXPosition(currentIndex, totalNumber, shiftFromCenter, fraction): number {
     const circumferenceUC: number = 2 * Math.PI;
     const angleBetweenUC = circumferenceUC / totalNumber;
-    const resultYPosUC =
+    const resultXPosUC =
       this.factor * Math.sin((currentIndex + shiftFromCenter) * angleBetweenUC);
-    const resultYPosShiftedUC = 1 - resultYPosUC;
+    const resultYPosShiftedUC = 1 - resultXPosUC;
 
     const radiusFactor = this.factor * this.radius * fraction;
     const resultYPosShifted = radiusFactor * resultYPosShiftedUC;
@@ -220,10 +271,10 @@ export class SpiderchartComponent implements OnInit {
   getYPosition(currentIndex, totalNumber, shiftFromCenter, fraction): number {
     const circumferenceUC: number = 2 * Math.PI;
     const angleBetweenSectorsUC = circumferenceUC / totalNumber;
-    const resultXPosUC =
+    const resultYPosUC =
       this.factor *
       Math.cos((currentIndex + shiftFromCenter) * angleBetweenSectorsUC);
-    const resultXPosShiftedUC = 1 - resultXPosUC;
+    const resultXPosShiftedUC = 1 - resultYPosUC;
 
     const radiusFactor = this.factor * this.radius * fraction;
     const resultXPosShifted = radiusFactor * resultXPosShiftedUC;
