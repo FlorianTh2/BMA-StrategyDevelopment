@@ -13,7 +13,10 @@ import {
   PartialModel,
   PartialModelsGQL
 } from "../../../graphql/generated/graphql";
-import { InputMaturityModelSpiderChart } from "../../models/InputMaturityModelSpiderChart";
+import {
+  InputMaturityModelSpiderChart,
+  InputUserPartialModelSpiderChart
+} from "../../models/InputMaturityModelSpiderChart";
 // good reference
 // http://bl.ocks.org/nbremer/6506614
 @Component({
@@ -38,13 +41,13 @@ export class SpiderchartComponent implements OnInit {
   // we need extra Width or Height, but if we increase width or hight
   // directly -> all increases/shrinks and we need a way to just increase
   // the base svg (only applied to that)
-  private extraWidth: number = 0;
-  private extraHeight: number = 20;
+  private extraWidth: number = 400;
+  private extraHeight: number = 200;
   private translateX: number = 100;
   private translateY: number = 100;
   private levels: number = 8;
   private shiftFromCenter: number = 0.0;
-  private opacityArea: number = 0.5;
+  private opacityArea: number = 0.8;
   private toRight: number = 5;
   private customFormat = d3.format(".1f");
   private colorscale = d3.scaleOrdinal(d3.schemeCategory10);
@@ -89,7 +92,7 @@ export class SpiderchartComponent implements OnInit {
     // in the middle (level=0) would have been just a dot
     for (var level = 1; level < this.levels + 1; level++) {
       const spiderNet = g1
-        .selectAll(".levels")
+        .selectAll(".lineSelection")
         .data(sub_level_axis.slice(0, -2))
         .enter()
         .append("svg:line")
@@ -98,7 +101,8 @@ export class SpiderchartComponent implements OnInit {
             b,
             number_sub_level_axis,
             this.shiftFromCenter,
-            level / this.levels
+            level / this.levels,
+            1
           )
         )
         .attr("y1", (a, b) =>
@@ -106,7 +110,8 @@ export class SpiderchartComponent implements OnInit {
             b,
             number_sub_level_axis,
             this.shiftFromCenter,
-            level / this.levels
+            level / this.levels,
+            1
           )
         )
         .attr("x2", (a, b) =>
@@ -114,7 +119,8 @@ export class SpiderchartComponent implements OnInit {
             b + 1,
             number_sub_level_axis,
             this.shiftFromCenter,
-            level / this.levels
+            level / this.levels,
+            1
           )
         )
         .attr("y2", (a, b) =>
@@ -122,7 +128,8 @@ export class SpiderchartComponent implements OnInit {
             b + 1,
             number_sub_level_axis,
             this.shiftFromCenter,
-            level / this.levels
+            level / this.levels,
+            1
           )
         )
         .attr("class", "line")
@@ -140,23 +147,178 @@ export class SpiderchartComponent implements OnInit {
 
     // -> level = 1 and this.levels +1, since: to not begin at the middle but at the actually first position (since we dont want to display 0.0 in the middle)
     for (var level = 1; level < this.levels + 1; level++) {
-      g1.selectAll(".levels1")
+      g1.selectAll(".legendSelection")
         .data([1])
         .enter()
         .append("svg:text")
-        .attr("x", (a) => this.getXPosition(1, 1, 0, 1 / 1))
-        .attr("y", (a) => this.getYPosition(1, 1, 0, level / this.levels))
+        .attr("x", (a) => this.getXPosition(1, 1, 0, 1 / 1, 1))
+        .attr("y", (a) => this.getYPosition(1, 1, 0, level / this.levels, 1))
         // important since this.getYPosition returns always (e.g. different currentIndex or fraction) the same (=0)
-        // take a look at problem 6: short: to get all centered (x not needed since always the same (1))
+        // take a look at problem 6 - in short: to get all centered (x not needed since always the same (1))
         .attr(
           "transform",
           "translate(0, " + (1 - level / this.levels) * this.radius + ")"
         )
         .attr("class", "legend")
         .style("font-size", "12px")
-        // -> level +1 to not begin at the middle but at the actually first position (since we dont want to display 0.0 in the middle)
         .text(this.customFormat((level * this.maxValue) / this.levels));
     }
+
+    // for top-level-partial-models create lines from core to outside based on setup
+    const gPartialModelAxis = g1
+      .selectAll(".partialModelAxis")
+      .data(top_level_axis)
+      .enter()
+      .append("g")
+      .attr("class", ".axis");
+
+    gPartialModelAxis
+      .append("line")
+      .attr("x1", this.radius)
+      .attr("y1", this.radius)
+      .attr("x2", (a, b) =>
+        this.getXPosition(b, number_top_level_axis, 0, 1 / 1, 1.0)
+      )
+      .attr("y2", (a, b) =>
+        this.getYPosition(b, number_top_level_axis, 0, 1 / 1, 1.0)
+      )
+      .attr("class", "line")
+      .style("stroke", "grey")
+      .attr("stroke-width", "2px");
+
+    // create labels
+    gPartialModelAxis
+      .append("text")
+      .attr("class", "labels")
+      .text((d: InputUserPartialModelSpiderChart) => d.partialModel.name)
+      .style("font-size", "11px")
+      .attr("dx", "-75px")
+      .attr("x", (a, b) =>
+        this.getXPosition(b, number_top_level_axis, 0, 1 / 1, 1.25)
+      )
+      .attr("y", (a, b) =>
+        this.getYPosition(b, number_top_level_axis, 0, 1 / 1, 1.1)
+      );
+
+    // for sub-level-partial-models create lines from core to outside based on setup
+    const gSubPartialModelAxis = g1
+      .selectAll(".subPartialModels")
+      .data(sub_level_axis)
+      .enter()
+      .append("g")
+      .attr("class", "subPartialModelAxis")
+      .append("line")
+      .attr("x1", this.radius)
+      .attr("y1", this.radius)
+      .attr("x2", (a, b) =>
+        this.getXPosition(b, number_sub_level_axis, 0, 1 / 1, 1.0)
+      )
+      .attr("y2", (a, b) =>
+        this.getYPosition(b, number_sub_level_axis, 0, 1 / 1, 1.0)
+      )
+      .attr("class", "line")
+      .style("stroke", "grey")
+      .attr("stroke-width", "1px");
+
+    g1.selectAll(".area")
+      .data([top_level_axis])
+      .enter()
+      .append("polygon")
+      .attr("class", "radar-chart-area")
+      .style("stroke-width", "1.5px")
+      .style("stroke", "grey")
+      .attr("points", (a: InputUserPartialModelSpiderChart[]) => {
+        const result = a
+          .map(
+            (b, c) =>
+              this.getXPosition(
+                c,
+                number_top_level_axis,
+                0,
+                1 / 1,
+                b.maturityLevelEvaluationMetrics /
+                  b.maxMaturityLevelEvaluationMetrics
+              ) +
+              "," +
+              this.getYPosition(
+                c,
+                number_top_level_axis,
+                0,
+                1 / 1,
+                b.maturityLevelEvaluationMetrics /
+                  b.maxMaturityLevelEvaluationMetrics
+              )
+          )
+          .reduce((d, e) => d + " " + e);
+        return result;
+      })
+      .style("fill", "#8ac4d0")
+      .style("fill-opacity", this.opacityArea)
+      // needed function-keyword to get context of "this" otherwise this points to the module
+      .on("mouseover", function (a) {
+        const thisPolygon = "polygon." + d3.select(this).attr("class");
+        g1.selectAll("polygon").transition(200).style("fill-opacity", 0.1);
+        g1.selectAll(thisPolygon).transition(200).style("fill-opacity", 0.9);
+      })
+      .on("mouseout", () =>
+        g1
+          .selectAll("polygon")
+          .transition(200)
+          .style("fill-opacity", this.opacityArea)
+      );
+
+    // init/prepare tooltip for following definition of edge-point-hover
+    var tooltip = g1
+      .append("text")
+      .style("opacity", 1)
+      .style("font-size", "23px");
+
+    // draw single edge-points
+    g1.selectAll(".nodes")
+      .data(top_level_axis)
+      .enter()
+      .append("svg:circle")
+      .attr("class", "circle-edge-point")
+      .attr("r", 5)
+      .attr("cx", (a: InputUserPartialModelSpiderChart, b) =>
+        this.getXPosition(
+          b,
+          number_top_level_axis,
+          0,
+          1 / 1,
+          a.maturityLevelEvaluationMetrics / a.maxMaturityLevelEvaluationMetrics
+        )
+      )
+      .attr("cy", (a: InputUserPartialModelSpiderChart, b) =>
+        this.getYPosition(
+          b,
+          number_top_level_axis,
+          0,
+          1 / 1,
+          a.maturityLevelEvaluationMetrics / a.maxMaturityLevelEvaluationMetrics
+        )
+      )
+      .style("fill", "#28527a")
+      // needed function-keyword to get context of "this" otherwise this points to the module
+      .on("mouseover", function (a: MouseEvent) {
+        tooltip
+          .attr("x", () => parseFloat(d3.select(this).attr("cx")) - 10)
+          .attr("y", () => parseFloat(d3.select(this).attr("cy")) - 5)
+          .text(d3.format(".1f")(a.screenX))
+          .attr("transition", 200)
+          .style("opacity", 0.5);
+
+        const thisPolygon = "polygon." + d3.select(this).attr("class");
+        // why changed idk
+        g1.selectAll("polygon").transition(200).style("fill-opacity", 0.9);
+        g1.selectAll(thisPolygon).transition(200).style("fill-opacity", 0.1);
+      })
+      .on("mouseout", () =>
+        g1
+          .selectAll("polygon")
+          .transition(200)
+          .style("fill-opacity", this.opacityArea)
+      );
   }
 
   flattenArray(array: any[]): any[] {
@@ -251,25 +413,37 @@ export class SpiderchartComponent implements OnInit {
   // fraction = a possibility to introduce some levels
   //  - without levels = max = 1/1 = without levels, min=0
   //  - e.g. draw a circle with 1/2 the radius: fraction=0.5
-  getXPosition(currentIndex, totalNumber, shiftFromCenter, fraction): number {
+  getXPosition(
+    currentIndex,
+    totalNumber,
+    shiftFromCenter,
+    fraction,
+    stretch
+  ): number {
     const circumferenceUC: number = 2 * Math.PI;
     const angleBetweenUC = circumferenceUC / totalNumber;
     const resultXPosUC =
       this.factor * Math.sin((currentIndex + shiftFromCenter) * angleBetweenUC);
-    const resultYPosShiftedUC = 1 + resultXPosUC;
+    const resultYPosShiftedUC = 1 + stretch * resultXPosUC;
 
     const radiusFactor = this.factor * this.radius * fraction;
     const resultYPosShifted = radiusFactor * resultYPosShiftedUC;
     return resultYPosShifted;
   }
 
-  getYPosition(currentIndex, totalNumber, shiftFromCenter, fraction): number {
+  getYPosition(
+    currentIndex,
+    totalNumber,
+    shiftFromCenter,
+    fraction,
+    stretch
+  ): number {
     const circumferenceUC: number = 2 * Math.PI;
     const angleBetweenSectorsUC = circumferenceUC / totalNumber;
     const resultYPosUC =
       this.factor *
       Math.cos((currentIndex + shiftFromCenter) * angleBetweenSectorsUC);
-    const resultXPosShiftedUC = 1 - resultYPosUC;
+    const resultXPosShiftedUC = 1 - stretch * resultYPosUC;
 
     const radiusFactor = this.factor * this.radius * fraction;
     const resultXPosShifted = radiusFactor * resultXPosShiftedUC;
