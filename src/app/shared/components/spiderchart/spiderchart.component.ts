@@ -85,10 +85,12 @@ export class SpiderchartComponent implements OnInit {
         "translate(" + this.extraWidth / 2 + "," + this.extraHeight / 2 + ")"
       );
 
-    for (var level = 0; level < this.levels; level++) {
+    // -> level = 1 and this.levels +1, since: to not begin at the middle but at the actually first position (since we dont want to display 0.0 in the middle)
+    // in the middle (level=0) would have been just a dot
+    for (var level = 1; level < this.levels + 1; level++) {
       const spiderNet = g1
         .selectAll(".levels")
-        .data(sub_level_axis)
+        .data(sub_level_axis.slice(0, -2))
         .enter()
         .append("svg:line")
         .attr("x1", (a, b) =>
@@ -136,43 +138,24 @@ export class SpiderchartComponent implements OnInit {
         );
     }
 
-    // for (var level = 0; level < this.levels; level++) {
-    //   g1.selectAll(".levels")
-    //     .data([1])
-    //     .enter()
-    //     .append("svg:text")
-    //     .attr("x", (a) => this.getXPosition(1, 1, 0, 1 / 1))
-    //     .attr("y", (a) => this.getYPosition(1, 1, 0, (level + 1) / this.levels))
-    //     .attr("class", "legend")
-    //     .style("font-size", "12px")
-    //     .text(this.customFormat((level * this.maxValue) / this.levels));
-    // }
-
-    for (var j = 0; j < this.levels; j++) {
-      var levelFactor = this.factor * this.radius * ((j + 1) / this.levels);
-      g1.selectAll(".levels")
-        .data([1]) //dummy data
+    // -> level = 1 and this.levels +1, since: to not begin at the middle but at the actually first position (since we dont want to display 0.0 in the middle)
+    for (var level = 1; level < this.levels + 1; level++) {
+      g1.selectAll(".levels1")
+        .data([1])
         .enter()
         .append("svg:text")
-        .attr("x", (d) => {
-          return levelFactor * (1 - this.factor * Math.sin(0));
-        })
-        .attr("y", (d) => {
-          return levelFactor * (1 - this.factor * Math.cos(0));
-        })
-        .attr("class", "legend")
-        .style("font-family", "sans-serif")
-        .style("font-size", "12px")
+        .attr("x", (a) => this.getXPosition(1, 1, 0, 1 / 1))
+        .attr("y", (a) => this.getYPosition(1, 1, 0, level / this.levels))
+        // important since this.getYPosition returns always (e.g. different currentIndex or fraction) the same (=0)
+        // take a look at problem 6: short: to get all centered (x not needed since always the same (1))
         .attr(
           "transform",
-          "translate(" +
-            (this.width / 2 - levelFactor + this.toRight) +
-            ", " +
-            (this.height / 2 - levelFactor) +
-            ")"
+          "translate(0, " + (1 - level / this.levels) * this.radius + ")"
         )
-        .attr("fill", "#737373")
-        .text(this.customFormat(((j + 1) * this.maxValue) / this.levels));
+        .attr("class", "legend")
+        .style("font-size", "12px")
+        // -> level +1 to not begin at the middle but at the actually first position (since we dont want to display 0.0 in the middle)
+        .text(this.customFormat((level * this.maxValue) / this.levels));
     }
   }
 
@@ -244,8 +227,20 @@ export class SpiderchartComponent implements OnInit {
   //               - spiegelt den Kreis
   //            - ähnlich funktioniert es wenn man rechnet "die Koordinate + 1"
   //                - spiegelt den Kreis nicht
+  //            - empfohlen: Ausgang: d3.js: koordinatenursprung ist oben links und positive y bewirken, dass die Figur nach
+  //                          unten geht (unten sind höhere y-koordinaten) d.h. mathematisch betrachtet ist das Koordinaten
+  //                          system an der y-Achse gespiegelt
+  //                          -> bei der x-Achse ist das anders: d3.js wie auch mathematisch: höhere x-Werte = translation
+  //                              nach rechts
+  //                          -> deshalb: bei Berechnung von x: + 1 (keine spiegellung durch +1)
+  //                                      bei der Berechnung von y: -1 sodass man im Grunde das Ergebnis spiegelt
+  //                                        und dadurch (jetzt durch 2 spiegellungen 1. durch d3.js und 2. durch diese Rechnung)
+  //                                        wieder "normal ist" und damit die grafische Darstellung mit der mathematiscehn
+  //                                        Rechnung übereinstimmt (wenn vor 1-koordinate ein hoher y wert herauskommt, ist
+  //                                        dieser auch oben und nicht weiter unten)
+  //                                        -> gerade bei der legende ist das wichtig, die soll ja nicht von der mitte nach unten gehen
   // 6. Problem: wenn man nun mehrere ineinander-verschachtelte Kreise haben möchte (eine art Level) ist zwar
-  //             nach der Lösung des vorrangegangenen Problems jeder Kreis vollersichtlich, da um r=1 in den ersten
+  //             nach der Lösung des vorrangegangenen Problems jeder Kreis voll ersichtlich, da um r=1 in den ersten
   //             Quadranten translatiert wurde, aber nicht alle Kreise sind mittig, der größte ist mittig, alle
   //             anderen nicht, diese "hängen" alle leicht verschoben in der linken oberen Ecke
   //    Lösung: einfach translatieren mit (1-level/levels) * radius in x+y-richtung
@@ -261,7 +256,7 @@ export class SpiderchartComponent implements OnInit {
     const angleBetweenUC = circumferenceUC / totalNumber;
     const resultXPosUC =
       this.factor * Math.sin((currentIndex + shiftFromCenter) * angleBetweenUC);
-    const resultYPosShiftedUC = 1 - resultXPosUC;
+    const resultYPosShiftedUC = 1 + resultXPosUC;
 
     const radiusFactor = this.factor * this.radius * fraction;
     const resultYPosShifted = radiusFactor * resultYPosShiftedUC;
