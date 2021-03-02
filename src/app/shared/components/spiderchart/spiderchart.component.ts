@@ -1,3 +1,32 @@
+// diagram sources
+// http://techslides.com/over-1000-d3-js-examples-and-demos
+// https://www.visualcinnamon.com/2013/09/making-d3-radar-chart-look-bit-better/
+// http://bl.ocks.org/nbremer/6506614
+// http://bl.ocks.org/tezzutezzu/c9d8706587e8f5b5d72084b083b502f8
+// https://stackoverflow.com/a/42643557
+// https://github.com/alangrafu/radar-chart-d3/blob/ea5d63a9472086dbb9aa2d8cdf317d5177b731e9/src/radar-chart.js#L94
+//
+// d3.js basics
+// example:
+//  d3.select("body").selectAll("span").data([1,2,3]).enter().append("p").text("hi")
+//  d3.select("body").selectAll("p").data(dataset).enter().append("p").text("New paragraph!");
+// https://bost.ocks.org/mike/selection/
+// https://github.com/d3/d3-selection
+//  By convention, selection methods that return the current selection use four spaces of indent, while methods that return a new selection use only two.
+// https://alignedleft.com/tutorials/d3/binding-data
+// g-Element: http://tutorials.jenkov.com/svg/g-element.html
+// Generally, though - position and size are .attr, and all other decoration is .style. But hey, that’s probably a lie, too.
+//
+// math basics
+// https://medium.com/analytics-vidhya/the-mathematics-behind-radar-charts-8a4cbc1f14ee
+// https://de.wikipedia.org/wiki/Kreisbogen#:~:text=Der%20zu%20einem%20Kreissektor%20geh%C3%B6rende,den%20beiden%20Radien%20als%20Mittelpunktswinkel.
+//  Kreisumfang/ Gesamtkreisbogen = 2*r*pi (unter Annahme, dass r=1 [wie im Einheitskreis] bleibt: = 2*pi)
+// https://de.wikipedia.org/wiki/Einheitskreis
+// https://de.wikipedia.org/wiki/Radiant_(Einheit)
+//  1 Kreis = 2 pi = 260°
+// https://www.lernhelfer.de/schuelerlexikon/mathematik/artikel/bogenmass
+// https://de.wikipedia.org/wiki/Sinus_und_Kosinus
+
 import {
   Component,
   ElementRef,
@@ -6,19 +35,10 @@ import {
   ViewEncapsulation
 } from "@angular/core";
 import * as d3 from "d3";
-import { data as externalData } from "../../../../assets/js/exampleData";
-import { RadarChart } from "../../../../assets/js/RadarChart";
-import { Observable } from "rxjs";
-import {
-  PartialModel,
-  PartialModelsGQL
-} from "../../../graphql/generated/graphql";
 import {
   InputMaturityModelSpiderChart,
   InputUserPartialModelSpiderChart
 } from "../../models/InputMaturityModelSpiderChart";
-// good reference
-// http://bl.ocks.org/nbremer/6506614
 @Component({
   selector: "app-spiderchart",
   templateUrl: "./spiderchart.component.html",
@@ -133,7 +153,7 @@ export class SpiderchartComponent implements OnInit {
           )
         )
         .attr("class", "line")
-        .style("stroke", "grey")
+        .style("stroke", "#7f7f7f")
         .style("stroke-width", "0.75px")
         .attr(
           "transform",
@@ -183,7 +203,7 @@ export class SpiderchartComponent implements OnInit {
         this.getYPosition(b, number_top_level_axis, 0, 1 / 1, 1.0)
       )
       .attr("class", "line")
-      .style("stroke", "grey")
+      .style("stroke", "#7f7f7f")
       .attr("stroke-width", "2px");
 
     // create labels
@@ -217,7 +237,7 @@ export class SpiderchartComponent implements OnInit {
         this.getYPosition(b, number_sub_level_axis, 0, 1 / 1, 1.0)
       )
       .attr("class", "line")
-      .style("stroke", "grey")
+      .style("stroke", "#7f7f7f")
       .attr("stroke-width", "1px");
 
     g1.selectAll(".area")
@@ -226,7 +246,7 @@ export class SpiderchartComponent implements OnInit {
       .append("polygon")
       .attr("class", "radar-chart-area")
       .style("stroke-width", "1.5px")
-      .style("stroke", "grey")
+      .style("stroke", "#7f7f7f")
       .attr("points", (a: InputUserPartialModelSpiderChart[]) => {
         const result = a
           .map(
@@ -274,12 +294,12 @@ export class SpiderchartComponent implements OnInit {
       .style("font-size", "23px");
 
     // draw single edge-points
-    g1.selectAll(".nodes")
+    g1.selectAll(".edges")
       .data(top_level_axis)
       .enter()
       .append("svg:circle")
       .attr("class", "circle-edge-point")
-      .attr("r", 5)
+      .attr("r", 7.5)
       .attr("cx", (a: InputUserPartialModelSpiderChart, b) =>
         this.getXPosition(
           b,
@@ -298,7 +318,9 @@ export class SpiderchartComponent implements OnInit {
           a.maturityLevelEvaluationMetrics / a.maxMaturityLevelEvaluationMetrics
         )
       )
-      .style("fill", "#28527a")
+      .attr("stroke", "white")
+      .attr("stroke-width", 3)
+      .style("fill", "#ff7f0e")
       // needed function-keyword to get context of "this" otherwise this points to the module
       .on(
         "mouseover",

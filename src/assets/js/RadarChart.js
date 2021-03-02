@@ -1,23 +1,3 @@
-// diagram sources
-// https://www.visualcinnamon.com/2013/09/making-d3-radar-chart-look-bit-better/
-// http://bl.ocks.org/nbremer/6506614
-// http://bl.ocks.org/tezzutezzu/c9d8706587e8f5b5d72084b083b502f8
-// https://stackoverflow.com/a/42643557
-// https://github.com/alangrafu/radar-chart-d3/blob/ea5d63a9472086dbb9aa2d8cdf317d5177b731e9/src/radar-chart.js#L94
-//
-// d3.js basics
-// g-Element: http://tutorials.jenkov.com/svg/g-element.html
-//
-// math basics
-// https://medium.com/analytics-vidhya/the-mathematics-behind-radar-charts-8a4cbc1f14ee
-// https://de.wikipedia.org/wiki/Kreisbogen#:~:text=Der%20zu%20einem%20Kreissektor%20geh%C3%B6rende,den%20beiden%20Radien%20als%20Mittelpunktswinkel.
-//  Kreisumfang/ Gesamtkreisbogen = 2*r*pi (unter Annahme, dass r=1 [wie im Einheitskreis] bleibt: = 2*pi)
-// https://de.wikipedia.org/wiki/Einheitskreis
-// https://de.wikipedia.org/wiki/Radiant_(Einheit)
-//  1 Kreis = 2 pi = 260°
-// https://www.lernhelfer.de/schuelerlexikon/mathematik/artikel/bogenmass
-// https://de.wikipedia.org/wiki/Sinus_und_Kosinus
-
 import * as d3 from "d3";
 
 export const RadarChart = {
