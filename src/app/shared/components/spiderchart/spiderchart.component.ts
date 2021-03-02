@@ -300,25 +300,28 @@ export class SpiderchartComponent implements OnInit {
       )
       .style("fill", "#28527a")
       // needed function-keyword to get context of "this" otherwise this points to the module
-      .on("mouseover", function (a: MouseEvent) {
-        tooltip
-          .attr("x", () => parseFloat(d3.select(this).attr("cx")) - 10)
-          .attr("y", () => parseFloat(d3.select(this).attr("cy")) - 5)
-          .text(d3.format(".1f")(a.screenX))
-          .attr("transition", 200)
-          .style("opacity", 0.5);
+      .on(
+        "mouseover",
+        function (mouseEvent, data: InputUserPartialModelSpiderChart) {
+          tooltip
+            .attr("x", () => parseFloat(d3.select(this).attr("cx")) - 10)
+            .attr("y", () => parseFloat(d3.select(this).attr("cy")) - 5)
+            .text(d3.format(".1f")(data.maturityLevelEvaluationMetrics))
+            .attr("transition", 200)
+            .style("opacity", 0.5);
 
-        const thisPolygon = "polygon." + d3.select(this).attr("class");
-        // why changed idk
-        g1.selectAll("polygon").transition(200).style("fill-opacity", 0.9);
-        g1.selectAll(thisPolygon).transition(200).style("fill-opacity", 0.1);
-      })
-      .on("mouseout", () =>
-        g1
-          .selectAll("polygon")
+          const thisPolygon = "polygon." + d3.select(this).attr("class");
+          // why changed idk
+          g1.selectAll("polygon").transition(200).style("fill-opacity", 0.9);
+          g1.selectAll(thisPolygon).transition(200).style("fill-opacity", 0.1);
+        }
+      )
+      .on("mouseout", () => {
+        tooltip.transition(200).style("opacity", 0.0);
+        g1.selectAll("polygon")
           .transition(200)
-          .style("fill-opacity", this.opacityArea)
-      );
+          .style("fill-opacity", this.opacityArea);
+      });
   }
 
   flattenArray(array: any[]): any[] {
