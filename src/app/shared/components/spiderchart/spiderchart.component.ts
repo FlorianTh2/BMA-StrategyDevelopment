@@ -60,7 +60,7 @@ export class SpiderchartComponent implements OnInit {
   inputMaturityModel: InputMaturityModelSpiderChart;
   hostElement: any;
   private svg: any;
-  private factor: number = 1;
+  private factor: number = 1.0;
   private height: number = 400;
   private width: number = this.height;
   private radius: number =
@@ -628,7 +628,7 @@ export class SpiderchartComponent implements OnInit {
       this.factor * Math.sin((currentIndex + shiftFromCenter) * angleBetweenUC);
     const resultYPosShiftedUC = 1 + stretch * resultXPosUC;
 
-    const radiusFactor = this.factor * this.radius * fraction;
+    const radiusFactor = this.radius * fraction;
     const resultYPosShifted = radiusFactor * resultYPosShiftedUC;
     return resultYPosShifted;
   }
@@ -647,7 +647,7 @@ export class SpiderchartComponent implements OnInit {
       Math.cos((currentIndex + shiftFromCenter) * angleBetweenSectorsUC);
     const resultXPosShiftedUC = 1 - stretch * resultYPosUC;
 
-    const radiusFactor = this.factor * this.radius * fraction;
+    const radiusFactor = this.radius * fraction;
     const resultXPosShifted = radiusFactor * resultXPosShiftedUC;
     return resultXPosShifted;
   }
