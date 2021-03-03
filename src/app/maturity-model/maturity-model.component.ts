@@ -75,7 +75,8 @@ export class MaturityModelComponent implements OnInit {
               // took simply the first one ([0]) since one must exist at least (like at least: "Aussage trifft zu" with 5 levels (0-4) (but not 5 evaluationMetrics but one))
               maxMaturityLevelEvaluationMetrics:
                 b.userEvaluationMetrics[0].evaluationMetric.maxValue,
-              partialModel: b.partialModel
+              partialModel: b.partialModel,
+              parentUserPartialModel: a
             } as InputSubUserPartialModelSpiderChart;
           })
         } as InputUserPartialModelSpiderChart;

@@ -7,10 +7,19 @@
 // https://github.com/alangrafu/radar-chart-d3/blob/ea5d63a9472086dbb9aa2d8cdf317d5177b731e9/src/radar-chart.js#L94
 //
 // d3.js basics
+// basics: d3.selectAll("tagA").data(array).enter().append("tagA"). ...
+// if you dont have data (u want to create only one or something like that):
+//    gLegend.append("...").attr("..."). ...
 // example:
 //  d3.select("body").selectAll("span").data([1,2,3]).enter().append("p").text("hi")
 //  d3.select("body").selectAll("p").data(dataset).enter().append("p").text("New paragraph!");
 // https://bost.ocks.org/mike/selection/
+//  .data(...) = data-join, der mehrere selections anbietet und das einzelne data-datum in dem html-property speichert
+//    enter(): bietet methode: append()
+//    update:
+//    exit(): bietet methode: remove()
+// https://tmcw.github.io/presentations/dcjq/
+// https://www.d3indepth.com/selections/
 // https://github.com/d3/d3-selection
 //  By convention, selection methods that return the current selection use four spaces of indent, while methods that return a new selection use only two.
 // https://alignedleft.com/tutorials/d3/binding-data
@@ -37,6 +46,7 @@ import {
 import * as d3 from "d3";
 import {
   InputMaturityModelSpiderChart,
+  InputSubUserPartialModelSpiderChart,
   InputUserPartialModelSpiderChart
 } from "../../models/InputMaturityModelSpiderChart";
 @Component({
@@ -63,14 +73,11 @@ export class SpiderchartComponent implements OnInit {
   // the base svg (only applied to that)
   private extraWidth: number = 400;
   private extraHeight: number = 200;
-  private translateX: number = 100;
-  private translateY: number = 100;
   private levels: number = 8;
-  private shiftFromCenter: number = 0.0;
-  private opacityArea: number = 0.8;
+  private shiftFromCenter: number = 1;
+  private opacityArea: number = 0.6;
   private toRight: number = 5;
   private customFormat = d3.format(".1f");
-  private colorscale = d3.scaleOrdinal(d3.schemeCategory10);
   private legendOptions = ["Reifegrad (ungewichtet)"];
 
   constructor(private elRef: ElementRef) {
@@ -82,8 +89,8 @@ export class SpiderchartComponent implements OnInit {
   }
 
   createRadarChart() {
-    console.log(this.inputMaturityModel);
-
+    // needed since in annonym-function declared with "function"-keyword: the "this"-context changes to the functions-scope
+    const module = this;
     const top_level_axis = this.inputMaturityModel.userPartialModels;
     const number_top_level_axis: number = top_level_axis.length;
 
@@ -92,7 +99,6 @@ export class SpiderchartComponent implements OnInit {
         (a) => a.subUserPartialModel
       )
     );
-
     const number_sub_level_axis: number = sub_level_axis.length;
 
     this.svg = d3
@@ -108,19 +114,20 @@ export class SpiderchartComponent implements OnInit {
         "translate(" + this.extraWidth / 2 + "," + this.extraHeight / 2 + ")"
       );
 
+    // create "spider net" (the circles approximated with lines)
     // -> level = 1 and this.levels +1, since: to not begin at the middle but at the actually first position (since we dont want to display 0.0 in the middle)
     // in the middle (level=0) would have been just a dot
     for (var level = 1; level < this.levels + 1; level++) {
       const spiderNet = g1
         .selectAll(".lineSelection")
-        .data(sub_level_axis.slice(0, -2))
+        .data(sub_level_axis) // .slice(0, -2)
         .enter()
         .append("svg:line")
         .attr("x1", (a, b) =>
           this.getXPosition(
             b,
             number_sub_level_axis,
-            this.shiftFromCenter,
+            -this.shiftFromCenter,
             level / this.levels,
             1
           )
@@ -129,7 +136,7 @@ export class SpiderchartComponent implements OnInit {
           this.getYPosition(
             b,
             number_sub_level_axis,
-            this.shiftFromCenter,
+            -this.shiftFromCenter,
             level / this.levels,
             1
           )
@@ -138,7 +145,7 @@ export class SpiderchartComponent implements OnInit {
           this.getXPosition(
             b + 1,
             number_sub_level_axis,
-            this.shiftFromCenter,
+            -this.shiftFromCenter,
             level / this.levels,
             1
           )
@@ -147,7 +154,7 @@ export class SpiderchartComponent implements OnInit {
           this.getYPosition(
             b + 1,
             number_sub_level_axis,
-            this.shiftFromCenter,
+            -this.shiftFromCenter,
             level / this.levels,
             1
           )
@@ -165,6 +172,7 @@ export class SpiderchartComponent implements OnInit {
         );
     }
 
+    // create vertical %-scale from core to top
     // -> level = 1 and this.levels +1, since: to not begin at the middle but at the actually first position (since we dont want to display 0.0 in the middle)
     for (var level = 1; level < this.levels + 1; level++) {
       g1.selectAll(".legendSelection")
@@ -177,7 +185,11 @@ export class SpiderchartComponent implements OnInit {
         // take a look at problem 6 - in short: to get all centered (x not needed since always the same (1))
         .attr(
           "transform",
-          "translate(0, " + (1 - level / this.levels) * this.radius + ")"
+          "translate(" +
+            this.toRight +
+            ", " +
+            (1 - level / this.levels) * this.radius +
+            ")"
         )
         .attr("class", "legend")
         .style("font-size", "12px")
@@ -231,16 +243,42 @@ export class SpiderchartComponent implements OnInit {
       .attr("x1", this.radius)
       .attr("y1", this.radius)
       .attr("x2", (a, b) =>
-        this.getXPosition(b, number_sub_level_axis, 0, 1 / 1, 1.0)
+        this.getXPosition(
+          b,
+          number_sub_level_axis,
+          -this.shiftFromCenter,
+          1 / 1,
+          1.0
+        )
       )
       .attr("y2", (a, b) =>
-        this.getYPosition(b, number_sub_level_axis, 0, 1 / 1, 1.0)
+        this.getYPosition(
+          b,
+          number_sub_level_axis,
+          -this.shiftFromCenter,
+          1 / 1,
+          1.0
+        )
       )
       .attr("class", "line")
       .style("stroke", "#7f7f7f")
       .attr("stroke-width", "1px");
 
+    // init/prepare tooltip for following definition of edge-point-hover
+    var tooltip = d3
+      .select("#chart")
+      .append("div")
+      .style("position", "absolute")
+      .style("visibility", "hidden")
+      .style("background-color", "white")
+      .style("border", "solid")
+      .style("border-width", "1px")
+      .style("border-radius", "5px")
+      .style("padding", "10px");
+
+    // draw data-"area" from coordinates for top-level-partial-model
     g1.selectAll(".area")
+      // packed in list since its a polygon-element and we need 1 element with all points
       .data([top_level_axis])
       .enter()
       .append("polygon")
@@ -287,13 +325,7 @@ export class SpiderchartComponent implements OnInit {
           .style("fill-opacity", this.opacityArea)
       );
 
-    // init/prepare tooltip for following definition of edge-point-hover
-    var tooltip = g1
-      .append("text")
-      .style("opacity", 1)
-      .style("font-size", "23px");
-
-    // draw single edge-points
+    // draw single edge-points for top-level-partial-models
     g1.selectAll(".edges")
       .data(top_level_axis)
       .enter()
@@ -324,13 +356,18 @@ export class SpiderchartComponent implements OnInit {
       // needed function-keyword to get context of "this" otherwise this points to the module
       .on(
         "mouseover",
-        function (mouseEvent, data: InputUserPartialModelSpiderChart) {
+        function (event, data: InputUserPartialModelSpiderChart) {
           tooltip
-            .attr("x", () => parseFloat(d3.select(this).attr("cx")) - 10)
-            .attr("y", () => parseFloat(d3.select(this).attr("cy")) - 5)
-            .text(d3.format(".1f")(data.maturityLevelEvaluationMetrics))
-            .attr("transition", 200)
-            .style("opacity", 0.5);
+            .html(
+              "<div>Partial Model: " +
+                data.partialModel.name +
+                "<br> Value: " +
+                data.maturityLevelEvaluationMetrics +
+                "</div>"
+            )
+            .style("left", module.getXTooltip(this, tooltip))
+            .style("top", module.getYTooltip(this, tooltip))
+            .style("visibility", "visible");
 
           const thisPolygon = "polygon." + d3.select(this).attr("class");
           // why changed idk
@@ -339,15 +376,152 @@ export class SpiderchartComponent implements OnInit {
         }
       )
       .on("mouseout", () => {
-        tooltip.transition(200).style("opacity", 0.0);
+        tooltip.style("visibility", "hidden");
         g1.selectAll("polygon")
           .transition(200)
           .style("fill-opacity", this.opacityArea);
       });
-  }
 
-  flattenArray(array: any[]): any[] {
-    return [].concat.apply([], array);
+    // draw same thing (area+edgepoints) for sub-partialmodels -> cant merge with above since i want
+    // to get top-level-partial-models in the "middle" and sub-partial-models to be shiftet, so that
+    // top-level-partial-models are in the middle -> because of this the calculation changes and cant be merged
+    g1.selectAll(".area-sub-level-partial-model")
+      // packed in list since its a polygon-element and we need 1 element with all points
+      .data([sub_level_axis])
+      .enter()
+      .append("polygon")
+      .attr("class", "radar-chart-area-sub-level-partial-model")
+      .style("stroke-width", "1.5px")
+      .style("stroke", "#7f7f7f")
+      .attr("points", (a: InputSubUserPartialModelSpiderChart[]) => {
+        const result = a
+          .map(
+            (b, c) =>
+              this.getXPosition(
+                c,
+                number_sub_level_axis,
+                -this.shiftFromCenter,
+                1 / 1,
+                b.maturityLevelEvaluationMetrics /
+                  b.maxMaturityLevelEvaluationMetrics
+              ) +
+              "," +
+              this.getYPosition(
+                c,
+                number_sub_level_axis,
+                -this.shiftFromCenter,
+                1 / 1,
+                b.maturityLevelEvaluationMetrics /
+                  b.maxMaturityLevelEvaluationMetrics
+              )
+          )
+          .reduce((d, e) => d + " " + e);
+        return result;
+      })
+      .style("fill", "#f4d160")
+      .style("fill-opacity", this.opacityArea)
+      .on("mouseover", function (a) {
+        const thisPolygon = "polygon." + d3.select(this).attr("class");
+        g1.selectAll("polygon").transition(200).style("fill-opacity", 0.1);
+        g1.selectAll(thisPolygon).transition(200).style("fill-opacity", 0.9);
+      })
+      .on("mouseout", () =>
+        g1
+          .selectAll("polygon")
+          .transition(200)
+          .style("fill-opacity", this.opacityArea)
+      );
+
+    // draw single edge-points
+    g1.selectAll(".edges-sub-level-partial-model")
+      .data(sub_level_axis)
+      .enter()
+      .append("svg:circle")
+      .attr("class", "circle-edge-point-sub-level-partial-model")
+      .attr("r", 7.5)
+      .attr("cx", (a: InputSubUserPartialModelSpiderChart, b) =>
+        this.getXPosition(
+          b,
+          number_sub_level_axis,
+          -this.shiftFromCenter,
+          1 / 1,
+          a.maturityLevelEvaluationMetrics / a.maxMaturityLevelEvaluationMetrics
+        )
+      )
+      .attr("cy", (a: InputSubUserPartialModelSpiderChart, b) =>
+        this.getYPosition(
+          b,
+          number_sub_level_axis,
+          -this.shiftFromCenter,
+          1 / 1,
+          a.maturityLevelEvaluationMetrics / a.maxMaturityLevelEvaluationMetrics
+        )
+      )
+      .attr("stroke", "white")
+      .attr("stroke-width", 3)
+      .style("fill", "#fbeeac")
+      // needed function-keyword to get context of "this" otherwise this points to the module
+      .on(
+        "mouseover",
+        function (event, data: InputSubUserPartialModelSpiderChart) {
+          tooltip
+            .html(
+              "<div>Sub-Partial Model: " +
+                data.partialModel.name +
+                "<br>Parent: " +
+                data.parentUserPartialModel.partialModel.name +
+                "<br> Value: " +
+                data.maturityLevelEvaluationMetrics +
+                "</div>"
+            )
+            .style("left", module.getXTooltip(this, tooltip))
+            .style("top", module.getYTooltip(this, tooltip))
+            .style("visibility", "visible");
+
+          const thisPolygon = "polygon." + d3.select(this).attr("class");
+          // why changed idk
+          g1.selectAll("polygon").transition(200).style("fill-opacity", 0.9);
+          g1.selectAll(thisPolygon).transition(200).style("fill-opacity", 0.1);
+        }
+      )
+      .on("mouseout", () => {
+        tooltip.style("visibility", "hidden");
+        g1.selectAll("polygon")
+          .transition(200)
+          .style("fill-opacity", this.opacityArea);
+      });
+
+    // create legend
+    const gLegend = this.svg
+      .append("g")
+      .attr("class", "main-legend")
+      .attr("height", 100)
+      .attr("width", 200);
+
+    // create legend color squares
+    gLegend
+      .selectAll("rect")
+      .data(["Partial Models", "Sub-Partial Models"])
+      .enter()
+      .append("rect")
+      .attr("x", this.width + this.extraWidth - 150)
+      .attr("y", (a, b) => b * 20)
+      .attr("width", 10)
+      .attr("height", 10)
+      .attr("fill", (a, b) =>
+        b === 0 ? "rgb(138, 196, 208)" : "rgb(244, 209, 96)"
+      );
+
+    // create legend-text
+    gLegend
+      .selectAll("text")
+      .data(["Partial Models", "Sub-Partial Models"])
+      .enter()
+      .append("text")
+      .attr("x", this.width + this.extraWidth - 130)
+      .attr("y", (a, b) => b * 20 + 10)
+      .attr("font-size", "11px")
+      .text((a) => a);
   }
 
   // Nebenbemerkung
@@ -475,60 +649,26 @@ export class SpiderchartComponent implements OnInit {
     return resultXPosShifted;
   }
 
-  createChartLegend() {
-    this.svg = d3.select(this.hostElement).select("#body").selectAll("svg");
+  // keep in mind where the tooltip div spawns: only with right x+y at the buttom-left-corner of edge
+  getXTooltip(currentObject, tooltipSelection): string {
+    return (
+      currentObject.getBoundingClientRect().x -
+      tooltipSelection.node().getBoundingClientRect().width / 2 +
+      currentObject.getBoundingClientRect().width / 2 +
+      "px"
+    );
+  }
 
-    var colorscale = this.colorscale;
+  getYTooltip(currentObject, tooltipSelection): string {
+    return (
+      currentObject.getBoundingClientRect().y -
+      tooltipSelection.node().getBoundingClientRect().height -
+      currentObject.getBoundingClientRect().height +
+      "px"
+    );
+  }
 
-    //Create the title for the legend
-    var text = this.svg
-      .append("text")
-      .attr("class", "title")
-      .attr("transform", "translate(90,0)")
-      .attr("x", this.width - 70)
-      .attr("y", 10)
-      .attr("font-size", "12px")
-      .attr("fill", "#404040")
-      .text("What % of owners use a specific service in a week");
-
-    //Initiate Legend
-    var legend = this.svg
-      .append("g")
-      .attr("class", "legend")
-      .attr("height", 100)
-      .attr("width", 200)
-      .attr("transform", "translate(90,20)");
-
-    //Create colour squares
-    legend
-      .selectAll("rect")
-      .data(this.legendOptions)
-      .enter()
-      .append("rect")
-      .attr("x", this.width - 65)
-      .attr("y", function (d, i) {
-        return i * 20;
-      })
-      .attr("width", 10)
-      .attr("height", 10)
-      .style("fill", function (d, i) {
-        return colorscale(i);
-      });
-
-    //Create text next to squares
-    legend
-      .selectAll("text")
-      .data(this.legendOptions)
-      .enter()
-      .append("text")
-      .attr("x", this.width - 52)
-      .attr("y", function (d, i) {
-        return i * 20 + 9;
-      })
-      .attr("font-size", "11px")
-      .attr("fill", "#737373")
-      .text(function (d) {
-        return d;
-      });
+  flattenArray(array: any[]): any[] {
+    return [].concat.apply([], array);
   }
 }
