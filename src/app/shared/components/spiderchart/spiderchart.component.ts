@@ -78,7 +78,6 @@ export class SpiderchartComponent implements OnInit {
   private opacityArea: number = 0.6;
   private toRight: number = 5;
   private customFormat = d3.format(".1f");
-  private legendOptions = ["Reifegrad (ungewichtet)"];
 
   constructor(private elRef: ElementRef) {
     this.hostElement = this.elRef.nativeElement;
