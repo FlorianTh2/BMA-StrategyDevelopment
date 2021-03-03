@@ -61,7 +61,7 @@ export class SpiderchartComponent implements OnInit {
   hostElement: any;
   private svg: any;
   private factor: number = 1;
-  private height: number = 500;
+  private height: number = 400;
   private width: number = this.height;
   private radius: number =
     this.factor * Math.min(this.width / 2, this.height / 2);
@@ -71,10 +71,12 @@ export class SpiderchartComponent implements OnInit {
   // we need extra Width or Height, but if we increase width or hight
   // directly -> all increases/shrinks and we need a way to just increase
   // the base svg (only applied to that)
-  private extraWidth: number = 400;
-  private extraHeight: number = 200;
+  private extraWidth: number = 200;
+  private extraHeight: number = 75;
   private levels: number = 8;
-  private shiftFromCenter: number = 1;
+  // will be calculated: (numberOfSubPartialModelsPerPartialModel -1) / 2
+  //  to get subPartialModels in the middle of its parentPartialModel
+  private shiftFromCenter;
   private opacityArea: number = 0.6;
   private toRight: number = 5;
   private customFormat = d3.format(".1f");
@@ -99,6 +101,8 @@ export class SpiderchartComponent implements OnInit {
       )
     );
     const number_sub_level_axis: number = sub_level_axis.length;
+    this.shiftFromCenter =
+      (number_sub_level_axis / number_top_level_axis - 1) / 2;
 
     this.svg = d3
       .select("#chart")
