@@ -1,0 +1,7 @@
+mutation CreateUserMaturityModel($userMaturityModel: CreateUserMaturityModelRequest!){
+  createUserMaturityModel(userMaturityModel: $userMaturityModel)
+  {
+    id
+    name
+  }
+}

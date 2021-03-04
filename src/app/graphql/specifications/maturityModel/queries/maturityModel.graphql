@@ -5,9 +5,25 @@ query MaturityModel($maturityModelId: ID!){
     partialModels {
       name
       weight
+      description
+      evaluationMetrics {
+        id
+        name
+        description
+        weight
+        maxValue
+      }
       subPartialModels{
         name
         weight
+        description
+        evaluationMetrics {
+          id
+          name
+          description
+          weight
+          maxValue
+        }
       }
     }
   }

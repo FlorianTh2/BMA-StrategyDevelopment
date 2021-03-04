@@ -1,5 +1,6 @@
 import { Component, Input, OnInit } from "@angular/core";
 import { Message } from "../shared/models/message.model";
+import { CreateUserEvaluationMetricRequest } from "../../graphql/generated/graphql";
 
 @Component({
   selector: "app-qa-message",
@@ -8,7 +9,7 @@ import { Message } from "../shared/models/message.model";
 })
 export class QaMessageComponent implements OnInit {
   @Input()
-  message: Message;
+  createUserEvaluationMetricRequest: CreateUserEvaluationMetricRequest;
 
   constructor() {}
 

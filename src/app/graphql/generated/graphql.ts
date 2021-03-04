@@ -100,6 +100,7 @@ export type Mutation = {
   __typename?: 'Mutation';
   login?: Maybe<Scalars['String']>;
   register?: Maybe<Scalars['String']>;
+  createUserMaturityModel?: Maybe<UserMaturityModel>;
 };
 
 
@@ -110,6 +111,31 @@ export type MutationLoginArgs = {
 
 export type MutationRegisterArgs = {
   userRegistrationRequest: UserRegistrationRequest;
+};
+
+
+export type MutationCreateUserMaturityModelArgs = {
+  userMaturityModel: CreateUserMaturityModelRequest;
+};
+
+export type CreateUserMaturityModelRequest = {
+  name: Scalars['String'];
+  maturityLevel?: Maybe<Scalars['Float']>;
+  projectId: Scalars['ID'];
+  userPartialModels: Array<CreateUserPartialModelRequest>;
+};
+
+export type CreateUserPartialModelRequest = {
+  maturityLevelEvaluationMetrics: Scalars['Float'];
+  partialModelId: Scalars['ID'];
+  userEvaluationMetrics?: Maybe<Array<Maybe<CreateUserEvaluationMetricRequest>>>;
+  subUserPartialModels?: Maybe<Array<Maybe<CreateUserPartialModelRequest>>>;
+  superUserPartialModel?: Maybe<CreateUserPartialModelRequest>;
+};
+
+export type CreateUserEvaluationMetricRequest = {
+  valueEvaluationMetric: Scalars['Float'];
+  evaluationMetricId: Scalars['ID'];
 };
 
 export type UserLoginRequest = {
@@ -240,10 +266,17 @@ export type MaturityModelQuery = (
     & Pick<MaturityModel, 'name' | 'version'>
     & { partialModels: Array<(
       { __typename?: 'PartialModel' }
-      & Pick<PartialModel, 'name' | 'weight'>
-      & { subPartialModels?: Maybe<Array<(
+      & Pick<PartialModel, 'name' | 'weight' | 'description'>
+      & { evaluationMetrics: Array<(
+        { __typename?: 'EvaluationMetric' }
+        & Pick<EvaluationMetric, 'id' | 'name' | 'description' | 'weight' | 'maxValue'>
+      )>, subPartialModels?: Maybe<Array<(
         { __typename?: 'PartialModel' }
-        & Pick<PartialModel, 'name' | 'weight'>
+        & Pick<PartialModel, 'name' | 'weight' | 'description'>
+        & { evaluationMetrics: Array<(
+          { __typename?: 'EvaluationMetric' }
+          & Pick<EvaluationMetric, 'id' | 'name' | 'description' | 'weight' | 'maxValue'>
+        )> }
       )>> }
     )> }
   ) }
@@ -331,6 +364,19 @@ export type CheckEmailAddressQuery = (
   & Pick<Query, 'checkEmailAddress'>
 );
 
+export type CreateUserMaturityModelMutationVariables = Exact<{
+  userMaturityModel: CreateUserMaturityModelRequest;
+}>;
+
+
+export type CreateUserMaturityModelMutation = (
+  { __typename?: 'Mutation' }
+  & { createUserMaturityModel?: Maybe<(
+    { __typename?: 'UserMaturityModel' }
+    & Pick<UserMaturityModel, 'id' | 'name'>
+  )> }
+);
+
 export type UserMaturityModelOfUserQueryVariables = Exact<{
   userMaturityModelId: Scalars['ID'];
 }>;
@@ -383,9 +429,25 @@ export const MaturityModelDocument = gql`
     partialModels {
       name
       weight
+      description
+      evaluationMetrics {
+        id
+        name
+        description
+        weight
+        maxValue
+      }
       subPartialModels {
         name
         weight
+        description
+        evaluationMetrics {
+          id
+          name
+          description
+          weight
+          maxValue
+        }
       }
     }
   }
@@ -529,6 +591,25 @@ export const CheckEmailAddressDocument = gql`
   })
   export class CheckEmailAddressGQL extends Apollo.Query<CheckEmailAddressQuery, CheckEmailAddressQueryVariables> {
     document = CheckEmailAddressDocument;
+    
+    constructor(apollo: Apollo.Apollo) {
+      super(apollo);
+    }
+  }
+export const CreateUserMaturityModelDocument = gql`
+    mutation CreateUserMaturityModel($userMaturityModel: CreateUserMaturityModelRequest!) {
+  createUserMaturityModel(userMaturityModel: $userMaturityModel) {
+    id
+    name
+  }
+}
+    `;
+
+  @Injectable({
+    providedIn: 'root'
+  })
+  export class CreateUserMaturityModelGQL extends Apollo.Mutation<CreateUserMaturityModelMutation, CreateUserMaturityModelMutationVariables> {
+    document = CreateUserMaturityModelDocument;
     
     constructor(apollo: Apollo.Apollo) {
       super(apollo);

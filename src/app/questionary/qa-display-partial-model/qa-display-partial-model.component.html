@@ -1,0 +1,24 @@
+<div>
+  <p>
+    Topic: {{createUserPartialModelRequest["partialModel"].name}}
+  </p>
+  <div *ngIf="createUserPartialModelRequest['partialModel'].description">
+    <p>
+      Description:
+      <br>
+      {{createUserPartialModelRequest["partialModel"].description}}
+    </p>
+  </div>
+  <div>
+    <div *ngFor="let createUserEvaluationMetricRequest of createUserPartialModelRequest.userEvaluationMetrics">
+
+    </div>
+  </div>
+  <div *ngIf="createUserPartialModelRequest.subUserPartialModels">
+    <div class="" style="padding: 20px">
+      <div *ngFor="let subCreateUserPartialModelRequest of createUserPartialModelRequest.subUserPartialModels">
+        <app-qa-display-partial-model [createUserPartialModelRequest]="subCreateUserPartialModelRequest"></app-qa-display-partial-model>
+      </div>
+    </div>
+  </div>
+</div>
