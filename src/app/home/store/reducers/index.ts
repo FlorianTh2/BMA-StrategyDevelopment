@@ -59,7 +59,7 @@ export const selectHomeReducerState = createSelector(
 // maps from one-reducer-of-the-module-state to the model class
 // why? -> so we dont have to include the reducer-state-reference in the view angular-component (the view)
 // somehow useless but in like normal szenarios we have this abstraction to map from the ReducerState
-// to the actual property (see more in counterReducer)
+// to the actual property (see more in createUserMaturityModelRequestReducer)
 export const selectHomeReducerStateCounter = createSelector(
   selectHomeReducerState,
   (state) => state as Counter

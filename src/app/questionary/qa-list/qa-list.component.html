@@ -8,12 +8,9 @@
     Just select the option you can best relate to based on the given description
   </h3>
   <div class="selector-container">
-    <ng-container *ngIf="maturityModel$ | async as maturityModel, else loading">
-      <ng-container *ngIf="createCreateUserMaturityModelRequest(maturityModel) as createUserMaturityModelRequest, else loading">
-      <div *ngFor="let createUserPartialModelRequest of createUserMaturityModelRequest.userPartialModels" style="padding-top: 20px">
-        <app-qa-display-partial-model [createUserPartialModelRequest]="createUserPartialModelRequest"></app-qa-display-partial-model>
-      </div>
-      </ng-container>
+    <ng-container *ngIf="createUserMaturityModelRequest$ | async as createUserMaturityModelRequest, else loading">
+      hi
+      {{showConsole(createUserMaturityModelRequest)}}
     </ng-container>
   </div>
 </div>

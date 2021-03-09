@@ -9,14 +9,16 @@ import {
   EvaluationMetric,
   MaturityModel,
   MaturityModelGQL,
-  PartialModel,
-  UserMaturityModel,
-  UserMaturityModelsOfUserGQL,
-  UserPartialModel
+  PartialModel
 } from "../../graphql/generated/graphql";
 import { map } from "rxjs/operators";
 import { ID_OF_MATURITYMODEL } from "../../shared/constants/constants";
 import { ActivatedRoute } from "@angular/router";
+import { select, Store } from "@ngrx/store";
+import { retrieveCreateUserMaturityModelRequest } from "../store/actions/createUserMaturityModelRequest.action";
+import * as fromQuestionary from "./../store/reducers";
+import { retrieveMessageQueue } from "../store/actions/messageQueue.action";
+import { retrieveDisplayedMessageQueue } from "../store/actions/displayedMessageQueue.action";
 
 @Component({
   selector: "app-qa-list",
@@ -24,19 +26,21 @@ import { ActivatedRoute } from "@angular/router";
   styleUrls: ["./qa-list.component.scss"]
 })
 export class QaListComponent implements OnInit {
-  MESSAGES: Message[] = [
-    { id: 0, sender: Sender.System, content: "Welcome" },
-    { id: 1, sender: Sender.User, content: "Welcome" },
-    { id: 2, sender: Sender.System, content: "Welcome" },
-    { id: 3, sender: Sender.User, content: "Welcome" },
-    { id: 4, sender: Sender.System, content: "Welcome" }
-  ];
   projectId: string;
-  maturityModel$: Observable<MaturityModel>;
+  currentEvaluationMetric: EvaluationMetric;
+  messageQueue: Message[] = [];
+  renderedMessageQueue: Message[] = [];
+
+  createUserMaturityModelRequest$: Observable<CreateUserMaturityModelRequest> = this.store$.select(
+    fromQuestionary.selectCreateUserMaturityModelRequestReducerStateObject
+  );
+
+  selectCreateUserMaturityModelRequestReducerStateObject;
 
   constructor(
     private route: ActivatedRoute,
-    private maturityModelGQL: MaturityModelGQL
+    private maturityModelGQL: MaturityModelGQL,
+    private store$: Store<fromQuestionary.State>
   ) {}
 
   ngOnInit(): void {
@@ -46,17 +50,99 @@ export class QaListComponent implements OnInit {
       this.projectId = paramMap.get("project_id");
     });
 
-    this.maturityModel$ = this.maturityModelGQL
+    this.maturityModelGQL
       .watch({ maturityModelId: ID_OF_MATURITYMODEL })
       .valueChanges.pipe(
         map((result) => result.data.maturityModel as MaturityModel)
-      );
+      )
+      .subscribe((a) => {
+        const userMaturityModel: CreateUserMaturityModelRequest = this.createCreateUserMaturityModelRequest(
+          a
+        );
+        const messageQueue: Message[] = this.createMessagesFromCreateUserPartialModelRequest(
+          userMaturityModel.userPartialModels,
+          [] as Message[]
+        );
+
+        this.store$.dispatch(
+          retrieveCreateUserMaturityModelRequest({
+            createUserMaturityModelRequest: userMaturityModel
+          })
+        );
+
+        this.store$.dispatch(
+          retrieveMessageQueue({
+            messageQueue: messageQueue
+          })
+        );
+
+        this.store$.dispatch(
+          retrieveDisplayedMessageQueue({
+            displayedMessageQueue: [messageQueue[0]]
+          })
+        );
+      });
   }
+
+  showConsole(a) {
+    console.log(a);
+  }
+
+  //
+  // loadNextQuestion(): Message {
+  //   this.firstLoad = false;
+  //   const result: Message = this.messageQueue.shift();
+  //   this.renderedMessageQueue.push(result);
+  //   return result;
+  // }
+  //
+
+  createMessagesFromCreateUserPartialModelRequest(
+    createUserPartialModelRequests: CreateUserPartialModelRequest[],
+    inputList: Message[]
+  ): Message[] {
+    const result = createUserPartialModelRequests.map((a) => {
+      inputList.push({
+        sender: Sender.System,
+        creatUserPartialModelRequest: a
+      } as Message);
+      if (
+        Array.isArray(a.subUserPartialModels) &&
+        a.subUserPartialModels.length
+      ) {
+        this.createMessagesFromCreateUserPartialModelRequest(
+          a.subUserPartialModels,
+          inputList
+        );
+      }
+    });
+    return inputList;
+  }
+
+  // createMessagesFromCreateUserPartialModelRequest(
+  //   createUserPartialModelRequests: CreateUserPartialModelRequest[]
+  // ) {
+  //   createUserPartialModelRequests.map((a) => {
+  //     return {
+  //       sender: Sender.System,
+  //       creatUserPartialModelRequest: a
+  //     } as Message);
+  //     // add one message for each evaluation Metrics
+  //     if (
+  //       Array.isArray(a.subUserPartialModels) &&
+  //       a.subUserPartialModels.length
+  //     ) {
+  //       createMessagesFromCreateUserPartialModelRequest(
+  //         a.subUserPartialModels
+  //       );
+  //     }
+  //   });
+  // }
 
   createCreateUserMaturityModelRequest(
     maturityModel: MaturityModel
   ): CreateUserMaturityModelRequest {
-    return {
+    const result = {
       // will be undefined if accessed from public-route since we have no projectId since this will be available to public (there is no project-route)
       projectId: this.projectId,
       maturityLevel: 0,
@@ -65,6 +151,7 @@ export class QaListComponent implements OnInit {
         maturityModel.partialModels
       )
     } as CreateUserMaturityModelRequest;
+    return result;
   }
 
   createCreateUserPartialModelRequests(

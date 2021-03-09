@@ -10,8 +10,6 @@ import { ID_OF_MATURITYMODEL } from "../shared/constants/constants";
   styleUrls: ["./home.component.scss"]
 })
 export class HomeComponent implements OnInit {
-  maturityModel$: Observable<MaturityModel>;
-
   constructor() {}
 
   ngOnInit(): void {}
