@@ -72,7 +72,7 @@ export class SpiderchartComponent implements OnInit {
   // we need extra Width or Height, but if we increase width or hight
   // directly -> all increases/shrinks and we need a way to just increase
   // the base svg (only applied to that)
-  private extraWidth: number = 200;
+  private extraWidth: number = 300;
   private extraHeight: number = 75;
   private levels: number = 8;
   // will be calculated: (numberOfSubPartialModelsPerPartialModel -1) / 2

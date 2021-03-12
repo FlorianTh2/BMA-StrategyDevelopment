@@ -2,19 +2,30 @@
   <h1>
     Maturity Model
   </h1>
-
-  <div>
-    <h3>Spiderchart</h3>
+  <ng-container *ngIf="{maturityModel: maturityModel$ | async} as data">
     <ng-container *ngIf="userMaturityModel$ | async as userMaturityModel, else loading">
-        <app-spiderchart [inputMaturityModel]="transformGraphQlInputUserMaturityModelToSpiderChartDataContract(userMaturityModel)"></app-spiderchart>
-    </ng-container>
-  </div>
+      <ul>
+        <li>
+          Overview:
+        </li>
+        <div class="center-spider-chart">
+          <div style="">
+            Reifegrad: 3
+          </div>
+          <app-spiderchart [inputMaturityModel]="transformGraphQlInputUserMaturityModelToSpiderChartDataContract(userMaturityModel)"></app-spiderchart>
+        </div>
+        <li>
+          Details:
+        </li>
+        Name: {{userMaturityModel.name}}
+        Data:
+        <br>
 
-  service-output:
-    <ng-container *ngIf="{maturityModel: maturityModel$ | async} as data">
-      {{data.maturityModel?.name}}
+        Created: {{userMaturityModel.created | customDate}}
+        Created By: {{userMaturityModel.creator}}
+      </ul>
     </ng-container>
-
+  </ng-container>
 </div>
 
 
