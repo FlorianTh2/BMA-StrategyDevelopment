@@ -47,8 +47,6 @@ import {
   styleUrls: ["./qa-list.component.scss"]
 })
 export class QaListComponent implements OnInit {
-  projectId: string;
-
   messageQueue$: Observable<MessageQueue> = this.store$.select(
     fromQuestionary.selectMessageQueueRequestReducerStateObject
   );
@@ -90,23 +88,20 @@ export class QaListComponent implements OnInit {
         );
     }
 
-    this.route.paramMap.subscribe((paramMap) => {
-      this.projectId = paramMap.get("project_id");
-    });
-    this.projectId = "1";
     this.initCreateUserMaturityModel();
     this.createForm();
   }
 
   private createForm() {
     this.saveMaturityModelForm = this.fb.group({
-      // email: ["", Validators.required],
-      // password: ["", [Validators.minLength(5), Validators.required]]
+      modelNameView: new FormControl("", [Validators.required]),
+      projectsView: new FormControl("", [Validators.required])
     });
   }
 
   setModelName(modelName: string) {
     this.modelName = modelName;
+    return true;
   }
 
   initCreateUserMaturityModel() {
@@ -198,9 +193,19 @@ export class QaListComponent implements OnInit {
   saveUserMaturityModel(
     createUserMaturityModelRequest: CreateUserMaturityModelRequest
   ) {
+    const selectedModelName = this.saveMaturityModelForm.get("modelNameView")
+      .value;
+    const selectedProjects: Project[] = this.saveMaturityModelForm.get(
+      "projectsView"
+    ).value;
     const result = this.createUserMaturityModelGQL
       .mutate({
-        userMaturityModel: createUserMaturityModelRequest
+        userMaturityModel: {
+          ...createUserMaturityModelRequest,
+          name: selectedModelName,
+          // currently only one project can be selected
+          projectId: selectedProjects[0].id
+        }
       })
       .pipe(
         map((a) => {
@@ -297,7 +302,6 @@ export class QaListComponent implements OnInit {
   ): CreateUserMaturityModelRequest {
     const result = {
       // will be undefined if accessed from public-route since we have no projectId since this will be available to public (there is no project-route)
-      projectId: this.projectId,
       maturityLevel: 0,
       name: "Define a name for your maturity-model!",
       userPartialModels: this.createCreateUserPartialModelRequests(

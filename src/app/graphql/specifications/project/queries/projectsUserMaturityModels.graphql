@@ -1,0 +1,10 @@
+query ProjectsUserMaturityModels($projectId: ID!){
+  projectOfUser(id: $projectId){
+    id
+    userMaturityModels{
+      name
+      updated
+      created
+    }
+  }
+}
