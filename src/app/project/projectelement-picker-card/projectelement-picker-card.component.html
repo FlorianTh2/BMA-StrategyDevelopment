@@ -1,7 +1,7 @@
 <div>
   <mat-card routerLink="/project/{{projectId}}/projectelements/maturitymodel/{{userMaturityModel.id}}" class="example-card">
     <mat-card-header>
-      <mat-card-title>{{userMaturityModel.name}}</mat-card-title>
+      <mat-card-title style="min-width: 250px">{{userMaturityModel.name.length < 20 ? userMaturityModel.name : userMaturityModel.name.slice(0,20) + "..."}}</mat-card-title>
     </mat-card-header>
     <mat-card-content>
       <mat-grid-list cols="2" rowHeight="3:1">

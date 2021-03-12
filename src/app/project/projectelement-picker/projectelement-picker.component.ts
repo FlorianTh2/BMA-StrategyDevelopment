@@ -3,6 +3,7 @@ import { Observable } from "rxjs";
 import {
   Project,
   ProjectsOfUserGQL,
+  ProjectsUserMaturityModelsOfUserGQL,
   UserMaturityModel,
   UserMaturityModelOfUserGQL,
   UserMaturityModelsOfUserGQL
@@ -21,7 +22,7 @@ export class ProjectelementPickerComponent implements OnInit {
 
   constructor(
     private route: ActivatedRoute,
-    private userMaturityModelsOfUserGQL: UserMaturityModelsOfUserGQL
+    private projectsUserMaturityModels: ProjectsUserMaturityModelsOfUserGQL
   ) {}
 
   ngOnInit(): void {
@@ -29,12 +30,14 @@ export class ProjectelementPickerComponent implements OnInit {
       this.projectId = paramMap.get("project_id");
     });
 
-    this.userMaturityModels$ = this.userMaturityModelsOfUserGQL
-      .watch()
+    this.userMaturityModels$ = this.projectsUserMaturityModels
+      .watch({
+        projectId: this.projectId
+      })
       .valueChanges.pipe(
         map(
           (result) =>
-            result.data.userMaturityModelsOfUser as UserMaturityModel[]
+            result.data.projectOfUser.userMaturityModels as UserMaturityModel[]
         )
       );
   }

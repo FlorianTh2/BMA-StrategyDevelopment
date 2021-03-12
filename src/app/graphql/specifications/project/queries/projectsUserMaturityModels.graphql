@@ -1,7 +1,8 @@
-query ProjectsUserMaturityModels($projectId: ID!){
+query ProjectsUserMaturityModelsOfUser($projectId: ID!){
   projectOfUser(id: $projectId){
     id
     userMaturityModels{
+      id
       name
       updated
       created

@@ -341,7 +341,7 @@ export class QaListComponent implements OnInit {
     const createdCreateUserEvaluationMetrics: CreateUserEvaluationMetricRequest[] = evaluationMetrics.map(
       (a) => {
         return {
-          valueEvaluationMetric: 0,
+          valueEvaluationMetric: a.minValue,
           evaluationMetricId: a.id
         } as CreateUserEvaluationMetricRequest;
       }

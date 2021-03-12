@@ -30,6 +30,7 @@ export type Query = {
   userMaturityModels?: Maybe<Array<UserMaturityModel>>;
   userMaturityModelOfUser?: Maybe<UserMaturityModel>;
   userMaturityModelsOfUser?: Maybe<Array<UserMaturityModel>>;
+  userMaturityModelsOfProjectOfUser?: Maybe<Array<UserMaturityModel>>;
   userPartialModel?: Maybe<UserPartialModel>;
   userPartialModels?: Maybe<Array<UserPartialModel>>;
   userEvaluationMetric?: Maybe<UserEvaluationMetric>;
@@ -69,6 +70,11 @@ export type QueryUserMaturityModelArgs = {
 
 export type QueryUserMaturityModelOfUserArgs = {
   id: Scalars['ID'];
+};
+
+
+export type QueryUserMaturityModelsOfProjectOfUserArgs = {
+  projectId: Scalars['ID'];
 };
 
 
@@ -332,6 +338,23 @@ export type ProjectsOfUserQuery = (
   )>> }
 );
 
+export type ProjectsUserMaturityModelsOfUserQueryVariables = Exact<{
+  projectId: Scalars['ID'];
+}>;
+
+
+export type ProjectsUserMaturityModelsOfUserQuery = (
+  { __typename?: 'Query' }
+  & { projectOfUser?: Maybe<(
+    { __typename?: 'Project' }
+    & Pick<Project, 'id'>
+    & { userMaturityModels: Array<(
+      { __typename?: 'UserMaturityModel' }
+      & Pick<UserMaturityModel, 'id' | 'name' | 'updated' | 'created'>
+    )> }
+  )> }
+);
+
 export type LoginMutationVariables = Exact<{
   email: Scalars['String'];
   password: Scalars['String'];
@@ -547,6 +570,30 @@ export const ProjectsOfUserDocument = gql`
   })
   export class ProjectsOfUserGQL extends Apollo.Query<ProjectsOfUserQuery, ProjectsOfUserQueryVariables> {
     document = ProjectsOfUserDocument;
+    
+    constructor(apollo: Apollo.Apollo) {
+      super(apollo);
+    }
+  }
+export const ProjectsUserMaturityModelsOfUserDocument = gql`
+    query ProjectsUserMaturityModelsOfUser($projectId: ID!) {
+  projectOfUser(id: $projectId) {
+    id
+    userMaturityModels {
+      id
+      name
+      updated
+      created
+    }
+  }
+}
+    `;
+
+  @Injectable({
+    providedIn: 'root'
+  })
+  export class ProjectsUserMaturityModelsOfUserGQL extends Apollo.Query<ProjectsUserMaturityModelsOfUserQuery, ProjectsUserMaturityModelsOfUserQueryVariables> {
+    document = ProjectsUserMaturityModelsOfUserDocument;
     
     constructor(apollo: Apollo.Apollo) {
       super(apollo);
