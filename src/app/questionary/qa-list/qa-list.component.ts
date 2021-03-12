@@ -17,7 +17,7 @@ import {
 } from "../../graphql/generated/graphql";
 import { map } from "rxjs/operators";
 import { ID_OF_MATURITYMODEL } from "../../shared/constants/constants";
-import { ActivatedRoute } from "@angular/router";
+import { ActivatedRoute, Router } from "@angular/router";
 import { select, Store } from "@ngrx/store";
 import * as fromQuestionary from "./../store/reducers";
 import {
@@ -72,7 +72,8 @@ export class QaListComponent implements OnInit {
     private createUserMaturityModelGQL: CreateUserMaturityModelGQL,
     private authorizationService: AuthorizationService,
     private projectsOfUserGQL: ProjectsOfUserGQL,
-    private fb: FormBuilder
+    private fb: FormBuilder,
+    private router: Router
   ) {}
 
   ngOnInit(): void {
@@ -139,7 +140,11 @@ export class QaListComponent implements OnInit {
           })
         );
 
-        this.loadNextQuestion();
+        this.messageQueue$
+          .subscribe((a) => {
+            if (a.displayedMessageQueue.length === 0) this.loadNextQuestion();
+          })
+          .unsubscribe();
       });
   }
 
@@ -198,25 +203,32 @@ export class QaListComponent implements OnInit {
     const selectedProjects: Project[] = this.saveMaturityModelForm.get(
       "projectsView"
     ).value;
+    const selectedProjectId: string = selectedProjects[0].id;
+    let createdUserMaturityModelId: string;
     const result = this.createUserMaturityModelGQL
       .mutate({
         userMaturityModel: {
           ...createUserMaturityModelRequest,
           name: selectedModelName,
           // currently only one project can be selected
-          projectId: selectedProjects[0].id
+          projectId: selectedProjectId
         }
       })
       .pipe(
         map((a) => {
-          console.log("inn");
-          const idOfCreated = a.data.createUserMaturityModel.id;
-          console.log(idOfCreated);
-          return idOfCreated;
+          return a;
         })
       )
-      .subscribe();
-    console.log(result);
+      .subscribe((a) => {
+        this.resetProgress();
+        createdUserMaturityModelId = a.data.createUserMaturityModel.id;
+        this.router.navigate([
+          "/project/" +
+            selectedProjectId +
+            "/projectelements/maturitymodel/" +
+            createdUserMaturityModelId
+        ]);
+      });
     return result;
   }
 
