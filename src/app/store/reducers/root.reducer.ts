@@ -41,7 +41,7 @@ export const ROOT_REDUCERS = new InjectionToken<
   })
 });
 
-// console.log all actions
+// log all actions
 export function logger(reducer: ActionReducer<State>): ActionReducer<State> {
   return (state, action) => {
     const result = reducer(state, action);

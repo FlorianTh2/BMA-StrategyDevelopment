@@ -1,6 +1,7 @@
-import * as d3 from "d3";
+// import * as d3 from "d3";
 
-export const RadarChart = {
+// export const RadarChart = {
+const RadarChart = {
   draw: function (tag_id_to_attach_to, data, options) {
     var cfg = {
       shiftFromCenter: 0.5,
@@ -397,8 +398,6 @@ export const RadarChart = {
         var newX = parseFloat(d3.select(this).attr("cx")) - 10;
         var newY = parseFloat(d3.select(this).attr("cy")) - 5;
 
-        // console.log("here33");
-        // console.log(d);
         // create tooltip for datapoints (if you hover over them)
         tooltip
           .attr("x", newX)

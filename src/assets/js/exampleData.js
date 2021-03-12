@@ -1,4 +1,4 @@
-export const data = [
+const data = [
   [
     { axis: "Email", value: 0.59 },
     { axis: "Social Networks", value: 0.56 },

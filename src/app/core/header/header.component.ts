@@ -15,8 +15,6 @@ export class HeaderComponent implements OnInit {
   ngOnInit(): void {
     this.authorizationService.userObservable.subscribe((a) => {
       this.user = a;
-      console.log("jetzt ist user: ");
-      console.log(this.user);
     });
   }
 }

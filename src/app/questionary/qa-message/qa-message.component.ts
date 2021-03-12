@@ -9,7 +9,10 @@ import { CreateUserEvaluationMetricRequest } from "../../graphql/generated/graph
 })
 export class QaMessageComponent implements OnInit {
   @Input()
-  createUserEvaluationMetricRequest: CreateUserEvaluationMetricRequest;
+  text: string;
+
+  @Input()
+  belongsToMetric: boolean;
 
   constructor() {}
 

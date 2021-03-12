@@ -25,6 +25,7 @@ query UserMaturityModelOfUser($userMaturityModelId: ID!){
             name
             weight
             maxValue
+            minValue
           }
         }
       }

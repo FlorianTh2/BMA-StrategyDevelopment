@@ -49,6 +49,7 @@ import {
   InputSubUserPartialModelSpiderChart,
   InputUserPartialModelSpiderChart
 } from "../../models/InputMaturityModelSpiderChart";
+
 @Component({
   selector: "app-spiderchart",
   templateUrl: "./spiderchart.component.html",

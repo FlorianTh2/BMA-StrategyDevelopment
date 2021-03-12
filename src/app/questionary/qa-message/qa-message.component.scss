@@ -1,3 +1,19 @@
-.qa-message-container{
-  padding: 20px 0px;
+.evaluationMetric{
+  padding: 20px;
+  margin: 20px;
+  color: white;
+  background-color: rgba(61,77,93,1);
+  border-radius: 50px;
+  box-shadow: 2px 2px #ccc;
+  max-width: 70%;
+  display: inline-block;
+}
+
+.float-left {
+  margin: 0 auto;
+}
+
+.float-right{
+  display: flex;
+  justify-content: flex-end
 }

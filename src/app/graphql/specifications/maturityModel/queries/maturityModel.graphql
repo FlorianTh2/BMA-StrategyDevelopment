@@ -3,6 +3,7 @@ query MaturityModel($maturityModelId: ID!){
     name
     version
     partialModels {
+      id
       name
       weight
       description
@@ -12,8 +13,10 @@ query MaturityModel($maturityModelId: ID!){
         description
         weight
         maxValue
+        minValue
       }
       subPartialModels{
+        id
         name
         weight
         description
@@ -23,6 +26,7 @@ query MaturityModel($maturityModelId: ID!){
           description
           weight
           maxValue
+          minValue
         }
       }
     }

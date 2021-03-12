@@ -1,19 +1,58 @@
+
+
+
+
 <div>
-  <h1>
-    Create your MaturityModel!
-  </h1>
-  <h3>
-    Create a fast individual Maturity MOdel through a quick questionair!
-    <br>
-    Just select the option you can best relate to based on the given description
-  </h3>
-  <div class="selector-container">
-    <ng-container *ngIf="createUserMaturityModelRequest$ | async as createUserMaturityModelRequest, else loading">
-      hi
-      {{showConsole(createUserMaturityModelRequest)}}
-    </ng-container>
+  <ng-container *ngIf="messageQueue$ | async as messageQueue, else loading">
+
+  <div class="parent-split">
+    <div class="child-split">
+      <h1>
+        Create your MaturityModel!
+      </h1>
+      <h3>
+        Create a fast individual Maturity Model through a quick questionair!
+        <br>
+        Just select the option you can best relate to based on the given description
+      </h3>
+    </div>
+    <div class="child-split center-save-button">
+      <button mat-raised-button color="" class="save-maturity-model-button" (click)="resetProgress()">Reset</button>
+      <div *ngIf="user">
+        <button mat-raised-button color="" class="save-maturity-model-button" (click)="saveUserMaturityModel(messageQueue.model)">Save Your MaturityModel</button>
+      </div>
+      <div *ngIf="!user">
+        <button mat-raised-button color="" [disabled]="true" class="save-maturity-model-button">Login to save!</button>
+      </div>
+    </div>
   </div>
+  <div class="">
+    <div *ngFor="let message of messageQueue.displayedMessageQueue; last as isLastMessage" class="selector-item">
+      <div *ngIf="getPartialModelById(message.creatUserPartialModelRequest.partialModelId) as viewPartialModel">
+        <div>
+          <app-qa-message [text]="viewPartialModel.description"></app-qa-message>
+        </div>
+        <div *ngFor="let evaluationMetric of viewPartialModel.evaluationMetrics; last as isLastEvaluationMetric">
+          <div>
+            <app-qa-message [text]="evaluationMetric.name + '?'" [belongsToMetric]="true"></app-qa-message>
+          </div>
+          <div class="test"></div>
+          <div class="float-right">
+            <span *ngFor="let i of [].constructor((evaluationMetric.maxValue+1) - evaluationMetric.minValue); let index = index" class="">
+              <button mat-button (click)="handleEvaluationEventClick(message,evaluationMetric, index, isLastMessage, isLastEvaluationMetric)" [ngClass]="{'evaluationMetric' : !isAlreadyClicked(messageQueue.clickedEvaluationMetricIds, evaluationMetric.id, index), 'evaluationMetric2': isAlreadyClicked(messageQueue.clickedEvaluationMetricIds, evaluationMetric.id, index)}">{{getEnumString(index+evaluationMetric.minValue)}}</button>
+            </span>
+          </div>
+          <div class="test"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  </ng-container>
 </div>
+
+
+
+
 
 <ng-template #loading>
   <mat-spinner></mat-spinner>

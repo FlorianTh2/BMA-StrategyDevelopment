@@ -235,6 +235,7 @@ export type EvaluationMetric = {
   description?: Maybe<Scalars['String']>;
   weight?: Maybe<Scalars['Float']>;
   maxValue: Scalars['Int'];
+  minValue: Scalars['Int'];
   partialModel?: Maybe<PartialModel>;
   created: Scalars['String'];
   creator: Scalars['String'];
@@ -246,6 +247,7 @@ export type MaturityModel = {
   __typename?: 'MaturityModel';
   id: Scalars['ID'];
   name: Scalars['String'];
+  language: Scalars['String'];
   version: Scalars['Int'];
   partialModels: Array<PartialModel>;
   created: Scalars['String'];
@@ -266,16 +268,16 @@ export type MaturityModelQuery = (
     & Pick<MaturityModel, 'name' | 'version'>
     & { partialModels: Array<(
       { __typename?: 'PartialModel' }
-      & Pick<PartialModel, 'name' | 'weight' | 'description'>
+      & Pick<PartialModel, 'id' | 'name' | 'weight' | 'description'>
       & { evaluationMetrics: Array<(
         { __typename?: 'EvaluationMetric' }
-        & Pick<EvaluationMetric, 'id' | 'name' | 'description' | 'weight' | 'maxValue'>
+        & Pick<EvaluationMetric, 'id' | 'name' | 'description' | 'weight' | 'maxValue' | 'minValue'>
       )>, subPartialModels?: Maybe<Array<(
         { __typename?: 'PartialModel' }
-        & Pick<PartialModel, 'name' | 'weight' | 'description'>
+        & Pick<PartialModel, 'id' | 'name' | 'weight' | 'description'>
         & { evaluationMetrics: Array<(
           { __typename?: 'EvaluationMetric' }
-          & Pick<EvaluationMetric, 'id' | 'name' | 'description' | 'weight' | 'maxValue'>
+          & Pick<EvaluationMetric, 'id' | 'name' | 'description' | 'weight' | 'maxValue' | 'minValue'>
         )> }
       )>> }
     )> }
@@ -402,7 +404,7 @@ export type UserMaturityModelOfUserQuery = (
           & Pick<UserEvaluationMetric, 'id' | 'valueEvaluationMetric'>
           & { evaluationMetric: (
             { __typename?: 'EvaluationMetric' }
-            & Pick<EvaluationMetric, 'id' | 'name' | 'weight' | 'maxValue'>
+            & Pick<EvaluationMetric, 'id' | 'name' | 'weight' | 'maxValue' | 'minValue'>
           ) }
         )> }
       )>> }
@@ -427,6 +429,7 @@ export const MaturityModelDocument = gql`
     name
     version
     partialModels {
+      id
       name
       weight
       description
@@ -436,8 +439,10 @@ export const MaturityModelDocument = gql`
         description
         weight
         maxValue
+        minValue
       }
       subPartialModels {
+        id
         name
         weight
         description
@@ -447,6 +452,7 @@ export const MaturityModelDocument = gql`
           description
           weight
           maxValue
+          minValue
         }
       }
     }
@@ -643,6 +649,7 @@ export const UserMaturityModelOfUserDocument = gql`
             name
             weight
             maxValue
+            minValue
           }
         }
       }

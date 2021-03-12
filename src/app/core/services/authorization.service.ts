@@ -6,6 +6,7 @@ import { Apollo } from "apollo-angular";
 import { LoginGQL, RegisterGQL, User } from "../../graphql/generated/graphql";
 import jwtDecode from "jwt-decode";
 import { JwtPayload } from "../../shared/models/jwtPayload";
+
 @Injectable({
   providedIn: "root"
 })
@@ -73,12 +74,14 @@ export class AuthorizationService {
   }
 
   tryCreationOfUserFromJwtAfterPageReload() {
-    const token = localStorage.getItem("token");
-    let decodedToken: JwtPayload = jwtDecode(token);
-    const user: User = decodedToken.user as User;
-    if (decodedToken && user) {
-      this.updateLoggedInUser(user, token);
-    }
+    try {
+      const token = localStorage.getItem("token");
+      let decodedToken: JwtPayload = jwtDecode(token);
+      const user: User = decodedToken.user as User;
+      if (decodedToken && user) {
+        this.updateLoggedInUser(user, token);
+      }
+    } catch (e) {}
   }
 
   setTokenToLocalStorage(token: string): void {

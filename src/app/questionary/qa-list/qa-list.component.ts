@@ -4,21 +4,33 @@ import { Sender } from "../shared/enums/senderEnum";
 import { Observable } from "rxjs";
 import {
   CreateUserEvaluationMetricRequest,
+  CreateUserMaturityModelGQL,
   CreateUserMaturityModelRequest,
   CreateUserPartialModelRequest,
   EvaluationMetric,
   MaturityModel,
   MaturityModelGQL,
-  PartialModel
+  PartialModel,
+  User
 } from "../../graphql/generated/graphql";
 import { map } from "rxjs/operators";
 import { ID_OF_MATURITYMODEL } from "../../shared/constants/constants";
 import { ActivatedRoute } from "@angular/router";
 import { select, Store } from "@ngrx/store";
-import { retrieveCreateUserMaturityModelRequest } from "../store/actions/createUserMaturityModelRequest.action";
 import * as fromQuestionary from "./../store/reducers";
-import { retrieveMessageQueue } from "../store/actions/messageQueue.action";
-import { retrieveDisplayedMessageQueue } from "../store/actions/displayedMessageQueue.action";
+import {
+  resetQuestionary,
+  retrieveCreateUserMaturityModelRequest,
+  retrieveMessageQueue,
+  selectEvaluationMetric,
+  setNextMessageWithEvaluationMetric,
+  setProperty
+} from "../store/actions/messageQueue.action";
+import { MessageQueue } from "../shared/models/messageQueue.model";
+import { EvaluationItem } from "../shared/models/evaluationItem";
+import { Apollo } from "apollo-angular";
+import { EvaluationMetricEnum } from "../shared/enums/evaluationMetric.enum";
+import { AuthorizationService } from "../../core/services/authorization.service";
 
 @Component({
   selector: "app-qa-list",
@@ -27,29 +39,38 @@ import { retrieveDisplayedMessageQueue } from "../store/actions/displayedMessage
 })
 export class QaListComponent implements OnInit {
   projectId: string;
-  currentEvaluationMetric: EvaluationMetric;
-  messageQueue: Message[] = [];
-  renderedMessageQueue: Message[] = [];
 
-  createUserMaturityModelRequest$: Observable<CreateUserMaturityModelRequest> = this.store$.select(
-    fromQuestionary.selectCreateUserMaturityModelRequestReducerStateObject
+  messageQueue$: Observable<MessageQueue> = this.store$.select(
+    fromQuestionary.selectMessageQueueRequestReducerStateObject
   );
 
-  selectCreateUserMaturityModelRequestReducerStateObject;
+  partialModelList: PartialModel[] = [];
+
+  evaluationMetricList: EvaluationMetric[] = [];
+
+  user: User = null;
 
   constructor(
+    private apollo: Apollo,
     private route: ActivatedRoute,
     private maturityModelGQL: MaturityModelGQL,
-    private store$: Store<fromQuestionary.State>
+    private store$: Store<fromQuestionary.State>,
+    private createUserMaturityModelGQL: CreateUserMaturityModelGQL,
+    private authorizationService: AuthorizationService
   ) {}
 
   ngOnInit(): void {
-    // will be undefined since this route will be available to public (without a project)
-    // but possibly will be defined if loggedIn
+    this.authorizationService.userObservable.subscribe((a) => {
+      this.user = a;
+    });
     this.route.paramMap.subscribe((paramMap) => {
       this.projectId = paramMap.get("project_id");
     });
+    this.projectId = "1";
+    this.initCreateUserMaturityModel();
+  }
 
+  initCreateUserMaturityModel() {
     this.maturityModelGQL
       .watch({ maturityModelId: ID_OF_MATURITYMODEL })
       .valueChanges.pipe(
@@ -59,6 +80,14 @@ export class QaListComponent implements OnInit {
         const userMaturityModel: CreateUserMaturityModelRequest = this.createCreateUserMaturityModelRequest(
           a
         );
+        const result = this.createPartialModelAndEvaluationList(
+          a.partialModels,
+          [],
+          []
+        );
+        this.partialModelList = result.partialModelList;
+        this.evaluationMetricList = result.evaluationList;
+
         const messageQueue: Message[] = this.createMessagesFromCreateUserPartialModelRequest(
           userMaturityModel.userPartialModels,
           [] as Message[]
@@ -76,26 +105,128 @@ export class QaListComponent implements OnInit {
           })
         );
 
-        this.store$.dispatch(
-          retrieveDisplayedMessageQueue({
-            displayedMessageQueue: [messageQueue[0]]
-          })
-        );
+        this.loadNextQuestion();
       });
+  }
+
+  createPartialModelAndEvaluationList(
+    partialModels: PartialModel[],
+    inputListPartialModels: PartialModel[],
+    inputListEvaluationMetrics: EvaluationMetric[]
+  ): { partialModelList: PartialModel[]; evaluationList: EvaluationMetric[] } {
+    partialModels.map((a) => {
+      inputListPartialModels.push(a);
+      if (Array.isArray(a.evaluationMetrics) && a.evaluationMetrics.length) {
+        inputListEvaluationMetrics = inputListEvaluationMetrics.concat(
+          a.evaluationMetrics
+        );
+      }
+      if (Array.isArray(a.subPartialModels) && a.subPartialModels.length) {
+        this.createPartialModelAndEvaluationList(
+          a.subPartialModels,
+          inputListPartialModels,
+          inputListEvaluationMetrics
+        );
+      }
+    });
+    return {
+      partialModelList: inputListPartialModels,
+      evaluationList: inputListEvaluationMetrics
+    };
   }
 
   showConsole(a) {
     console.log(a);
   }
 
-  //
-  // loadNextQuestion(): Message {
-  //   this.firstLoad = false;
-  //   const result: Message = this.messageQueue.shift();
-  //   this.renderedMessageQueue.push(result);
-  //   return result;
-  // }
-  //
+  getEnumString(index: number): string {
+    return EvaluationMetricEnum[index];
+  }
+
+  getPartialModelById(id: string): PartialModel {
+    return this.partialModelList.filter((a) => a.id === id)[0];
+  }
+
+  resetProgress() {
+    this.store$.dispatch(resetQuestionary());
+    this.initCreateUserMaturityModel();
+  }
+
+  saveUserMaturityModel(
+    createUserMaturityModelRequest: CreateUserMaturityModelRequest
+  ) {
+    console.log("here");
+    const result = this.createUserMaturityModelGQL
+      .mutate({
+        userMaturityModel: createUserMaturityModelRequest
+      })
+      .pipe(
+        map((a) => {
+          console.log("inn");
+          const idOfCreated = a.data.createUserMaturityModel.id;
+          console.log(idOfCreated);
+          return idOfCreated;
+        })
+      )
+      .subscribe();
+    console.log(result);
+    return result;
+  }
+
+  isAlreadyClicked(
+    clickedEvaluationList: EvaluationItem[],
+    evaluationMetricId: string,
+    index: number
+  ) {
+    const resultList = clickedEvaluationList.filter(
+      (a) =>
+        a.evaluationMetricId === parseInt(evaluationMetricId) &&
+        a.index === index
+    );
+    return Array.isArray(resultList) && resultList.length;
+  }
+
+  handleEvaluationEventClick(
+    message: Message,
+    evaluationMetric: EvaluationMetric,
+    index: number,
+    isLastMessage: boolean,
+    isLastEvaluationMetric: boolean
+  ) {
+    const newValue = index + evaluationMetric.minValue;
+    this.store$.dispatch(
+      selectEvaluationMetric({
+        item: {
+          evaluationMetricId: parseInt(evaluationMetric.id),
+          index: index
+        } as EvaluationItem
+      })
+    );
+    // change model
+    this.store$.dispatch(
+      setProperty({
+        partialModelId: parseInt(
+          message.creatUserPartialModelRequest.partialModelId
+        ),
+        evaluationMetricId: parseInt(evaluationMetric.id),
+        newValue: newValue
+      })
+    );
+    // load next message
+    if (isLastMessage && isLastEvaluationMetric) this.loadNextQuestion();
+  }
+
+  async loadNextQuestion() {
+    this.store$.dispatch(setNextMessageWithEvaluationMetric());
+  }
+
+  hasEvaluationMetric(message: Message) {
+    const result =
+      Array.isArray(
+        message.creatUserPartialModelRequest.userEvaluationMetrics
+      ) && message.creatUserPartialModelRequest.userEvaluationMetrics.length;
+    return result;
+  }
 
   createMessagesFromCreateUserPartialModelRequest(
     createUserPartialModelRequests: CreateUserPartialModelRequest[],
@@ -118,26 +249,6 @@ export class QaListComponent implements OnInit {
     });
     return inputList;
   }
-
-  // createMessagesFromCreateUserPartialModelRequest(
-  //   createUserPartialModelRequests: CreateUserPartialModelRequest[]
-  // ) {
-  //   createUserPartialModelRequests.map((a) => {
-  //     return {
-  //       sender: Sender.System,
-  //       creatUserPartialModelRequest: a
-  //     } as Message);
-  //     // add one message for each evaluation Metrics
-  //     if (
-  //       Array.isArray(a.subUserPartialModels) &&
-  //       a.subUserPartialModels.length
-  //     ) {
-  //       createMessagesFromCreateUserPartialModelRequest(
-  //         a.subUserPartialModels
-  //       );
-  //     }
-  //   });
-  // }
 
   createCreateUserMaturityModelRequest(
     maturityModel: MaturityModel
@@ -162,9 +273,6 @@ export class QaListComponent implements OnInit {
         return {
           maturityLevelEvaluationMetrics: 0,
           partialModelId: a.id,
-          // storing addition the whole partialModel (and later the evaluationMetric to userEvaluationMetric to get easier access)
-          // this object will be ignored with graphql and since it is not send
-          partialModel: a,
           userEvaluationMetrics:
             Array.isArray(a.evaluationMetrics) && a.evaluationMetrics.length
               ? this.createCreateUserEvaluationMetricRequests(
@@ -188,8 +296,7 @@ export class QaListComponent implements OnInit {
       (a) => {
         return {
           valueEvaluationMetric: 0,
-          evaluationMetricId: a.id,
-          evaluationMetric: a
+          evaluationMetricId: a.id
         } as CreateUserEvaluationMetricRequest;
       }
     );

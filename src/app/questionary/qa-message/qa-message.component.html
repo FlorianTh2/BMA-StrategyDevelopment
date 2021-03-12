@@ -1,5 +1,17 @@
-<div class="qa-message-container">
-  <div>
-    Description: {{ createUserEvaluationMetricRequest["evaluationMetric"].id}}
+<ng-container *ngIf="belongsToMetric">
+  <div class="float-right">
+    <div class="evaluationMetric">
+      {{text}}
+    </div>
+    <br>
   </div>
-</div>
+</ng-container>
+
+<ng-container *ngIf="!belongsToMetric">
+  <div class="">
+    <div class="evaluationMetric">
+      {{text}}
+    </div>
+    <br>
+  </div>
+</ng-container>

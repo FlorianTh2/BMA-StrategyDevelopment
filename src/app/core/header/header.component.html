@@ -1,6 +1,13 @@
 <mat-toolbar color="grey">
   <h1>
-    <a routerLink="" routerLinkActive="active">Digital Business Model</a>
+    <a routerLink="" routerLinkActive="active">
+      <span>
+        <div class="conino-image-container">
+          <img src="assets/images/conino_logo_01.jpg" alt="conino-logo" class="conino-image">
+        </div>
+        Digital Business Model
+      </span>
+    </a>
   </h1>
 
   <ng-container *ngIf="!user">
@@ -13,6 +20,7 @@
 
   <ng-container *ngIf="user">
     <div class="nav-items">
+      <a mat-button routerLink="questionary" routerLinkActive="active"> Questionary </a>
       <a mat-button routerLink="project" routerLinkActive="active"> Projects </a>
       <a mat-button routerLink="auth/logout" routerLinkActive="active"> Logout </a>
     </div>

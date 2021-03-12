@@ -6,3 +6,14 @@ a {
 .nav-items {
   margin-left: auto;
 }
+
+.conino-image-container {
+  display: inline-block;
+  width: 50px;
+}
+
+/* Resize images */
+.conino-image-container img {
+  width: 100%;
+  height: auto;
+}
