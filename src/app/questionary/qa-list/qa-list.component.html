@@ -1,58 +1,106 @@
-
-
-
-
 <div>
   <ng-container *ngIf="messageQueue$ | async as messageQueue, else loading">
+  <mat-drawer-container class="example-container" autosize hasBackdrop="false">
+  <mat-drawer #drawer class="example-sidenav" mode="push" position="end">
+    <div *ngIf="userProjects$ | async as userProjects, else loading">
 
-  <div class="parent-split">
-    <div class="child-split">
-      <h1>
-        Create your MaturityModel!
-      </h1>
-      <h3>
-        Create a fast individual Maturity Model through a quick questionair!
-        <br>
-        Just select the option you can best relate to based on the given description
-      </h3>
-    </div>
-    <div class="child-split center-save-button">
-      <button mat-raised-button color="" class="save-maturity-model-button" (click)="resetProgress()">Reset</button>
-      <div *ngIf="user">
-        <button mat-raised-button color="" class="save-maturity-model-button" (click)="saveUserMaturityModel(messageQueue.model)">Save Your MaturityModel</button>
-      </div>
-      <div *ngIf="!user">
-        <button mat-raised-button color="" [disabled]="true" class="save-maturity-model-button">Login to save!</button>
-      </div>
-    </div>
-  </div>
-  <div class="">
-    <div *ngFor="let message of messageQueue.displayedMessageQueue; last as isLastMessage" class="selector-item">
-      <div *ngIf="getPartialModelById(message.creatUserPartialModelRequest.partialModelId) as viewPartialModel">
-        <div>
-          <app-qa-message [text]="viewPartialModel.description"></app-qa-message>
+    <h4>Save your Maturity Model!</h4>
+
+    <form class="ui form" [formGroup]="saveMaturityModelForm" (ngSubmit)="saveUserMaturityModel(messageQueue.model)">
+
+      <h5>
+        Select a name for your Maturity Model
+      </h5>
+        <div class="ui left icon input">
+          <input type="text" placeholder="{{messageQueue.model.name}}" formControlName="nameMaturityModel">
+          <i class="user icon"></i>
         </div>
-        <div *ngFor="let evaluationMetric of viewPartialModel.evaluationMetrics; last as isLastEvaluationMetric">
-          <div>
-            <app-qa-message [text]="evaluationMetric.name + '?'" [belongsToMetric]="true"></app-qa-message>
-          </div>
-          <div class="test"></div>
-          <div class="float-right">
-            <span *ngFor="let i of [].constructor((evaluationMetric.maxValue+1) - evaluationMetric.minValue); let index = index" class="">
-              <button mat-button (click)="handleEvaluationEventClick(message,evaluationMetric, index, isLastMessage, isLastEvaluationMetric)" [ngClass]="{'evaluationMetric' : !isAlreadyClicked(messageQueue.clickedEvaluationMetricIds, evaluationMetric.id, index), 'evaluationMetric2': isAlreadyClicked(messageQueue.clickedEvaluationMetricIds, evaluationMetric.id, index)}">{{getEnumString(index+evaluationMetric.minValue)}}</button>
-            </span>
-          </div>
-          <div class="test"></div>
-        </div>
+
+      <h5>
+        Select a project to store your maturity model
+      </h5>
+      <div *ngIf="setModelName(messageQueue.model.name)">
+      <mat-form-field class="example-form-field">
+        <mat-label>Clearable input</mat-label>
+        <input matInput type="text" [(ngModel)]="modelName">
+        <button mat-button *ngIf="modelName" matSuffix mat-icon-button aria-label="Clear" (click)="modelName=''">
+          <mat-icon>close</mat-icon>
+        </button>
+      </mat-form-field>
       </div>
-    </div>
-  </div>
-  </ng-container>
+
+      <br>
+      <mat-form-field appearance="fill">
+        <mat-label>Select Project</mat-label>
+        <mat-select [formControl]="saveMaturityModelFormControl" multiple>
+          <mat-select-trigger>
+            {{saveMaturityModelFormControl.value ? saveMaturityModelFormControl.value[0] : ''}}
+            <span *ngIf="saveMaturityModelFormControl.value?.length > 1" class="example-additional-selection">
+        (+{{saveMaturityModelFormControl.value.length - 1}} {{saveMaturityModelFormControl.value?.length === 2 ? 'other' : 'others'}})
+      </span>
+          </mat-select-trigger>
+          <mat-option *ngFor="let project of userProjects" [value]="project">{{project.name}}</mat-option>
+        </mat-select>
+      </mat-form-field>
+      <br>
+
+      <button mat-raised-button class="ui button save-maturity-model-button0" type="submit">Save</button>
+
+
+    </form>
 </div>
 
+</mat-drawer>
+  <div class="">
+    <div>
+      <div class="parent-split">
+        <div class="child-split">
+          <h1>
+            Create your MaturityModel!
+          </h1>
+          <h3>
+            Create a fast individual Maturity Model through a quick questionair!
+            <br>
+            Just select the option you can best relate to based on the given description
+          </h3>
+        </div>
+        <div class="child-split center-save-button">
+          <button mat-raised-button color="" class="save-maturity-model-button" (click)="resetProgress()">Reset</button>
+          <div *ngIf="user">
+            <button mat-raised-button color="" class="save-maturity-model-button" (click)="saveUserMaturityModelToggle()">Save Your MaturityModel</button>
+          </div>
+          <div *ngIf="!user">
+            <button mat-raised-button color="" [disabled]="true" class="save-maturity-model-button">Login to save!</button>
+          </div>
+        </div>
+      </div>
+      <div class="">
+        <div *ngFor="let message of messageQueue.displayedMessageQueue; last as isLastMessage" class="selector-item">
+          <div *ngIf="getPartialModelById(message.creatUserPartialModelRequest.partialModelId) as viewPartialModel">
+            <div>
+              <app-qa-message [text]="viewPartialModel.description"></app-qa-message>
+            </div>
+            <div *ngFor="let evaluationMetric of viewPartialModel.evaluationMetrics; last as isLastEvaluationMetric">
+              <div>
+                <app-qa-message [text]="evaluationMetric.name + '?'" [belongsToMetric]="true"></app-qa-message>
+              </div>
+              <div class="test"></div>
+              <div class="float-right">
+                <span *ngFor="let i of [].constructor((evaluationMetric.maxValue+1) - evaluationMetric.minValue); let index = index" class="">
+                  <button mat-button (click)="handleEvaluationEventClick(message,evaluationMetric, index, isLastMessage, isLastEvaluationMetric)" [ngClass]="{'evaluationMetric' : !isAlreadyClicked(messageQueue.clickedEvaluationMetricIds, evaluationMetric.id, index), 'evaluationMetric2': isAlreadyClicked(messageQueue.clickedEvaluationMetricIds, evaluationMetric.id, index)}">{{getEnumString(index+evaluationMetric.minValue)}}</button>
+                </span>
+              </div>
+              <div class="test"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</mat-drawer-container>
+  </ng-container>
 
-
-
+</div>
 
 <ng-template #loading>
   <mat-spinner></mat-spinner>

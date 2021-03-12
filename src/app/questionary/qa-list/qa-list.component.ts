@@ -1,4 +1,4 @@
-import { Component, OnInit } from "@angular/core";
+import { Component, OnInit, ViewChild } from "@angular/core";
 import { Message } from "../shared/models/message.model";
 import { Sender } from "../shared/enums/senderEnum";
 import { Observable } from "rxjs";
@@ -11,6 +11,8 @@ import {
   MaturityModel,
   MaturityModelGQL,
   PartialModel,
+  Project,
+  ProjectsOfUserGQL,
   User
 } from "../../graphql/generated/graphql";
 import { map } from "rxjs/operators";
@@ -31,6 +33,13 @@ import { EvaluationItem } from "../shared/models/evaluationItem";
 import { Apollo } from "apollo-angular";
 import { EvaluationMetricEnum } from "../shared/enums/evaluationMetric.enum";
 import { AuthorizationService } from "../../core/services/authorization.service";
+import { MatSidenav } from "@angular/material/sidenav";
+import {
+  FormBuilder,
+  FormControl,
+  FormGroup,
+  Validators
+} from "@angular/forms";
 
 @Component({
   selector: "app-qa-list",
@@ -50,24 +59,54 @@ export class QaListComponent implements OnInit {
 
   user: User = null;
 
+  modelName: string = "";
+  saveMaturityModelFormControl = new FormControl();
+  saveMaturityModelForm: FormGroup;
+  @ViewChild("drawer") sidenav: MatSidenav;
+  showFiller = false;
+  userProjects$: Observable<Project[]>;
+
   constructor(
     private apollo: Apollo,
     private route: ActivatedRoute,
     private maturityModelGQL: MaturityModelGQL,
     private store$: Store<fromQuestionary.State>,
     private createUserMaturityModelGQL: CreateUserMaturityModelGQL,
-    private authorizationService: AuthorizationService
+    private authorizationService: AuthorizationService,
+    private projectsOfUserGQL: ProjectsOfUserGQL,
+    private fb: FormBuilder
   ) {}
 
   ngOnInit(): void {
     this.authorizationService.userObservable.subscribe((a) => {
       this.user = a;
     });
+
+    if (this.user) {
+      this.userProjects$ = this.projectsOfUserGQL
+        .watch()
+        .valueChanges.pipe(
+          map((result) => result.data.projectsOfUser as Project[])
+        );
+    }
+
     this.route.paramMap.subscribe((paramMap) => {
       this.projectId = paramMap.get("project_id");
     });
     this.projectId = "1";
     this.initCreateUserMaturityModel();
+    this.createForm();
+  }
+
+  private createForm() {
+    this.saveMaturityModelForm = this.fb.group({
+      // email: ["", Validators.required],
+      // password: ["", [Validators.minLength(5), Validators.required]]
+    });
+  }
+
+  setModelName(modelName: string) {
+    this.modelName = modelName;
   }
 
   initCreateUserMaturityModel() {
@@ -152,10 +191,13 @@ export class QaListComponent implements OnInit {
     this.initCreateUserMaturityModel();
   }
 
+  saveUserMaturityModelToggle() {
+    this.sidenav.toggle();
+  }
+
   saveUserMaturityModel(
     createUserMaturityModelRequest: CreateUserMaturityModelRequest
   ) {
-    console.log("here");
     const result = this.createUserMaturityModelGQL
       .mutate({
         userMaturityModel: createUserMaturityModelRequest

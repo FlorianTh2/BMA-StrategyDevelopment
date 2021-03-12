@@ -9,6 +9,8 @@ import { SharedModule } from "../shared/share.module";
 import { QaDisplayPartialModelComponent } from "./qa-display-partial-model/qa-display-partial-model.component";
 import { StoreModule } from "@ngrx/store";
 import * as fromQuestionary from "./store/reducers";
+import { AuthRoutingModule } from "../auth/auth-routing.module";
+import { FormsModule, ReactiveFormsModule } from "@angular/forms";
 
 @NgModule({
   declarations: [
@@ -24,7 +26,10 @@ import * as fromQuestionary from "./store/reducers";
     StoreModule.forFeature(
       fromQuestionary.questionaryFeatureKey,
       fromQuestionary.reducers
-    )
+    ),
+    AuthRoutingModule,
+    ReactiveFormsModule,
+    FormsModule
   ]
 })
 export class QuestionaryModule {}
