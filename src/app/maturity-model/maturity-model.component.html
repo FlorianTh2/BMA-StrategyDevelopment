@@ -3,8 +3,10 @@
     Maturity Model
   </h1>
   <ng-container *ngIf="{maturityModel: maturityModel$ | async} as data">
-    <ng-container *ngIf="userMaturityModel$ | async as userMaturityModel, else loading">
-      <ul>
+    <ng-container *ngIf="userMaturityModelSpiderChart$ | async as userMaturityModelSpiderChart, else loading">
+      <ng-container *ngIf="transformGraphQlInputUserMaturityModelToSpiderChartDataContract(userMaturityModelSpiderChart) as mixedMaturityModelSpiderChart">
+
+        <ul>
         <li>
           Overview:
         </li>
@@ -12,20 +14,34 @@
           <div style="">
             Reifegrad: 3
           </div>
-          <app-spiderchart [inputMaturityModel]="transformGraphQlInputUserMaturityModelToSpiderChartDataContract(userMaturityModel)"></app-spiderchart>
+          <app-spiderchart [inputMaturityModel]="mixedMaturityModelSpiderChart"></app-spiderchart>
         </div>
         <li>
           Details:
         </li>
-        Name: {{userMaturityModel.name}}
-        Data:
-        <br>
+          <div>
+            <p>
+              Name: {{userMaturityModelSpiderChart.name}}
+            </p>
+            <p>
+              Data:
+            </p>
+            <div>
+              <ng-container *ngFor="let _ of userMaturityModelOfUserData.userPartialModels; let i = index;trackBy:trackByIndex">
+              <app-display-partial-model [(userPartialModel)]="userMaturityModelOfUserData.userPartialModels[i]"></app-display-partial-model>
+              </ng-container>
 
-        Created: {{userMaturityModel.created | customDate}}
-        Created By: {{userMaturityModel.creator}}
+
+            </div>
+              Created: {{userMaturityModelSpiderChart.updated | customDate}}
+              Created By: {{userMaturityModelSpiderChart.creator}}
+          </div>
       </ul>
+      </ng-container>
     </ng-container>
   </ng-container>
+
+  <pre>{{userMaturityModelOfUserData | json}}</pre>
 </div>
 
 

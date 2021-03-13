@@ -7,6 +7,7 @@ import {
 export interface InputSubUserPartialModelSpiderChart {
   maturityLevelEvaluationMetrics: number;
   maxMaturityLevelEvaluationMetrics: number;
+  minMaturityLevelEvaluationMetrics: number;
   partialModel: PartialModel;
   parentUserPartialModel: UserPartialModel;
 }

@@ -166,7 +166,6 @@ function setValueEvaluationMatric(
       const evaluationMetricResult: CreateUserEvaluationMetricRequest[] = a.userEvaluationMetrics.map(
         (b) => {
           if (parseInt(b.evaluationMetricId) === evaluationId) {
-            console.log("hi");
             return { ...b, valueEvaluationMetric: newValue };
           }
           return b;

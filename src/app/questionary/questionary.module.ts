@@ -6,19 +6,13 @@ import { QuestionaryComponent } from "./questionary.component";
 import { QaListComponent } from "./qa-list/qa-list.component";
 import { QaMessageComponent } from "./qa-message/qa-message.component";
 import { SharedModule } from "../shared/share.module";
-import { QaDisplayPartialModelComponent } from "../maturity-model/qa-display-partial-model/qa-display-partial-model.component";
 import { StoreModule } from "@ngrx/store";
 import * as fromQuestionary from "./store/reducers";
 import { AuthRoutingModule } from "../auth/auth-routing.module";
 import { FormsModule, ReactiveFormsModule } from "@angular/forms";
 
 @NgModule({
-  declarations: [
-    QuestionaryComponent,
-    QaListComponent,
-    QaMessageComponent,
-    QaDisplayPartialModelComponent
-  ],
+  declarations: [QuestionaryComponent, QaListComponent, QaMessageComponent],
   imports: [
     CommonModule,
     QuestionaryRoutingModule,

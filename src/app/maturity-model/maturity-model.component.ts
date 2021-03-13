@@ -1,11 +1,15 @@
 import { Component, OnInit } from "@angular/core";
-import { ActivatedRoute } from "@angular/router";
+import { ActivatedRoute, Router } from "@angular/router";
 import {
+  CreateUserMaturityModelGQL,
   MaturityModel,
   MaturityModelGQL,
+  PartialModel,
+  ProjectsOfUserGQL,
   UserEvaluationMetric,
   UserMaturityModel,
-  UserMaturityModelOfUserGQL
+  UserMaturityModelOfUserGQL,
+  UserPartialModel
 } from "../graphql/generated/graphql";
 import { map } from "rxjs/operators";
 import { Observable } from "rxjs";
@@ -15,6 +19,16 @@ import {
   InputSubUserPartialModelSpiderChart,
   InputUserPartialModelSpiderChart
 } from "../shared/models/InputMaturityModelSpiderChart";
+import {
+  AbstractControl,
+  FormBuilder,
+  FormControl,
+  FormGroup
+} from "@angular/forms";
+import { Apollo } from "apollo-angular";
+import { Store } from "@ngrx/store";
+import * as fromQuestionary from "../questionary/store/reducers";
+import { TreeItem, data, UserPartialModelItem } from "./mock";
 
 @Component({
   selector: "app-maturity-model",
@@ -23,31 +37,63 @@ import {
 })
 export class MaturityModelComponent implements OnInit {
   maturityModel_id: string;
-  userMaturityModel$: Observable<UserMaturityModel>;
+  userMaturityModelSpiderChart$: Observable<UserMaturityModel>;
   maturityModel$: Observable<MaturityModel>;
+
+  userMaturityModelOfUserData: UserMaturityModel;
+  adjustMaturityModelForm: FormGroup;
+  adjustMaturityModelFormControl = new FormControl();
+  dataItems: TreeItem = data;
 
   constructor(
     private route: ActivatedRoute,
     private userMaturityModelOfUserGQL: UserMaturityModelOfUserGQL,
-    private maturityModelGQL: MaturityModelGQL
+    private maturityModelGQL: MaturityModelGQL,
+    private apollo: Apollo,
+    private store$: Store<fromQuestionary.State>,
+    private formBuilder: FormBuilder,
+    private router: Router
   ) {}
 
   ngOnInit(): void {
     this.maturityModel_id = this.route.snapshot.paramMap.get(
       "maturitymodel_id"
     );
-    this.userMaturityModel$ = this.userMaturityModelOfUserGQL
+    this.userMaturityModelSpiderChart$ = this.userMaturityModelOfUserGQL
       .watch({ userMaturityModelId: this.maturityModel_id })
       .valueChanges.pipe(
         map(
           (result) => result.data.userMaturityModelOfUser as UserMaturityModel
         )
       );
+
+    this.userMaturityModelOfUserGQL
+      .watch({ userMaturityModelId: this.maturityModel_id })
+      .valueChanges.pipe(
+        map(
+          (result) => result.data.userMaturityModelOfUser as UserMaturityModel
+        )
+      )
+      .subscribe((res) => {
+        this.userMaturityModelOfUserData = JSON.parse(JSON.stringify(res));
+      });
+
     this.maturityModel$ = this.maturityModelGQL
       .watch({ maturityModelId: ID_OF_MATURITYMODEL })
       .valueChanges.pipe(
         map((result) => result.data.maturityModel as MaturityModel)
       );
+  }
+  trackByIndex(index: number, obj: any): any {
+    return index;
+  }
+
+  onSubmit() {
+    console.log(this.adjustMaturityModelForm.value);
+  }
+
+  showConsole(item: any) {
+    console.log(item);
   }
 
   // needed since we dont know the dimension of userMaturityModel: how many levels of subUserPartialModels do we have?
@@ -75,6 +121,8 @@ export class MaturityModelComponent implements OnInit {
               // took simply the first one ([0]) since one must exist at least (like at least: "Aussage trifft zu" with 5 levels (0-4) (but not 5 evaluationMetrics but one))
               maxMaturityLevelEvaluationMetrics:
                 b.userEvaluationMetrics[0].evaluationMetric.maxValue,
+              minMaturityLevelEvaluationMetrics:
+                b.userEvaluationMetrics[0].evaluationMetric.minValue,
               partialModel: b.partialModel,
               parentUserPartialModel: a
             } as InputSubUserPartialModelSpiderChart;
