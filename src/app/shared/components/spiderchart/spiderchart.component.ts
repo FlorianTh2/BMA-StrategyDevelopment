@@ -41,6 +41,7 @@ import {
   ElementRef,
   Input,
   OnInit,
+  SimpleChanges,
   ViewEncapsulation
 } from "@angular/core";
 import * as d3 from "d3";
@@ -87,7 +88,13 @@ export class SpiderchartComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    console.log("spiderchart ngOnInit");
     this.createRadarChart();
+  }
+
+  ngOnChanges(changes: SimpleChanges) {
+    // delete radarchart
+    // this.createRadarChart();
   }
 
   createRadarChart() {

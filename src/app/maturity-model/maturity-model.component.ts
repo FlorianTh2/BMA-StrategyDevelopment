@@ -12,7 +12,7 @@ import {
   UserPartialModel
 } from "../graphql/generated/graphql";
 import { map } from "rxjs/operators";
-import { Observable } from "rxjs";
+import { BehaviorSubject, Observable, Subject } from "rxjs";
 import { ID_OF_MATURITYMODEL } from "../shared/constants/constants";
 import {
   InputMaturityModelSpiderChart,
@@ -29,6 +29,7 @@ import { Apollo } from "apollo-angular";
 import { Store } from "@ngrx/store";
 import * as fromQuestionary from "../questionary/store/reducers";
 import { TreeItem, data, UserPartialModelItem } from "./mock";
+import { of } from "rxjs";
 
 @Component({
   selector: "app-maturity-model",
@@ -44,6 +45,7 @@ export class MaturityModelComponent implements OnInit {
   adjustMaturityModelForm: FormGroup;
   adjustMaturityModelFormControl = new FormControl();
   dataItems: TreeItem = data;
+  testSubject$: Subject<UserMaturityModel>;
 
   constructor(
     private route: ActivatedRoute,
@@ -76,6 +78,9 @@ export class MaturityModelComponent implements OnInit {
       )
       .subscribe((res) => {
         this.userMaturityModelOfUserData = JSON.parse(JSON.stringify(res));
+        this.testSubject$ = new BehaviorSubject(
+          this.userMaturityModelOfUserData
+        );
       });
 
     this.maturityModel$ = this.maturityModelGQL
@@ -86,8 +91,6 @@ export class MaturityModelComponent implements OnInit {
   }
 
   onUserPartialModelChange(event: UserPartialModel, id: string) {
-    console.log(event);
-    console.log(id);
     this.userMaturityModelOfUserData.userPartialModels = this.userMaturityModelOfUserData.userPartialModels.map(
       (a) => {
         if (a.id === id) {
@@ -96,6 +99,7 @@ export class MaturityModelComponent implements OnInit {
         return a;
       }
     );
+    this.testSubject$.next(this.userMaturityModelOfUserData);
   }
 
   onSubmit() {

@@ -3,10 +3,8 @@
     Maturity Model
   </h1>
   <ng-container *ngIf="{maturityModel: maturityModel$ | async} as data">
-    <ng-container *ngIf="userMaturityModelSpiderChart$ | async as userMaturityModelSpiderChart, else loading">
-      <ng-container *ngIf="transformGraphQlInputUserMaturityModelToSpiderChartDataContract(userMaturityModelSpiderChart) as mixedMaturityModelSpiderChart">
-
-        <ul>
+    <ng-container *ngIf="testSubject$ | async as userMaturityModelSpiderChart, else loading">
+      <ng-container *ngIf="transformGraphQlInputUserMaturityModelToSpiderChartDataContract(userMaturityModelOfUserData) as mixedMaturityModelSpiderChart"><ul>
         <li>
           Overview:
         </li>
@@ -14,6 +12,7 @@
           <div style="">
             Reifegrad: 3
           </div>
+<!--          {{showConsole(transformGraphQlInputUserMaturityModelToSpiderChartDataContract(userMaturityModelOfUserData))}}-->
           <app-spiderchart [inputMaturityModel]="mixedMaturityModelSpiderChart"></app-spiderchart>
         </div>
         <li>

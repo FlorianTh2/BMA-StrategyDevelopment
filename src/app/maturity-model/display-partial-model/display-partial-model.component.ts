@@ -29,7 +29,6 @@ export class DisplayPartialModelComponent implements OnInit {
 
   keyEventUserEvaluationMatrix(event, id: string) {
     const inputValue = event;
-    console.log(inputValue.target.value);
     const emitValue = {
       ...this.userPartialModel,
       userEvaluationMetrics: this.userPartialModel.userEvaluationMetrics.map(
@@ -37,8 +36,7 @@ export class DisplayPartialModelComponent implements OnInit {
           if (a.id === id) {
             return {
               ...a,
-              // @ts-ignore
-              valueEvaluationMetric: inputValue.target.value
+              valueEvaluationMetric: parseInt(inputValue.target.value)
             };
           }
           return a;
