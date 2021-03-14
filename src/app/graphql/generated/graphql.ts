@@ -30,7 +30,6 @@ export type Query = {
   userMaturityModels?: Maybe<Array<UserMaturityModel>>;
   userMaturityModelOfUser?: Maybe<UserMaturityModel>;
   userMaturityModelsOfUser?: Maybe<Array<UserMaturityModel>>;
-  userMaturityModelsOfProjectOfUser?: Maybe<Array<UserMaturityModel>>;
   userPartialModel?: Maybe<UserPartialModel>;
   userPartialModels?: Maybe<Array<UserPartialModel>>;
   userEvaluationMetric?: Maybe<UserEvaluationMetric>;
@@ -70,11 +69,6 @@ export type QueryUserMaturityModelArgs = {
 
 export type QueryUserMaturityModelOfUserArgs = {
   id: Scalars['ID'];
-};
-
-
-export type QueryUserMaturityModelsOfProjectOfUserArgs = {
-  projectId: Scalars['ID'];
 };
 
 
@@ -414,11 +408,13 @@ export type UserMaturityModelOfUserQuery = (
     & Pick<UserMaturityModel, 'id' | 'name' | 'created' | 'updated'>
     & { userPartialModels: Array<(
       { __typename?: 'UserPartialModel' }
+      & Pick<UserPartialModel, 'id'>
       & { partialModel: (
         { __typename?: 'PartialModel' }
         & Pick<PartialModel, 'id' | 'name' | 'weight'>
       ), subUserPartialModels: Array<Maybe<(
         { __typename?: 'UserPartialModel' }
+        & Pick<UserPartialModel, 'id'>
         & { partialModel: (
           { __typename?: 'PartialModel' }
           & Pick<PartialModel, 'id' | 'name' | 'weight'>
@@ -676,12 +672,14 @@ export const UserMaturityModelOfUserDocument = gql`
     created
     updated
     userPartialModels {
+      id
       partialModel {
         id
         name
         weight
       }
       subUserPartialModels {
+        id
         partialModel {
           id
           name

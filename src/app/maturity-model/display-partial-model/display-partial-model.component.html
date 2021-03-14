@@ -6,7 +6,7 @@
     Weight: {{userPartialModel?.partialModel?.weight}}
   </div>
     <ng-container *ngIf="isArray(userPartialModel.userEvaluationMetrics)">
-      <ng-container *ngFor="let userEvaluationMetric of userPartialModel.userEvaluationMetrics">
+      <ng-container *ngFor="let userEvaluationMetric of userPartialModel.userEvaluationMetrics; let i = index;trackBy:trackByIndex">
         <div>
           Evaluationsmetric: {{userEvaluationMetric.evaluationMetric.name}}
           ID: {{userEvaluationMetric.id}}
@@ -14,20 +14,19 @@
         </div>
         <div>
           Value:
-          <input type="number" value="{{userEvaluationMetric.valueEvaluationMetric}}" (keypress)="keyEventUserEvaluationMatrix($event, userEvaluationMetric.id)"  />
+          <input type="number" value="{{userEvaluationMetric.valueEvaluationMetric}}" (input)="keyEventUserEvaluationMatrix($event, userEvaluationMetric.id)"  />
         </div>
       </ng-container>
     </ng-container>
 
   <ng-container *ngIf="isArray(userPartialModel.subUserPartialModels)">
     <ng-container *ngFor="let _ of userPartialModel.subUserPartialModels; let i = index">
-      <app-display-partial-model [userPartialModel]="userPartialModel.subUserPartialModels[i]" (userPartialModelChange)="keyUserSubPartialModelEvent($event)"></app-display-partial-model>
+      <p style="padding-left: 20px">
+        <app-display-partial-model [userPartialModel]="userPartialModel.subUserPartialModels[i]" (userPartialModelChange)="keyUserSubPartialModelEvent($event)"></app-display-partial-model>
+      </p>
     </ng-container>
   </ng-container>
 
 
 
 </div>
-
-
-<!--(changedInSubPartialModel)="onSubPartialModelChange($event)-->

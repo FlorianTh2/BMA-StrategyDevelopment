@@ -5,12 +5,14 @@ query UserMaturityModelOfUser($userMaturityModelId: ID!){
     created
     updated
     userPartialModels {
+      id
       partialModel {
         id
         name
         weight
       }
       subUserPartialModels {
+        id
         partialModel {
           id
           name

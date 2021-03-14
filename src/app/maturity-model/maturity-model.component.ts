@@ -84,8 +84,18 @@ export class MaturityModelComponent implements OnInit {
         map((result) => result.data.maturityModel as MaturityModel)
       );
   }
-  trackByIndex(index: number, obj: any): any {
-    return index;
+
+  onUserPartialModelChange(event: UserPartialModel, id: string) {
+    console.log(event);
+    console.log(id);
+    this.userMaturityModelOfUserData.userPartialModels = this.userMaturityModelOfUserData.userPartialModels.map(
+      (a) => {
+        if (a.id === id) {
+          return event;
+        }
+        return a;
+      }
+    );
   }
 
   onSubmit() {

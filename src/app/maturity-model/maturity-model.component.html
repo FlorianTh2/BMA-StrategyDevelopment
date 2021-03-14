@@ -27,8 +27,8 @@
               Data:
             </p>
             <div>
-              <ng-container *ngFor="let _ of userMaturityModelOfUserData.userPartialModels; let i = index;trackBy:trackByIndex">
-              <app-display-partial-model [(userPartialModel)]="userMaturityModelOfUserData.userPartialModels[i]"></app-display-partial-model>
+              <ng-container *ngFor="let _ of userMaturityModelOfUserData.userPartialModels; let i = index">
+                <app-display-partial-model [userPartialModel]="userMaturityModelOfUserData.userPartialModels[i]" (userPartialModelChange)="onUserPartialModelChange($event, userMaturityModelOfUserData.userPartialModels[i].id)"></app-display-partial-model>
               </ng-container>
 
 

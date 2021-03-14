@@ -21,7 +21,6 @@ export class DisplayPartialModelComponent implements OnInit {
 
   keyEvent(event) {
     const inputValue = event.target.value;
-    console.log(inputValue);
     this.userPartialModelChange.emit({
       ...this.userPartialModel,
       maturityLevelEvaluationMetrics: inputValue
@@ -30,30 +29,52 @@ export class DisplayPartialModelComponent implements OnInit {
 
   keyEventUserEvaluationMatrix(event, id: string) {
     const inputValue = event;
-    this.userPartialModelChange.emit({
+    console.log(inputValue.target.value);
+    const emitValue = {
       ...this.userPartialModel,
       userEvaluationMetrics: this.userPartialModel.userEvaluationMetrics.map(
         (a) => {
           if (a.id === id) {
             return {
               ...a,
-              valueEvaluationMetric: inputValue
+              // @ts-ignore
+              valueEvaluationMetric: inputValue.target.value
             };
           }
           return a;
         }
       )
-    });
+    };
+    // console.log("sub-level-emit with partialModel");
+    // console.log(this.userPartialModel);
+    // console.log("=");
+    // console.log(emitValue);
+    this.userPartialModelChange.emit(emitValue);
   }
 
   keyUserSubPartialModelEvent(event: UserPartialModel) {
-    console.log(event);
-    this.userPartialModelChange.emit({
-      ...event
-    });
+    // console.log(event);
+    const newSubUserPartialModels = this.userPartialModel.subUserPartialModels.map(
+      (a) => {
+        if (a.id === event.id) {
+          return event;
+        }
+        return a;
+      }
+    );
+    // console.log(this.userPartialModel.subUserPartialModels);
+    // console.log(newSubUserPartialModels);
+    const emitValue = {
+      ...this.userPartialModel,
+      subUserPartialModels: newSubUserPartialModels
+    };
+    // console.log("top-level-emit with partial model:");
+    // console.log(this.userPartialModel);
+    // console.log(emitValue);
+    this.userPartialModelChange.emit(emitValue);
   }
 
-  trackByIndex(index: number, obj: any): any {
+  trackByIndex(index: any, obj: any): any {
     return index;
   }
 
@@ -63,14 +84,5 @@ export class DisplayPartialModelComponent implements OnInit {
 
   isArray(array: any): number {
     return Array.isArray(array) && array.length;
-  }
-
-  onSubPartialModelChange(event) {
-    const inputValue = event.target.value;
-    console.log(inputValue);
-    this.userPartialModelChange.emit({
-      ...this.userPartialModel,
-      maturityLevelEvaluationMetrics: inputValue
-    });
   }
 }
