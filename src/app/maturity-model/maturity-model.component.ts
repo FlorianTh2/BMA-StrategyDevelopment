@@ -45,7 +45,6 @@ export class MaturityModelComponent implements OnInit {
   adjustMaturityModelForm: FormGroup;
   adjustMaturityModelFormControl = new FormControl();
   dataItems: TreeItem = data;
-  testSubject$: Subject<UserMaturityModel>;
 
   constructor(
     private route: ActivatedRoute,
@@ -78,9 +77,6 @@ export class MaturityModelComponent implements OnInit {
       )
       .subscribe((res) => {
         this.userMaturityModelOfUserData = JSON.parse(JSON.stringify(res));
-        this.testSubject$ = new BehaviorSubject(
-          this.userMaturityModelOfUserData
-        );
       });
 
     this.maturityModel$ = this.maturityModelGQL
@@ -99,7 +95,6 @@ export class MaturityModelComponent implements OnInit {
         return a;
       }
     );
-    this.testSubject$.next(this.userMaturityModelOfUserData);
   }
 
   onSubmit() {

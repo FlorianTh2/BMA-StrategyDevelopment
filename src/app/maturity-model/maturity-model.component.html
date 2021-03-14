@@ -3,7 +3,7 @@
     Maturity Model
   </h1>
   <ng-container *ngIf="{maturityModel: maturityModel$ | async} as data">
-    <ng-container *ngIf="testSubject$ | async as userMaturityModelSpiderChart, else loading">
+    <ng-container *ngIf="userMaturityModelSpiderChart$ | async as userMaturityModelSpiderChart, else loading">
       <ng-container *ngIf="transformGraphQlInputUserMaturityModelToSpiderChartDataContract(userMaturityModelOfUserData) as mixedMaturityModelSpiderChart"><ul>
         <li>
           Overview:

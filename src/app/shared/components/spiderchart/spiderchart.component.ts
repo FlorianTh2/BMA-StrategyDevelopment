@@ -60,6 +60,7 @@ import {
 export class SpiderchartComponent implements OnInit {
   @Input()
   inputMaturityModel: InputMaturityModelSpiderChart;
+
   hostElement: any;
   private svg: any;
   private factor: number = 1.0;
@@ -88,12 +89,11 @@ export class SpiderchartComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    console.log("spiderchart ngOnInit");
     this.createRadarChart();
   }
 
   ngOnChanges(changes: SimpleChanges) {
-    // delete radarchart
+    console.log("hi");
     // this.createRadarChart();
   }
 
