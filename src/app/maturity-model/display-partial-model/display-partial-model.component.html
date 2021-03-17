@@ -9,14 +9,24 @@
       <ng-container *ngFor="let userEvaluationMetric of userPartialModel.userEvaluationMetrics; let i = index;trackBy:trackByIndex">
         <div class="evaluation-metrics">
           <div>
-            Evaluationsmetric: {{userEvaluationMetric.evaluationMetric.name}}
-            ID: {{userEvaluationMetric.id}}
-            Min-Value: {{userEvaluationMetric.evaluationMetric.minValue}}
+            <p>
+              Evaluationsmetric:
+              <span style="padding-left: 10px">
+                {{userEvaluationMetric.evaluationMetric.name}}
+                <mat-form-field class="example-form-field">
+                  <input matInput type="number" value="{{userEvaluationMetric.valueEvaluationMetric}}" (input)="keyEventUserEvaluationMatrix($event, userEvaluationMetric.id)"  />
+                </mat-form-field>
+                </span>
+            </p>
           </div>
-          <div>
-            Value:
-            <input type="number" value="{{userEvaluationMetric.valueEvaluationMetric}}" (input)="keyEventUserEvaluationMatrix($event, userEvaluationMetric.id)"  />
-          </div>
+<!--          <div>-->
+<!--            <p>-->
+<!--            Current Value:-->
+<!--              <mat-form-field class="example-form-field">-->
+<!--              <input matInput type="number" value="{{userEvaluationMetric.valueEvaluationMetric}}" (input)="keyEventUserEvaluationMatrix($event, userEvaluationMetric.id)"  />-->
+<!--              </mat-form-field>-->
+<!--            </p>-->
+<!--          </div>-->
         </div>
       </ng-container>
     </ng-container>
