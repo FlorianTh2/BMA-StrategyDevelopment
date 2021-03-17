@@ -1,4 +1,4 @@
-import { Component, OnInit } from "@angular/core";
+import { ChangeDetectionStrategy, Component, OnInit } from "@angular/core";
 import { ActivatedRoute, Router } from "@angular/router";
 import {
   CreateUserMaturityModelGQL,
@@ -34,7 +34,8 @@ import { of } from "rxjs";
 @Component({
   selector: "app-maturity-model",
   templateUrl: "./maturity-model.component.html",
-  styleUrls: ["./maturity-model.component.scss"]
+  styleUrls: ["./maturity-model.component.scss"],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class MaturityModelComponent implements OnInit {
   maturityModel_id: string;
@@ -112,32 +113,38 @@ export class MaturityModelComponent implements OnInit {
   ): InputMaturityModelSpiderChart {
     const tmp: InputMaturityModelSpiderChart = {
       nameMaturityModel: userMaturityModel.name,
-      userPartialModels: userMaturityModel.userPartialModels.map((a) => {
-        return {
-          // will be determined after this first iteration
-          maturityLevelEvaluationMetrics: 0,
-          maxMaturityLevelEvaluationMetrics: 0,
+      userPartialModels: userMaturityModel.userPartialModels
+        .map((a) => {
+          return {
+            // will be determined after this first iteration
+            maturityLevelEvaluationMetrics: 0,
+            maxMaturityLevelEvaluationMetrics: 0,
 
-          partialModel: a.partialModel,
-          subUserPartialModel: a.subUserPartialModels.map((b) => {
-            return {
-              maturityLevelEvaluationMetrics:
-                b.userEvaluationMetrics.reduce(
-                  (c: number, d: UserEvaluationMetric) =>
-                    c + d.valueEvaluationMetric,
-                  0
-                ) / b.userEvaluationMetrics.length,
-              // took simply the first one ([0]) since one must exist at least (like at least: "Aussage trifft zu" with 5 levels (0-4) (but not 5 evaluationMetrics but one))
-              maxMaturityLevelEvaluationMetrics:
-                b.userEvaluationMetrics[0].evaluationMetric.maxValue,
-              minMaturityLevelEvaluationMetrics:
-                b.userEvaluationMetrics[0].evaluationMetric.minValue,
-              partialModel: b.partialModel,
-              parentUserPartialModel: a
-            } as InputSubUserPartialModelSpiderChart;
-          })
-        } as InputUserPartialModelSpiderChart;
-      })
+            partialModel: a.partialModel,
+            subUserPartialModel: a.subUserPartialModels
+              .map((b) => {
+                return {
+                  maturityLevelEvaluationMetrics:
+                    b.userEvaluationMetrics.reduce(
+                      (c: number, d: UserEvaluationMetric) =>
+                        c + d.valueEvaluationMetric,
+                      0
+                    ) / b.userEvaluationMetrics.length,
+                  // took simply the first one ([0]) since one must exist at least (like at least: "Aussage trifft zu" with 5 levels (0-4) (but not 5 evaluationMetrics but one))
+                  maxMaturityLevelEvaluationMetrics:
+                    b.userEvaluationMetrics[0].evaluationMetric.maxValue,
+                  minMaturityLevelEvaluationMetrics:
+                    b.userEvaluationMetrics[0].evaluationMetric.minValue,
+                  partialModel: b.partialModel,
+                  parentUserPartialModel: a
+                } as InputSubUserPartialModelSpiderChart;
+              })
+              .sort((a, b) =>
+                a.partialModel.name.localeCompare(b.partialModel.name)
+              )
+          } as InputUserPartialModelSpiderChart;
+        })
+        .sort((a, b) => a.partialModel.name.localeCompare(b.partialModel.name))
     };
     tmp.userPartialModels.map((a) => {
       a.maxMaturityLevelEvaluationMetrics =

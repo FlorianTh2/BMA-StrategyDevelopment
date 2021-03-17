@@ -1,32 +1,33 @@
 <div>
   <div>
-    Name: {{userPartialModel?.partialModel?.name}}
+    (Sub-) Partial-Model-Name: {{userPartialModel?.partialModel?.name}}
   </div>
   <div>
-    Weight: {{userPartialModel?.partialModel?.weight}}
+    Weight: {{userPartialModel?.partialModel?.weight.toFixed(2)}}
   </div>
     <ng-container *ngIf="isArray(userPartialModel.userEvaluationMetrics)">
       <ng-container *ngFor="let userEvaluationMetric of userPartialModel.userEvaluationMetrics; let i = index;trackBy:trackByIndex">
-        <div>
-          Evaluationsmetric: {{userEvaluationMetric.evaluationMetric.name}}
-          ID: {{userEvaluationMetric.id}}
-          Min-Value: {{userEvaluationMetric.evaluationMetric.minValue}}
-        </div>
-        <div>
-          Value:
-          <input type="number" value="{{userEvaluationMetric.valueEvaluationMetric}}" (input)="keyEventUserEvaluationMatrix($event, userEvaluationMetric.id)"  />
+        <div class="evaluation-metrics">
+          <div>
+            Evaluationsmetric: {{userEvaluationMetric.evaluationMetric.name}}
+            ID: {{userEvaluationMetric.id}}
+            Min-Value: {{userEvaluationMetric.evaluationMetric.minValue}}
+          </div>
+          <div>
+            Value:
+            <input type="number" value="{{userEvaluationMetric.valueEvaluationMetric}}" (input)="keyEventUserEvaluationMatrix($event, userEvaluationMetric.id)"  />
+          </div>
         </div>
       </ng-container>
     </ng-container>
 
   <ng-container *ngIf="isArray(userPartialModel.subUserPartialModels)">
     <ng-container *ngFor="let _ of userPartialModel.subUserPartialModels; let i = index">
-      <p style="padding-left: 20px">
+      <p style="padding-left: 20px; border-left: 1px solid black">
         <app-display-partial-model [userPartialModel]="userPartialModel.subUserPartialModels[i]" (userPartialModelChange)="keyUserSubPartialModelEvent($event)"></app-display-partial-model>
       </p>
     </ng-container>
   </ng-container>
-
 
 
 </div>

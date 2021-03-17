@@ -1,4 +1,5 @@
 // diagram sources
+// http://bl.ocks.org/nbremer/6506614
 // http://techslides.com/over-1000-d3-js-examples-and-demos
 // https://www.visualcinnamon.com/2013/09/making-d3-radar-chart-look-bit-better/
 // http://bl.ocks.org/nbremer/6506614
@@ -37,6 +38,7 @@
 // https://de.wikipedia.org/wiki/Sinus_und_Kosinus
 
 import {
+  ChangeDetectionStrategy,
   Component,
   ElementRef,
   Input,
@@ -63,54 +65,98 @@ export class SpiderchartComponent implements OnInit {
 
   hostElement: any;
   private svg: any;
+  // dont work directly on svg, instead work on group of svg
+  private g1: any;
+  private tooltip: any;
   private factor: number = 1.0;
   private height: number = 400;
   private width: number = this.height;
   private radius: number =
     this.factor * Math.min(this.width / 2, this.height / 2);
-  private factorLegend: number = 0.85;
-  private maxValue: number = 4;
+  private maxValue: number = 5;
   // needed since all scales with height but for external things like label
   // we need extra Width or Height, but if we increase width or hight
   // directly -> all increases/shrinks and we need a way to just increase
   // the base svg (only applied to that)
   private extraWidth: number = 300;
   private extraHeight: number = 75;
-  private levels: number = 8;
+  private levels: number = 10;
   // will be calculated: (numberOfSubPartialModelsPerPartialModel -1) / 2
   //  to get subPartialModels in the middle of its parentPartialModel
   private shiftFromCenter;
   private opacityArea: number = 0.6;
   private toRight: number = 5;
   private customFormat = d3.format(".1f");
+  // used to store which label got clicked at legend
+  private legendClickedName;
+
+  // following properties are data-specific and required for flowless update-of-data-process
+  top_level_axis: InputUserPartialModelSpiderChart[];
+  number_top_level_axis: number;
+  sub_level_axis: InputSubUserPartialModelSpiderChart[];
+  number_sub_level_axis: number;
 
   constructor(private elRef: ElementRef) {
     this.hostElement = this.elRef.nativeElement;
   }
 
   ngOnInit(): void {
-    this.createRadarChart();
+    // setup attributes
+    //  e.g. createRadarChart + updateChart are not based on this.userInputMaturityModel directly
+    //       -> instead they are based on this.top_level_axis, this.sub_level_axis, ...
+    //       -> this values need to be calculated
+    this.initChart();
+    this.createRadarChart(
+      this.top_level_axis,
+      this.number_top_level_axis,
+      this.sub_level_axis,
+      this.number_sub_level_axis,
+      this.g1,
+      this.tooltip
+    );
   }
 
   ngOnChanges(changes: SimpleChanges) {
-    console.log("hi");
-    // this.createRadarChart();
+    if (this.top_level_axis) {
+      this.inputMaturityModel = changes.inputMaturityModel.currentValue;
+      // following updates are based on this data (not directly on this.inputMaturityModel) (like the creation-process also)
+      this.top_level_axis = this.inputMaturityModel.userPartialModels;
+      this.number_top_level_axis = this.top_level_axis.length;
+
+      const old = this.sub_level_axis;
+      this.sub_level_axis = this.flattenArray(
+        this.inputMaturityModel.userPartialModels.map(
+          (a) => a.subUserPartialModel
+        )
+      );
+      this.number_sub_level_axis = this.sub_level_axis.length;
+      this.shiftFromCenter =
+        (this.number_sub_level_axis / this.number_top_level_axis - 1) / 2;
+
+      this.updateChart(
+        this.top_level_axis,
+        this.number_top_level_axis,
+        this.sub_level_axis,
+        old,
+        this.number_sub_level_axis,
+        this.g1,
+        this.tooltip
+      );
+    }
   }
 
-  createRadarChart() {
-    // needed since in annonym-function declared with "function"-keyword: the "this"-context changes to the functions-scope
-    const module = this;
-    const top_level_axis = this.inputMaturityModel.userPartialModels;
-    const number_top_level_axis: number = top_level_axis.length;
+  initChart() {
+    this.top_level_axis = this.inputMaturityModel.userPartialModels;
+    this.number_top_level_axis = this.top_level_axis.length;
 
-    const sub_level_axis = this.flattenArray(
+    this.sub_level_axis = this.flattenArray(
       this.inputMaturityModel.userPartialModels.map(
         (a) => a.subUserPartialModel
       )
     );
-    const number_sub_level_axis: number = sub_level_axis.length;
+    this.number_sub_level_axis = this.sub_level_axis.length;
     this.shiftFromCenter =
-      (number_sub_level_axis / number_top_level_axis - 1) / 2;
+      (this.number_sub_level_axis / this.number_top_level_axis - 1) / 2;
 
     this.svg = d3
       .select("#chart")
@@ -118,22 +164,50 @@ export class SpiderchartComponent implements OnInit {
       .attr("width", this.width + this.extraWidth)
       .attr("height", this.height + this.extraHeight);
 
-    const g1 = this.svg
+    this.g1 = this.svg
+      // dont work on svg, instead work on one group of svg
       .append("g")
       .attr(
         "transform",
         "translate(" + this.extraWidth / 2 + "," + this.extraHeight / 2 + ")"
       );
 
+    // init/prepare tooltip for following definition of edge-point-hover
+    this.tooltip = d3
+      .select("#chart")
+      .append("div")
+      .style("position", "absolute")
+      .style("visibility", "hidden")
+      .style("background-color", "white")
+      .style("border", "solid")
+      .style("border-width", "1px")
+      .style("border-radius", "5px")
+      .style("padding", "10px");
+
+    this.legendClickedName = {};
+  }
+
+  createRadarChart(
+    top_level_axis,
+    number_top_level_axis,
+    sub_level_axis,
+    number_sub_level_axis,
+    g1,
+    tooltip
+  ) {
+    // needed since in annonym-function declared with "function"-keyword: the "this"-context changes to the functions-scope
+    const module = this;
+
     // create "spider net" (the circles approximated with lines)
     // -> level = 1 and this.levels +1, since: to not begin at the middle but at the actually first position (since we dont want to display 0.0 in the middle)
     // in the middle (level=0) would have been just a dot
     for (var level = 1; level < this.levels + 1; level++) {
       const spiderNet = g1
-        .selectAll(".lineSelection")
+        .selectAll(".lineSelection" + level)
         .data(sub_level_axis) // .slice(0, -2)
         .enter()
         .append("svg:line")
+        .attr("class", "lineSelection" + level)
         .attr("x1", (a, b) =>
           this.getXPosition(
             b,
@@ -170,7 +244,6 @@ export class SpiderchartComponent implements OnInit {
             1
           )
         )
-        .attr("class", "line")
         .style("stroke", "#7f7f7f")
         .style("stroke-width", "0.75px")
         .attr(
@@ -186,10 +259,11 @@ export class SpiderchartComponent implements OnInit {
     // create vertical %-scale from core to top
     // -> level = 1 and this.levels +1, since: to not begin at the middle but at the actually first position (since we dont want to display 0.0 in the middle)
     for (var level = 1; level < this.levels + 1; level++) {
-      g1.selectAll(".legendSelection")
+      g1.selectAll(".legendSelection" + level)
         .data([1])
         .enter()
         .append("svg:text")
+        .attr("class", "legendSelection" + level)
         .attr("x", (a) => this.getXPosition(1, 1, 0, 1 / 1, 1))
         .attr("y", (a) => this.getYPosition(1, 1, 0, level / this.levels, 1))
         // important since this.getYPosition returns always (e.g. different currentIndex or fraction) the same (=0)
@@ -202,21 +276,21 @@ export class SpiderchartComponent implements OnInit {
             (1 - level / this.levels) * this.radius +
             ")"
         )
-        .attr("class", "legend")
         .style("font-size", "12px")
         .text(this.customFormat((level * this.maxValue) / this.levels));
     }
 
     // for top-level-partial-models create lines from core to outside based on setup
     const gPartialModelAxis = g1
-      .selectAll(".partialModelAxis")
+      .selectAll(".gPartialModelAxes")
       .data(top_level_axis)
       .enter()
       .append("g")
-      .attr("class", ".axis");
+      .attr("class", "gPartialModelAxes");
 
     gPartialModelAxis
       .append("line")
+      .attr("class", "partialModelAxis-line")
       .attr("x1", this.radius)
       .attr("y1", this.radius)
       .attr("x2", (a, b) =>
@@ -225,32 +299,36 @@ export class SpiderchartComponent implements OnInit {
       .attr("y2", (a, b) =>
         this.getYPosition(b, number_top_level_axis, 0, 1 / 1, 1.0)
       )
-      .attr("class", "line")
       .style("stroke", "#7f7f7f")
       .attr("stroke-width", "2px");
 
     // create labels
     gPartialModelAxis
       .append("text")
-      .attr("class", "labels")
-      .text((d: InputUserPartialModelSpiderChart) => d.partialModel.name)
+      .attr("class", "partialModelAxis-label")
+      .text((d: InputUserPartialModelSpiderChart) =>
+        d.partialModel.name.length > 25
+          ? d.partialModel.name.slice(0, 24) + "..."
+          : d.partialModel.name
+      )
       .style("font-size", "11px")
-      .attr("dx", "-75px")
       .attr("x", (a, b) =>
         this.getXPosition(b, number_top_level_axis, 0, 1 / 1, 1.25)
       )
+      .attr("dx", "-75px")
       .attr("y", (a, b) =>
         this.getYPosition(b, number_top_level_axis, 0, 1 / 1, 1.1)
       );
 
     // for sub-level-partial-models create lines from core to outside based on setup
     const gSubPartialModelAxis = g1
-      .selectAll(".subPartialModels")
+      .selectAll(".gSubPartialModelAxes")
       .data(sub_level_axis)
       .enter()
       .append("g")
-      .attr("class", "subPartialModelAxis")
+      .attr("class", "gSubPartialModelAxes")
       .append("line")
+      .attr("class", "subPartialModelAxis-label")
       .attr("x1", this.radius)
       .attr("y1", this.radius)
       .attr("x2", (a, b) =>
@@ -271,29 +349,16 @@ export class SpiderchartComponent implements OnInit {
           1.0
         )
       )
-      .attr("class", "line")
       .style("stroke", "#7f7f7f")
       .attr("stroke-width", "1px");
 
-    // init/prepare tooltip for following definition of edge-point-hover
-    var tooltip = d3
-      .select("#chart")
-      .append("div")
-      .style("position", "absolute")
-      .style("visibility", "hidden")
-      .style("background-color", "white")
-      .style("border", "solid")
-      .style("border-width", "1px")
-      .style("border-radius", "5px")
-      .style("padding", "10px");
-
     // draw data-"area" from coordinates for top-level-partial-model
-    g1.selectAll(".area")
+    g1.selectAll(".top-level-partial-model-area")
       // packed in list since its a polygon-element and we need 1 element with all points
       .data([top_level_axis])
       .enter()
       .append("polygon")
-      .attr("class", "radar-chart-area")
+      .attr("class", "top-level-partial-model-area")
       .style("stroke-width", "1.5px")
       .style("stroke", "#7f7f7f")
       .attr("points", (a: InputUserPartialModelSpiderChart[]) => {
@@ -337,11 +402,11 @@ export class SpiderchartComponent implements OnInit {
       );
 
     // draw single edge-points for top-level-partial-models
-    g1.selectAll(".edges")
+    g1.selectAll(".top-level-partial-model-edge-points")
       .data(top_level_axis)
       .enter()
       .append("svg:circle")
-      .attr("class", "circle-edge-point")
+      .attr("class", "top-level-partial-model-edge-points")
       .attr("r", 7.5)
       .attr("cx", (a: InputUserPartialModelSpiderChart, b) =>
         this.getXPosition(
@@ -380,10 +445,12 @@ export class SpiderchartComponent implements OnInit {
             .style("top", module.getYTooltip(this, tooltip))
             .style("visibility", "visible");
 
-          const thisPolygon = "polygon." + d3.select(this).attr("class");
-          // why changed idk
-          g1.selectAll("polygon").transition(200).style("fill-opacity", 0.9);
-          g1.selectAll(thisPolygon).transition(200).style("fill-opacity", 0.1);
+          g1.selectAll(".sub-level-partial-model-area")
+            .transition(200)
+            .style("fill-opacity", 0.1);
+          g1.selectAll(".top-level-partial-model-area")
+            .transition(200)
+            .style("fill-opacity", 0.9);
         }
       )
       .on("mouseout", () => {
@@ -396,12 +463,12 @@ export class SpiderchartComponent implements OnInit {
     // draw same thing (area+edgepoints) for sub-partialmodels -> cant merge with above since i want
     // to get top-level-partial-models in the "middle" and sub-partial-models to be shiftet, so that
     // top-level-partial-models are in the middle -> because of this the calculation changes and cant be merged
-    g1.selectAll(".area-sub-level-partial-model")
+    g1.selectAll(".sub-level-partial-model-area")
       // packed in list since its a polygon-element and we need 1 element with all points
       .data([sub_level_axis])
       .enter()
       .append("polygon")
-      .attr("class", "radar-chart-area-sub-level-partial-model")
+      .attr("class", "sub-level-partial-model-area")
       .style("stroke-width", "1.5px")
       .style("stroke", "#7f7f7f")
       .attr("points", (a: InputSubUserPartialModelSpiderChart[]) => {
@@ -444,11 +511,11 @@ export class SpiderchartComponent implements OnInit {
       );
 
     // draw single edge-points
-    g1.selectAll(".edges-sub-level-partial-model")
+    g1.selectAll(".sub-level-partial-model-edge-points")
       .data(sub_level_axis)
       .enter()
       .append("svg:circle")
-      .attr("class", "circle-edge-point-sub-level-partial-model")
+      .attr("class", "sub-level-partial-model-edge-points")
       .attr("r", 7.5)
       .attr("cx", (a: InputSubUserPartialModelSpiderChart, b) =>
         this.getXPosition(
@@ -489,10 +556,12 @@ export class SpiderchartComponent implements OnInit {
             .style("top", module.getYTooltip(this, tooltip))
             .style("visibility", "visible");
 
-          const thisPolygon = "polygon." + d3.select(this).attr("class");
-          // why changed idk
-          g1.selectAll("polygon").transition(200).style("fill-opacity", 0.9);
-          g1.selectAll(thisPolygon).transition(200).style("fill-opacity", 0.1);
+          g1.selectAll(".top-level-partial-model-area")
+            .transition(200)
+            .style("fill-opacity", 0.1);
+          g1.selectAll(".sub-level-partial-model-area")
+            .transition(200)
+            .style("fill-opacity", 0.9);
         }
       )
       .on("mouseout", () => {
@@ -504,17 +573,22 @@ export class SpiderchartComponent implements OnInit {
 
     // create legend
     const gLegend = this.svg
+      .selectAll(".g-legend")
+      // random value to be able to enter()
+      .data([1])
+      .enter()
       .append("g")
-      .attr("class", "main-legend")
+      .attr("class", "g-legend")
       .attr("height", 100)
       .attr("width", 200);
 
     // create legend color squares
     gLegend
-      .selectAll("rect")
+      .selectAll(".legend-rect")
       .data(["Partial Models", "Sub-Partial Models"])
       .enter()
       .append("rect")
+      .attr("class", "legend-rect")
       .attr("x", this.width + this.extraWidth - 150)
       .attr("y", (a, b) => b * 20)
       .attr("width", 10)
@@ -525,14 +599,179 @@ export class SpiderchartComponent implements OnInit {
 
     // create legend-text
     gLegend
-      .selectAll("text")
+      .selectAll(".legend-text")
       .data(["Partial Models", "Sub-Partial Models"])
       .enter()
       .append("text")
+      .attr("class", "legend-text")
       .attr("x", this.width + this.extraWidth - 130)
       .attr("y", (a, b) => b * 20 + 10)
+      .attr("cursor", "pointer")
       .attr("font-size", "11px")
-      .text((a) => a);
+      .text((a) => a)
+      .on("click", function (event, data: string) {
+        console.log("click1");
+        if (data === "Partial Models") {
+          if (module.legendClickedName[data] === 1) {
+            module.legendClickedName[data] = 0;
+            g1.selectAll("polygon")
+              .transition(200)
+              .style("fill-opacity", module.opacityArea);
+          } else {
+            module.legendClickedName[data] = 1;
+            g1.selectAll(".sub-level-partial-model-area")
+              .transition(200)
+              .style("fill-opacity", 0.1);
+            g1.selectAll(".top-level-partial-model-area")
+              .transition(200)
+              .style("fill-opacity", 0.9);
+          }
+        }
+        if (data === "Sub-Partial Models") {
+          if (module.legendClickedName[data] === 1) {
+            module.legendClickedName[data] = 0;
+            g1.selectAll("polygon")
+              .transition(200)
+              .style("fill-opacity", module.opacityArea);
+          } else {
+            module.legendClickedName[data] = 1;
+            g1.selectAll(".top-level-partial-model-area")
+              .transition(200)
+              .style("fill-opacity", 0.1);
+            g1.selectAll(".sub-level-partial-model-area")
+              .transition(200)
+              .style("fill-opacity", 0.9);
+          }
+        }
+      });
+  }
+
+  // reference 1: https://bl.ocks.org/mbostock/3808234/457c620cab92e5dc9b8351b31a572fe6eb7d51d7
+  //  -> to update (without general update pattern: selectAll + data + transition + attr)
+  // reference 2: https:medium.com/@mbostock/what-makes-software-good-943557f8a488#.cwn2o4ohw
+  updateChart(
+    top_level_axis,
+    number_top_level_axis,
+    sub_level_axis,
+    old_sub_level_axis,
+    number_sub_level_axis,
+    g1,
+    tooltip
+  ) {
+    const module = this;
+    const transition = d3.transition().duration(750);
+
+    // draw data-"area" from coordinates for top-level-partial-model
+    g1.selectAll(".top-level-partial-model-area")
+      // packed in list since its a polygon-element and we need 1 element with all points
+      .data([top_level_axis])
+      .transition(transition)
+      .attr("points", (a: InputUserPartialModelSpiderChart[]) => {
+        const result = a
+          .map(
+            (b, c) =>
+              this.getXPosition(
+                c,
+                number_top_level_axis,
+                0,
+                1 / 1,
+                b.maturityLevelEvaluationMetrics /
+                  b.maxMaturityLevelEvaluationMetrics
+              ) +
+              "," +
+              this.getYPosition(
+                c,
+                number_top_level_axis,
+                0,
+                1 / 1,
+                b.maturityLevelEvaluationMetrics /
+                  b.maxMaturityLevelEvaluationMetrics
+              )
+          )
+          .reduce((d, e) => d + " " + e);
+        return result;
+      });
+
+    // draw single edge-points for top-level-partial-models
+    g1.selectAll(".top-level-partial-model-edge-points")
+      .data(top_level_axis)
+      .transition(transition)
+      .attr("cx", (a: InputUserPartialModelSpiderChart, b) =>
+        this.getXPosition(
+          b,
+          number_top_level_axis,
+          0,
+          1 / 1,
+          a.maturityLevelEvaluationMetrics / a.maxMaturityLevelEvaluationMetrics
+        )
+      )
+      .attr("cy", (a: InputUserPartialModelSpiderChart, b) =>
+        this.getYPosition(
+          b,
+          number_top_level_axis,
+          0,
+          1 / 1,
+          a.maturityLevelEvaluationMetrics / a.maxMaturityLevelEvaluationMetrics
+        )
+      );
+
+    // draw same thing (area+edgepoints) for sub-partialmodels -> cant merge with above since i want
+    // to get top-level-partial-models in the "middle" and sub-partial-models to be shiftet, so that
+    // top-level-partial-models are in the middle -> because of this the calculation changes and cant be merged
+    g1.selectAll(".sub-level-partial-model-area")
+      // packed in list since its a polygon-element and we need 1 element with all points
+      .data([sub_level_axis])
+      .transition(transition)
+      .attr("points", (a: InputSubUserPartialModelSpiderChart[]) => {
+        const result = a
+          .map(
+            (b, c) =>
+              this.getXPosition(
+                c,
+                number_sub_level_axis,
+                -this.shiftFromCenter,
+                1 / 1,
+                b.maturityLevelEvaluationMetrics /
+                  b.maxMaturityLevelEvaluationMetrics
+              ) +
+              "," +
+              this.getYPosition(
+                c,
+                number_sub_level_axis,
+                -this.shiftFromCenter,
+                1 / 1,
+                b.maturityLevelEvaluationMetrics /
+                  b.maxMaturityLevelEvaluationMetrics
+              )
+          )
+          .reduce((d, e) => d + " " + e);
+        return result;
+      });
+
+    // draw single edge-points
+    g1.selectAll(".sub-level-partial-model-edge-points")
+      .data(sub_level_axis)
+      .transition(transition)
+      // .delay(0)
+      // .duration(0)
+      .attr("cx", (a: InputSubUserPartialModelSpiderChart, b) =>
+        this.getXPosition(
+          b,
+          number_sub_level_axis,
+          -this.shiftFromCenter,
+          1 / 1,
+          a.maturityLevelEvaluationMetrics / a.maxMaturityLevelEvaluationMetrics
+        )
+      )
+      .attr("cy", (a: InputSubUserPartialModelSpiderChart, b) =>
+        this.getYPosition(
+          b,
+          number_sub_level_axis,
+          -this.shiftFromCenter,
+          1 / 1,
+          a.maturityLevelEvaluationMetrics / a.maxMaturityLevelEvaluationMetrics
+        )
+      );
   }
 
   // Nebenbemerkung

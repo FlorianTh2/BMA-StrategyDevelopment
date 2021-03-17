@@ -4,7 +4,9 @@
   </h1>
   <ng-container *ngIf="{maturityModel: maturityModel$ | async} as data">
     <ng-container *ngIf="userMaturityModelSpiderChart$ | async as userMaturityModelSpiderChart, else loading">
-      <ng-container *ngIf="transformGraphQlInputUserMaturityModelToSpiderChartDataContract(userMaturityModelOfUserData) as mixedMaturityModelSpiderChart"><ul>
+      <ng-container *ngIf="transformGraphQlInputUserMaturityModelToSpiderChartDataContract(userMaturityModelOfUserData) as mixedMaturityModelSpiderChart">
+        <div class="edit-area">
+        <ul>
         <li>
           Overview:
         </li>
@@ -12,30 +14,32 @@
           <div style="">
             Reifegrad: 3
           </div>
-<!--          {{showConsole(transformGraphQlInputUserMaturityModelToSpiderChartDataContract(userMaturityModelOfUserData))}}-->
           <app-spiderchart [inputMaturityModel]="mixedMaturityModelSpiderChart"></app-spiderchart>
         </div>
         <li>
           Details:
         </li>
           <div>
-            <p>
+            <div>
               Name: {{userMaturityModelSpiderChart.name}}
-            </p>
-            <p>
-              Data:
-            </p>
+            </div>
+            <div>
+              Current inserted data:
+            </div>
             <div>
               <ng-container *ngFor="let _ of userMaturityModelOfUserData.userPartialModels; let i = index">
-                <app-display-partial-model [userPartialModel]="userMaturityModelOfUserData.userPartialModels[i]" (userPartialModelChange)="onUserPartialModelChange($event, userMaturityModelOfUserData.userPartialModels[i].id)"></app-display-partial-model>
+                <div style="padding-left: 20px; border-left: 1px solid black">
+                  <p>
+                  <app-display-partial-model [userPartialModel]="userMaturityModelOfUserData.userPartialModels[i]" (userPartialModelChange)="onUserPartialModelChange($event, userMaturityModelOfUserData.userPartialModels[i].id)"></app-display-partial-model>
+                  </p>
+                </div>
               </ng-container>
-
-
             </div>
               Created: {{userMaturityModelSpiderChart.updated | customDate}}
               Created By: {{userMaturityModelSpiderChart.creator}}
           </div>
       </ul>
+</div>
       </ng-container>
     </ng-container>
   </ng-container>
