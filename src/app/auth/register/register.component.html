@@ -1,56 +1,57 @@
-<h1>Registrieren</h1>
+<div>
+  <h1>Registrieren</h1>
 
+  <form class="ui form" [formGroup]="registerForm" (ngSubmit)="registrate()">
 
-
-<form class="ui form" [formGroup]="registerForm" (ngSubmit)="registrate()">
-
-
-  <div class="field">
-    <div class="ui left icon input">
-      <input type="text" placeholder="firstname" formControlName="firstname">
-      <i class="envelope icon"></i>
+    <p>
       <app-form-messages [control]="registerForm.get('firstname')" controlName="firstname"></app-form-messages>
-    </div>
-  </div>
-
-
-  <div class="field">
-    <div class="ui left icon input">
-      <input type="text" placeholder="lastname" formControlName="lastname">
-      <i class="envelope icon"></i>
       <app-form-messages [control]="registerForm.get('lastname')" controlName="lastname"></app-form-messages>
-    </div>
-  </div>
-
-  <div class="field">
-    <div class="ui left icon input">
-      <input type="text" placeholder="E-Mail" formControlName="email">
-      <i class="envelope icon"></i>
       <app-form-messages [control]="registerForm.get('email')" controlName="email"></app-form-messages>
+      <app-form-messages [control]="registerForm.get('passwords').get('password')" controlName="password"></app-form-messages>
+      <app-form-messages [control]="registerForm.get('passwords')" controlName="passwords"></app-form-messages>
+    </p>
+
+    <div>
+      <mat-form-field appearance="fill">
+        <mat-label>Firstname</mat-label>
+        <input matInput type="text" placeholder="firstname" formControlName="firstname">
+      </mat-form-field>
     </div>
-  </div>
 
-  <div formGroupName="passwords">
-    <div class="field">
-      <div class="ui left icon input">
-        <input type="password" placeholder="Passwort" formControlName="password">
-        <i class="lock icon"></i>
-        <app-form-messages [control]="registerForm.get('passwords').get('password')" controlName="password"></app-form-messages>
-      </div>
-    </div>
-
-
-    <div class="field">
-      <div class="ui left icon input">
-        <input type="password" placeholder="Passwort wiederholen" formControlName="passwordRepeat">
-        <i class="lock icon"></i>
-        <app-form-messages [control]="registerForm.get('passwords')" controlName="passwords"></app-form-messages>
-      </div>
+    <div>
+      <mat-form-field appearance="fill">
+        <mat-label>Lastname</mat-label>
+        <input matInput type="text" placeholder="lastname" formControlName="lastname">
+      </mat-form-field>
     </div>
 
 
-  </div>
-  <br>
-  <button class="ui button" type="submit" [disabled]="registerForm.invalid">Registrieren</button>
+    <div>
+      <mat-form-field appearance="fill">
+        <mat-label>Email</mat-label>
+        <input matInput type="text" placeholder="E-Mail" formControlName="email">
+      </mat-form-field>
+    </div>
 
-</form>
+
+    <div>
+      <mat-form-field appearance="fill">
+        <mat-label>Password</mat-label>
+        <input matInput type="password" placeholder="Passwort" formControlName="password">
+      </mat-form-field>
+    </div>
+
+
+    <div>
+      <mat-form-field appearance="fill">
+        <mat-label>Repeat Password</mat-label>
+        <input matInput type="password" placeholder="Repeat Password" formControlName="passwordRepeat">
+      </mat-form-field>
+    </div>
+
+    <p>
+      <button mat-raised-button type="submit" [disabled]="registerForm.invalid">Registrieren</button>
+    </p>
+
+  </form>
+</div>

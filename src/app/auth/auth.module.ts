@@ -7,7 +7,8 @@ import { LoginComponent } from "./login/login.component";
 import { RegisterComponent } from "./register/register.component";
 import { LogoutComponent } from "./logout/logout.component";
 import { ReactiveFormsModule } from "@angular/forms";
-import { FormMessagesComponent } from './form-messages/form-messages.component';
+import { FormMessagesComponent } from "./form-messages/form-messages.component";
+import { SharedModule } from "../shared/share.module";
 
 @NgModule({
   declarations: [
@@ -18,6 +19,6 @@ import { FormMessagesComponent } from './form-messages/form-messages.component';
     LogoutComponent,
     FormMessagesComponent
   ],
-  imports: [CommonModule, AuthRoutingModule, ReactiveFormsModule]
+  imports: [CommonModule, AuthRoutingModule, ReactiveFormsModule, SharedModule]
 })
 export class AuthModule {}
