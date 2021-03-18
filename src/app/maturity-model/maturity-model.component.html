@@ -5,14 +5,25 @@
   <ng-container *ngIf="{maturityModel: maturityModel$ | async} as data">
     <ng-container *ngIf="userMaturityModelSpiderChart$ | async as userMaturityModelSpiderChart, else loading">
       <ng-container *ngIf="transformGraphQlInputUserMaturityModelToSpiderChartDataContract(userMaturityModelOfUserData) as mixedMaturityModelSpiderChart">
+        <ng-container *ngIf="calculateMaturityLevel(userMaturityModelOfUserData.userPartialModels) as maturityLevel">
         <div class="edit-area">
         <ul>
         <li>
           Overview:
         </li>
         <div class="center-spider-chart">
-          <div style="">
-            Reifegrad: 3
+          <div class="display-maturity-model">
+            Your current
+            Maturity-Level is:
+            <div style="text-align: center; text-decoration: underline">
+              {{maturityLevel.toFixed(2)}}
+            </div>
+            <div>
+              According to that you are:
+              <div style="text-align: center; text-decoration: underline">
+                {{getEnumString(maturityLevel)}}
+              </div>
+            </div>
           </div>
           <app-spiderchart [inputMaturityModel]="mixedMaturityModelSpiderChart"></app-spiderchart>
         </div>
@@ -48,6 +59,7 @@
           </div>
       </ul>
 </div>
+        </ng-container>
       </ng-container>
     </ng-container>
   </ng-container>

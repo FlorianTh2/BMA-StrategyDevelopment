@@ -1,6 +1,6 @@
 .center-spider-chart{
   display: flex;
-  justify-content: space-evenly;
+  justify-content: flex-start;
   align-items: center;
 }
 
@@ -16,4 +16,9 @@
 .edit-area{
   padding-top: 20px;
   line-height: 1.5;
+}
+
+.display-maturity-model{
+  min-width: 300px;
+  font-size: 30px;
 }

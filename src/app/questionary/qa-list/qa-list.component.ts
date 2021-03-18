@@ -40,6 +40,7 @@ import {
   FormGroup,
   Validators
 } from "@angular/forms";
+import { MaturityLevelEnum } from "../../maturity-model/shared/maturityLevel.enum";
 
 @Component({
   selector: "app-qa-list",
@@ -112,37 +113,38 @@ export class QaListComponent implements OnInit {
         map((result) => result.data.maturityModel as MaturityModel)
       )
       .subscribe((a) => {
-        const userMaturityModel: CreateUserMaturityModelRequest = this.createCreateUserMaturityModelRequest(
-          a
-        );
-        const result = this.createPartialModelAndEvaluationList(
-          a.partialModels,
-          [],
-          []
-        );
-        this.partialModelList = result.partialModelList;
-        this.evaluationMetricList = result.evaluationList;
-
-        const messageQueue: Message[] = this.createMessagesFromCreateUserPartialModelRequest(
-          userMaturityModel.userPartialModels,
-          [] as Message[]
-        );
-
-        this.store$.dispatch(
-          retrieveCreateUserMaturityModelRequest({
-            createUserMaturityModelRequest: userMaturityModel
-          })
-        );
-
-        this.store$.dispatch(
-          retrieveMessageQueue({
-            messageQueue: messageQueue
-          })
-        );
-
         this.messageQueue$
-          .subscribe((a) => {
-            if (a.displayedMessageQueue.length === 0) this.loadNextQuestion();
+          .subscribe((b) => {
+            const result = this.createPartialModelAndEvaluationList(
+              a.partialModels,
+              [],
+              []
+            );
+            this.partialModelList = result.partialModelList;
+            this.evaluationMetricList = result.evaluationList;
+
+            if (b.displayedMessageQueue.length === 0) {
+              const userMaturityModel: CreateUserMaturityModelRequest = this.createCreateUserMaturityModelRequest(
+                a
+              );
+              const messageQueue: Message[] = this.createMessagesFromCreateUserPartialModelRequest(
+                userMaturityModel.userPartialModels,
+                [] as Message[]
+              );
+
+              this.store$.dispatch(
+                retrieveCreateUserMaturityModelRequest({
+                  createUserMaturityModelRequest: userMaturityModel
+                })
+              );
+
+              this.store$.dispatch(
+                retrieveMessageQueue({
+                  messageQueue: messageQueue
+                })
+              );
+              this.loadNextQuestion();
+            }
           })
           .unsubscribe();
       });
@@ -176,6 +178,13 @@ export class QaListComponent implements OnInit {
 
   showConsole(a) {
     console.log(a);
+  }
+
+  getEnumStringMaturityLevel(index: number): string {
+    const index_number: number = Math.floor(index);
+    if (index_number < 1) return MaturityLevelEnum[1];
+    if (index_number > 4) return MaturityLevelEnum[4];
+    return MaturityLevelEnum[index_number];
   }
 
   getEnumString(index: number): string {
@@ -272,7 +281,10 @@ export class QaListComponent implements OnInit {
       })
     );
     // load next message
-    if (isLastMessage && isLastEvaluationMetric) this.loadNextQuestion();
+    if (isLastMessage && isLastEvaluationMetric) {
+      this.loadNextQuestion();
+      console.log("hi2");
+    }
   }
 
   async loadNextQuestion() {

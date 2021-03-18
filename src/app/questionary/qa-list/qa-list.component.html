@@ -65,6 +65,7 @@
       <div class="">
         <div *ngFor="let message of messageQueue.displayedMessageQueue; last as isLastMessage" class="selector-item">
           <div *ngIf="getPartialModelById(message.creatUserPartialModelRequest.partialModelId) as viewPartialModel">
+            {{showConsole("hi")}}
             <div>
               <app-qa-message [text]="viewPartialModel.description"></app-qa-message>
             </div>

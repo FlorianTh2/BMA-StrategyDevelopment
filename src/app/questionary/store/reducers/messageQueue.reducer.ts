@@ -56,8 +56,6 @@ const internalMessageQueueReducer = createReducer(
         newValue: number;
       }
     ) => {
-      console.log("abc1");
-      console.log(state.model);
       const newModel: CreateUserMaturityModelRequest = {
         ...state.model,
         userPartialModels: setValueEvaluationMatric(
@@ -67,8 +65,6 @@ const internalMessageQueueReducer = createReducer(
           props.newValue
         )
       };
-      console.log("abc2");
-      console.log(newModel);
       return {
         ...state,
         model: newModel
