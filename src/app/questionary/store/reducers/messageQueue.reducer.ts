@@ -5,8 +5,6 @@ import {
   retrieveCreateUserMaturityModelRequest,
   retrieveMessageQueue,
   selectEvaluationMetric,
-  setNextMessage,
-  setNextMessageTillNextEvaluationMetric,
   setNextMessageWithEvaluationMetric,
   setProperty
 } from "../actions/messageQueue.action";
@@ -80,29 +78,29 @@ const internalMessageQueueReducer = createReducer(
       };
     }
   ),
-  on(setNextMessageTillNextEvaluationMetric, (state: State) => {
-    const extractedMessages: Message[] = [];
-    let index: number = 0;
-    while (true) {
-      const leadingElement: Message = state.messageQueue[index];
-      extractedMessages.push(leadingElement);
-      index += 1;
-      if (
-        Array.isArray(
-          leadingElement.creatUserPartialModelRequest.userEvaluationMetrics
-        ) &&
-        leadingElement.creatUserPartialModelRequest.userEvaluationMetrics.length
-      ) {
-        break;
-      }
-    }
-    const tmpDisplayedMessageQueue = [...state.displayedMessageQueue];
-    return {
-      ...state,
-      messageQueue: state.messageQueue.slice(index),
-      displayedMessageQueue: tmpDisplayedMessageQueue.concat(extractedMessages)
-    };
-  }),
+  // on(setNextMessageTillNextEvaluationMetric, (state: State) => {
+  //   const extractedMessages: Message[] = [];
+  //   let index: number = 0;
+  //   while (true) {
+  //     const leadingElement: Message = state.messageQueue[index];
+  //     extractedMessages.push(leadingElement);
+  //     index += 1;
+  //     if (
+  //       Array.isArray(
+  //         leadingElement.creatUserPartialModelRequest.userEvaluationMetrics
+  //       ) &&
+  //       leadingElement.creatUserPartialModelRequest.userEvaluationMetrics.length
+  //     ) {
+  //       break;
+  //     }
+  //   }
+  //   const tmpDisplayedMessageQueue = [...state.displayedMessageQueue];
+  //   return {
+  //     ...state,
+  //     messageQueue: state.messageQueue.slice(index),
+  //     displayedMessageQueue: tmpDisplayedMessageQueue.concat(extractedMessages)
+  //   };
+  // }),
   on(setNextMessageWithEvaluationMetric, (state: State) => {
     let extractedMessage: Message;
     let index: number = 0;
@@ -125,16 +123,16 @@ const internalMessageQueueReducer = createReducer(
       displayedMessageQueue: [...state.displayedMessageQueue, extractedMessage]
     };
   }),
-  on(setNextMessage, (state: State) => {
-    const leadingMessage = state.messageQueue[0];
-    return {
-      ...state,
-      messageQueue: state.messageQueue.slice(1),
-      displayedMessageQueue: state.displayedMessageQueue.concat([
-        leadingMessage
-      ])
-    };
-  }),
+  // on(setNextMessage, (state: State) => {
+  //   const leadingMessage = state.messageQueue[0];
+  //   return {
+  //     ...state,
+  //     messageQueue: state.messageQueue.slice(1),
+  //     displayedMessageQueue: state.displayedMessageQueue.concat([
+  //       leadingMessage
+  //     ])
+  //   };
+  // }),
   on(
     selectEvaluationMetric,
     (state: State, props: { item: EvaluationItem }) => {

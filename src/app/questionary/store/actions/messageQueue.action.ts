@@ -26,16 +26,8 @@ export const retrieveMessageQueue = createAction(
   props<{ messageQueue: Message[] }>()
 );
 
-export const setNextMessageTillNextEvaluationMetric = createAction(
-  "[Questionary] Set Next Message Till Next EvaluationMetrics success"
-);
-
 export const setNextMessageWithEvaluationMetric = createAction(
   "[Questionary] Set Next Message With EvaluationMetrics success"
-);
-
-export const setNextMessage = createAction(
-  "[Questionary] Set Next Message success"
 );
 
 export const selectEvaluationMetric = createAction(

@@ -13,12 +13,14 @@ import {
   PartialModel,
   Project,
   ProjectsOfUserGQL,
-  User
+  User,
+  UserEvaluationMetric,
+  UserPartialModel
 } from "../../graphql/generated/graphql";
 import { map } from "rxjs/operators";
 import { ID_OF_MATURITYMODEL } from "../../shared/constants/constants";
 import { ActivatedRoute, Router } from "@angular/router";
-import { select, Store } from "@ngrx/store";
+import { Store } from "@ngrx/store";
 import * as fromQuestionary from "./../store/reducers";
 import {
   resetQuestionary,
@@ -40,7 +42,8 @@ import {
   FormGroup,
   Validators
 } from "@angular/forms";
-import { MaturityLevelEnum } from "../../maturity-model/shared/maturityLevel.enum";
+import { MaturityLevelEnum } from "../../maturity-model/shared/enum/maturityLevel.enum";
+import { calculateMaturityLevel } from "../../maturity-model/shared/function/calculateMaturityLevel";
 
 @Component({
   selector: "app-qa-list",
@@ -64,6 +67,7 @@ export class QaListComponent implements OnInit {
   @ViewChild("drawer") sidenav: MatSidenav;
   showFiller = false;
   userProjects$: Observable<Project[]>;
+  calculateMaturityLevel = calculateMaturityLevel;
 
   constructor(
     private apollo: Apollo,
@@ -104,6 +108,34 @@ export class QaListComponent implements OnInit {
   setModelName(modelName: string) {
     this.modelName = modelName;
     return true;
+  }
+
+  createPartialModelsFromCreateUserPartialModelRequest(
+    userPartialModelRequests: CreateUserPartialModelRequest[]
+  ): UserPartialModel[] {
+    const tmp = userPartialModelRequests?.map((a) => {
+      return {
+        partialModel: this.partialModelList.filter(
+          (b) => b.id === a.partialModelId
+        )[0],
+        userEvaluationMetrics: this.isArray(a.userEvaluationMetrics)
+          ? a.userEvaluationMetrics.map((c) => {
+              return {
+                valueEvaluationMetric: c.valueEvaluationMetric,
+                evaluationMetric: this.evaluationMetricList.filter((d) => {
+                  return d.id === c.evaluationMetricId;
+                })[0]
+              } as UserEvaluationMetric;
+            })
+          : [],
+        subUserPartialModels: this.isArray(a.subUserPartialModels)
+          ? this.createPartialModelsFromCreateUserPartialModelRequest(
+              a.subUserPartialModels
+            )
+          : []
+      } as UserPartialModel;
+    });
+    return tmp;
   }
 
   initCreateUserMaturityModel() {
@@ -158,9 +190,7 @@ export class QaListComponent implements OnInit {
     partialModels.map((a) => {
       inputListPartialModels.push(a);
       if (Array.isArray(a.evaluationMetrics) && a.evaluationMetrics.length) {
-        inputListEvaluationMetrics = inputListEvaluationMetrics.concat(
-          a.evaluationMetrics
-        );
+        inputListEvaluationMetrics.push(...a.evaluationMetrics);
       }
       if (Array.isArray(a.subPartialModels) && a.subPartialModels.length) {
         this.createPartialModelAndEvaluationList(
@@ -254,6 +284,10 @@ export class QaListComponent implements OnInit {
     return Array.isArray(resultList) && resultList.length;
   }
 
+  isArray(array: any): number {
+    return Array.isArray(array) && array.length;
+  }
+
   handleEvaluationEventClick(
     message: Message,
     evaluationMetric: EvaluationMetric,
@@ -283,7 +317,6 @@ export class QaListComponent implements OnInit {
     // load next message
     if (isLastMessage && isLastEvaluationMetric) {
       this.loadNextQuestion();
-      console.log("hi2");
     }
   }
 

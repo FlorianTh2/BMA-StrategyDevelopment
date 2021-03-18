@@ -29,9 +29,8 @@ import { Apollo } from "apollo-angular";
 import { Store } from "@ngrx/store";
 import * as fromQuestionary from "../questionary/store/reducers";
 import { TreeItem, data, UserPartialModelItem } from "./mock";
-import { of } from "rxjs";
-import { EvaluationMetricEnum } from "../questionary/shared/enums/evaluationMetric.enum";
-import { MaturityLevelEnum } from "./shared/maturityLevel.enum";
+import { MaturityLevelEnum } from "./shared/enum/maturityLevel.enum";
+import { calculateMaturityLevel } from "./shared/function/calculateMaturityLevel";
 
 @Component({
   selector: "app-maturity-model",
@@ -48,6 +47,7 @@ export class MaturityModelComponent implements OnInit {
   adjustMaturityModelForm: FormGroup;
   adjustMaturityModelFormControl = new FormControl();
   dataItems: TreeItem = data;
+  calculateMaturityLevel = calculateMaturityLevel;
 
   constructor(
     private route: ActivatedRoute,
@@ -117,23 +117,6 @@ export class MaturityModelComponent implements OnInit {
 
   isArray(array: any): number {
     return Array.isArray(array) && array.length;
-  }
-
-  calculateMaturityLevel(userPartialModels: UserPartialModel[]): number {
-    return userPartialModels
-      .map((a) => {
-        console.log(a.partialModel.weight);
-        return this.isArray(a.userEvaluationMetrics)
-          ? a.partialModel.weight *
-              a.userEvaluationMetrics
-                .map((b) => {
-                  return b.evaluationMetric.weight * b.valueEvaluationMetric;
-                })
-                .reduce((c, d) => c + d)
-          : a.partialModel.weight *
-              this.calculateMaturityLevel(a.subUserPartialModels);
-      })
-      .reduce((e, f) => e + f);
   }
 
   // needed since we dont know the dimension of userMaturityModel: how many levels of subUserPartialModels do we have?

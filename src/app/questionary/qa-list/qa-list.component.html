@@ -65,7 +65,6 @@
       <div class="">
         <div *ngFor="let message of messageQueue.displayedMessageQueue; last as isLastMessage" class="selector-item">
           <div *ngIf="getPartialModelById(message.creatUserPartialModelRequest.partialModelId) as viewPartialModel">
-            {{showConsole("hi")}}
             <div>
               <app-qa-message [text]="viewPartialModel.description"></app-qa-message>
             </div>
@@ -80,6 +79,17 @@
                 </span>
               </div>
               <div class="test"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div *ngIf="messageQueue.messageQueue && messageQueue.model">
+          <div *ngIf="!isArray(messageQueue.messageQueue)">
+            <div *ngIf="createPartialModelsFromCreateUserPartialModelRequest(messageQueue.model?.userPartialModels) as maturityLevelCaluclationPartialModels">
+            <div class="show-result">
+              Your current Maturity-Level is: {{calculateMaturityLevel(maturityLevelCaluclationPartialModels).toFixed(2)}}
+            </div>
             </div>
           </div>
         </div>
