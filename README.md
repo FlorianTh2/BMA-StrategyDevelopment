@@ -1,9 +1,13 @@
 # Conino-BMA
 This project is a Business-Model-Analysis (BMA) tool and helps to develop and evaluate your current business-model in public health care. This project is part of the conino-venture. This repository is all about the front-end-part of the project. The back-end-part can be found [here](https://github.com/FlorianTh2/Conino-BMA-Backend).
 
+![alt text](.github/images/maturity-model-edit-2.PNG)
+
+* * *
+
 ![alt text](.github/images/questionary-1.PNG)
 
-![alt text](.github/images/maturity-model-edit-2.PNG)
+* * *
 
 ![alt text](.github/images/maturity-model-edit-3.PNG)
 
