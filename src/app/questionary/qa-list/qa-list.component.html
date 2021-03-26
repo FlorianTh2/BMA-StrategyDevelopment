@@ -4,11 +4,11 @@
   <mat-drawer #drawer class="example-sidenav" mode="push" position="end">
     <div *ngIf="userProjects$ | async as userProjects, else loading">
 
-    <h4>Save your Maturity Model!</h4>
+    <h4>Speichern Sie ihr Reifegradmodell - Ergebnis</h4>
 
     <form class="ui form" [formGroup]="saveMaturityModelForm" (ngSubmit)="saveUserMaturityModel(messageQueue.model)">
       <h5>
-        Select a name for your Maturity Model
+        Wählen Sie einen Namen für das Reifegradmodell
       </h5>
       <div *ngIf="setModelName(messageQueue.model?.name)">
         <mat-form-field class="example-form-field">
@@ -19,10 +19,10 @@
       </div>
       <br>
       <h5>
-        Select a project to store your maturity model
+        Wählen Sie ein Projekt, indem das Reifegradmodell gespeichert werden soll.
       </h5>
       <mat-form-field appearance="fill">
-        <mat-label>Select Project</mat-label>
+        <mat-label>Projekt wählen</mat-label>
         <mat-select formControlName="projectsView" multiple>
           <mat-select-trigger>
             {{saveMaturityModelFormControl.value ? saveMaturityModelFormControl.value[0] : ''}}
@@ -44,21 +44,21 @@
       <div class="parent-split">
         <div class="child-split">
           <h1>
-            Create your MaturityModel!
+            Reifegrad - Self Assessment
           </h1>
           <h3>
-            Create a fast individual Maturity Model through a quick questionair!
+            Führen Sie unkompliziert ein Self Assessment durch, um ihr Reifegradmodell zu erstellen
             <br>
-            Just select the option you can best relate to based on the given description
+            Wählen Sie einfach jene Aussagen, die am Besten zu Ihrem Unternehmen passen
           </h3>
         </div>
         <div class="child-split center-save-button">
           <button mat-raised-button color="" class="save-maturity-model-button" (click)="resetProgress()">Reset</button>
           <div *ngIf="user">
-            <button mat-raised-button color="" class="save-maturity-model-button" (click)="saveUserMaturityModelToggle()">Save Your MaturityModel</button>
+            <button mat-raised-button color="" class="save-maturity-model-button" (click)="saveUserMaturityModelToggle()">Speichern Sie das Modell!</button>
           </div>
           <div *ngIf="!user">
-            <button mat-raised-button color="" [disabled]="true" class="save-maturity-model-button">Login to save!</button>
+            <button mat-raised-button color="" [disabled]="true" class="save-maturity-model-button">Einloggen zum Speichern!</button>
           </div>
         </div>
       </div>
@@ -87,8 +87,10 @@
         <div *ngIf="messageQueue.messageQueue && messageQueue.model">
           <div *ngIf="!isArray(messageQueue.messageQueue)">
             <div *ngIf="createPartialModelsFromCreateUserPartialModelRequest(messageQueue.model?.userPartialModels) as maturityLevelCaluclationPartialModels">
-            <div class="show-result">
-              Your current Maturity-Level is: {{calculateMaturityLevel(maturityLevelCaluclationPartialModels).toFixed(2)}}
+<!--            <div class="show-result">-->
+              <div>
+                <app-qa-message [text]="'Ihr aktueller Reifegrad ist: ' + calculateMaturityLevel(maturityLevelCaluclationPartialModels).toFixed(2)" [belongsToMetric]="false"></app-qa-message>
+
             </div>
             </div>
           </div>

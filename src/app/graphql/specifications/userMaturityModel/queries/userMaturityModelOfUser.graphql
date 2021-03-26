@@ -9,6 +9,7 @@ query UserMaturityModelOfUser($userMaturityModelId: ID!){
       partialModel {
         id
         name
+        description
         weight
       }
       subUserPartialModels {
@@ -16,6 +17,7 @@ query UserMaturityModelOfUser($userMaturityModelId: ID!){
         partialModel {
           id
           name
+          description
           weight
         }
         userEvaluationMetrics {

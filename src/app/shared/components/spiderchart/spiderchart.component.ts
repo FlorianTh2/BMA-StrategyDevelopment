@@ -544,11 +544,11 @@ export class SpiderchartComponent implements OnInit {
         function (event, data: InputSubUserPartialModelSpiderChart) {
           tooltip
             .html(
-              "<div>Sub-Partial Model: " +
+              "<div>Name: " +
                 data.partialModel.name +
-                "<br>Parent: " +
+                "<br>Abgeleitet von: " +
                 data.parentUserPartialModel.partialModel.name +
-                "<br> Value: " +
+                "<br>Wert: " +
                 data.maturityLevelEvaluationMetrics +
                 "</div>"
             )

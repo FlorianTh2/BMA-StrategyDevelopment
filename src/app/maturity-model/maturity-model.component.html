@@ -1,6 +1,6 @@
 <div style="padding-left: 10rem; padding-right: 10rem">
   <h1>
-    Maturity Model
+    Self Assessment
   </h1>
   <ng-container *ngIf="{maturityModel: maturityModel$ | async} as data">
     <ng-container *ngIf="userMaturityModelSpiderChart$ | async as userMaturityModelSpiderChart, else loading">
@@ -9,17 +9,16 @@
         <div class="edit-area">
         <ul>
         <li>
-          Overview:
+          Übersicht:
         </li>
         <div class="center-spider-chart">
           <div class="display-maturity-model">
-            Your current
-            Maturity-Level is:
+            Ihr aktueller Reifegrad
             <div style="text-align: center; text-decoration: underline">
               {{maturityLevel.toFixed(2)}}
             </div>
             <div>
-              According to that you are:
+              Somit sind Sie in der Gruppe:
               <div style="text-align: center; text-decoration: underline">
                 {{getEnumString(maturityLevel)}}
               </div>
@@ -35,13 +34,10 @@
               Name: {{userMaturityModelSpiderChart.name}}
             </div>
             <div>
-              Minimum: 1
+              Bewertung zwischen: 1 und 5
             </div>
             <div>
-              Maximum: 5
-            </div>
-            <div>
-              Current inserted data:
+              Aktuelle Modellparameter:
             </div>
             <div>
               <ng-container *ngFor="let _ of userMaturityModelOfUserData.userPartialModels; let i = index">

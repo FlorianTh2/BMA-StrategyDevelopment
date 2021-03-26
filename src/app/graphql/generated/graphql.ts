@@ -411,13 +411,13 @@ export type UserMaturityModelOfUserQuery = (
       & Pick<UserPartialModel, 'id'>
       & { partialModel: (
         { __typename?: 'PartialModel' }
-        & Pick<PartialModel, 'id' | 'name' | 'weight'>
+        & Pick<PartialModel, 'id' | 'name' | 'description' | 'weight'>
       ), subUserPartialModels: Array<Maybe<(
         { __typename?: 'UserPartialModel' }
         & Pick<UserPartialModel, 'id'>
         & { partialModel: (
           { __typename?: 'PartialModel' }
-          & Pick<PartialModel, 'id' | 'name' | 'weight'>
+          & Pick<PartialModel, 'id' | 'name' | 'description' | 'weight'>
         ), userEvaluationMetrics: Array<(
           { __typename?: 'UserEvaluationMetric' }
           & Pick<UserEvaluationMetric, 'id' | 'valueEvaluationMetric'>
@@ -676,6 +676,7 @@ export const UserMaturityModelOfUserDocument = gql`
       partialModel {
         id
         name
+        description
         weight
       }
       subUserPartialModels {
@@ -683,6 +684,7 @@ export const UserMaturityModelOfUserDocument = gql`
         partialModel {
           id
           name
+          description
           weight
         }
         userEvaluationMetrics {

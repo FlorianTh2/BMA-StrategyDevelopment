@@ -1,16 +1,22 @@
 <div>
   <div>
-    (Sub-) Partial-Model-Name: {{userPartialModel?.partialModel?.name}}
+    Name: {{userPartialModel?.partialModel?.name}}
   </div>
   <div>
-    Weight: {{userPartialModel?.partialModel?.weight.toFixed(2)}}
+    Beschreibung:
+    <div style="padding-left: 20px">
+      {{userPartialModel?.partialModel?.description}}
+    </div>
+  </div>
+  <div>
+    Gewicht: {{userPartialModel?.partialModel?.weight.toFixed(2)}}
   </div>
     <ng-container *ngIf="isArray(userPartialModel.userEvaluationMetrics)">
       <ng-container *ngFor="let userEvaluationMetric of userPartialModel.userEvaluationMetrics; let i = index;trackBy:trackByIndex">
         <div class="evaluation-metrics">
           <div>
             <p>
-              Evaluationsmetric:
+              Metrik:
               <span style="padding-left: 10px">
                 {{userEvaluationMetric.evaluationMetric.name}}
                 <mat-form-field class="example-form-field">
