@@ -8,9 +8,11 @@ import { StoreModule } from "@ngrx/store";
 import { StoreDevtoolsModule } from "@ngrx/store-devtools";
 import { ROOT_REDUCERS, metaReducers } from "./store/reducers/root.reducer";
 import { StoreRouterConnectingModule } from "@ngrx/router-store";
+import { BusinessStrategyComponent } from "./business-strategy/business-strategy.component";
+import { BusinessStrategyModule } from "./business-strategy/business-strategy.module";
 
 @NgModule({
-  declarations: [AppComponent],
+  declarations: [AppComponent, BusinessStrategyComponent],
   imports: [
     BrowserModule,
     BrowserAnimationsModule,
@@ -32,7 +34,8 @@ import { StoreRouterConnectingModule } from "@ngrx/router-store";
       // logOnly: environment.production,
     }),
 
-    CoreModule
+    CoreModule,
+    BusinessStrategyModule
   ],
   providers: [],
   bootstrap: [AppComponent]
