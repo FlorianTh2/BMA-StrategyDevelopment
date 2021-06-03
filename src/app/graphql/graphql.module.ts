@@ -19,7 +19,7 @@ export function createApollo(httpLink: HttpLink): ApolloClientOptions<any> {
     return forward(operation);
   });
 
-  const http = httpLink.create({ uri: "http://localhost:4000/graphql" });
+  const http = httpLink.create({ uri: "https://bma-strategydevelopmentbackend.herokuapp.com/" });
   const link = middlewareAsLinkChain.concat(http);
 
   const apolloConfig = {
