@@ -7,5 +7,28 @@
           Erstellen Sie ihre individuelle Geschäftsstrategie
         </h3>
   </div>
+  <div>
 
+    <button mat-raised-button color="" (click)="fileInput.click()">Konsistenzmatrix hochladen</button>
+    <input hidden type="file" (change)="fileChanged($event)" #fileInput id="file">
+
+    <div style="height: 100px"></div>
+
+    <div *ngIf="resultArray">
+        <div *ngFor="let row of resultArray">
+          <div *ngFor="let cell of row" class="display-cell">
+<!--            <ng-container *ngIf="cell">-->
+            {{cell}}
+<!--            </ng-container>-->
+<!--            <ng-container *ngIf="!cell">-->
+<!--              -->
+<!--            </ng-container>-->
+          </div>
+        </div>
+    </div>
+  </div>
+
+  <div style="height: 100px"></div>
+
+  <button mat-raised-button color="" (click)="exportDocumentJsonToSheet()">Download Strategiebündel</button>
 </div>
