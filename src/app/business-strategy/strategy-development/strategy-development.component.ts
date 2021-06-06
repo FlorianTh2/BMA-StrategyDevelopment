@@ -61,15 +61,53 @@ export class StrategyDevelopmentComponent implements OnInit {
         this.resultFileName,
         this.resultArray
       );
-      let createbundles = this.consistencyMatrix.createbundles();
+      let createbundles: Array<Record<string, number>> = this.consistencyMatrix.createbundles();
+      this.exportBundlesToSheet(createbundles);
     };
     fileReader.readAsArrayBuffer(this.file);
   }
 
+  exportBundlesToSheet(bundles: Array<Record<string, number>>){
+    let resultArray = this.exportBundlesConvertToAoA(bundles);
+    console.log("result array string")
+    console.log(resultArray);
+    this.exportBundlesDownloadToUser(resultArray);
+  }
+
+  exportBundlesConvertToAoA(bundles: Array<Record<string, number>>){
+    let resultArray: Array<Array<string>> = [];
+    resultArray.push(["Paare"].concat(
+      bundles.map((a, index) => {
+        return "B" + index;
+      })
+    ));
+    let bundleKeys = Object.keys(bundles[0]);
+    console.log(bundleKeys)
+    resultArray = resultArray.concat(
+      bundleKeys.map((b, index) => {
+        let row = []
+        row.push(bundleKeys[index])
+        bundles.forEach(c => {
+          row.push(c[bundleKeys[index]])
+        })
+        return row;
+      })
+    )
+    return resultArray;
+  }
+
+  exportBundlesDownloadToUser(bundles: Array<Array<string>>){
+    var fileName = this.resultFileName;
+    // if we use workbook and NOT the resulting array it must be:
+    // .json_to_sheet or something like that
+    var workSheet = XLSX.utils.aoa_to_sheet(bundles);
+    var wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, workSheet, fileName);
+    XLSX.writeFile(wb, "strategiebündel.xlsx");
+  }
+
 
   downloadDocument(event: Event){
-    let bundles = this.consistencyMatrix.createbundles()
-    // this.exportDocumentJsonToSheet()
   }
 
   exportDocumentJsonToSheet() {

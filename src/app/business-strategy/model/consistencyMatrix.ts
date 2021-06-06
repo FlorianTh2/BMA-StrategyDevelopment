@@ -46,7 +46,7 @@ export class ConcistencyMatrix implements IConcistencyMatrix {
     console.log(this.modules);
   }
 
-  createbundles(){
+  createbundles(): Array<Record<string, number>>{
     let szenarios = this.createSzenarios();
     let lookUpTableOfBundleIndices: Record<string, Array<string>> = {};
     szenarios.forEach(a => {
@@ -144,7 +144,7 @@ export class ConcistencyMatrix implements IConcistencyMatrix {
   combineToBundles(
     lookUpTableOfBundleIndices: Record<string, Array<string>>,
     rowColumnCombinations: Record<string, number>
-  ){
+  ): Array<Record<string, number>>{
     let resultList: Array<Record<string, number>> = [];
     let moduleName: string = Object.keys(this.modules)[0];
     // key= e.g. "1a-2a-3a"; value= e.g. [["1a", "2a"], ["1a", "3a"]]
