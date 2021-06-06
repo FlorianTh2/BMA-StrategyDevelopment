@@ -47,21 +47,21 @@ export class ConcistencyMatrix implements IConcistencyMatrix {
   }
 
   createbundles(){
-    let moduleNames: string[] = Object.keys(this.modules)
-    let variableNames: string[] = Object.keys(this.modules[moduleNames[0]])
-    let optionNamesOneVariable : string[] = Object.keys(this.modules[moduleNames[0]][variableNames[0]])
-    let allOptionNames = Object.keys(this.modules[moduleNames[0]][variableNames[0]][optionNamesOneVariable[0]])
-    console.log(allOptionNames)
-    let result = [];
-    result = allOptionNames.map(a => {
-      return moduleNames.map(b => {
-        return variableNames.map(c => {
-          return this.modules[b][c][a]
-        })
-      })
+    let szenarios = this.createSzenarios();
+    let lookUpTableOfBundleIndices: Record<string, Array<string>> = {};
+    szenarios.forEach(a => {
+      let stringSzenarioRespresentation = a.join(" & ");
+      lookUpTableOfBundleIndices[stringSzenarioRespresentation] = this.createSzenarioOptionsKombination(a);
     })
-    console.log(result)
-    // this.modules.
+    console.log("lookUpTableOfBundleIndices");
+    console.log(lookUpTableOfBundleIndices)
+    let rowColumnCombinations: Record<string, number> = this.createPossibleRowColumnPairCombinations(this.modules[Object.keys(this.modules)[0]])
+    console.log("rowColumnCombinations")
+    console.log(rowColumnCombinations);
+    let bundles = this.combineToBundles(lookUpTableOfBundleIndices, rowColumnCombinations);
+    console.log("bundles:");
+    console.log(bundles);
+    return bundles;
   }
 
   // remainingVariables: startinput = all Variables
@@ -101,5 +101,82 @@ export class ConcistencyMatrix implements IConcistencyMatrix {
     // sure we could not call flatten in higher recursion step, but then every higher recursion step does not call
     // flatten and that is not what we want
     return [currentOptions];
+  }
+
+
+  // input: e.g. ["1A", "2A", "3A"]
+  createSzenarioOptionsKombination(options: string[]){
+    let combinationsArray = [];
+    while (options.length > 1) {
+      let baseOption = options[0];
+      let toCombineOptions = options.slice(1);
+      let combineResult = toCombineOptions.forEach(a => {
+        combinationsArray.push([baseOption, a]);
+      })
+      options = toCombineOptions;
+    }
+    return combinationsArray;
+  }
+
+  createPossibleRowColumnPairCombinations(
+    currentVariablesData: Record<string, Record<string, Record<string, number>>>,
+  ): Record<string, number>
+  {
+    let remainingVariables: string[] = Object.keys(currentVariablesData);
+    let result = {};
+    while (remainingVariables.length > 1) {
+      let currentVariable: string = remainingVariables[0];
+      let optionsOfThisVariable: string[] = Object.keys(currentVariablesData[currentVariable]);
+      remainingVariables = remainingVariables.slice(1);
+      optionsOfThisVariable.forEach(a => {
+        remainingVariables.forEach(b => {
+          let keysOfCombineVariable = Object.keys(currentVariablesData[b]);
+          keysOfCombineVariable.forEach(c => {
+            let keyStringRepresentation = a + "/" + c;
+            result[keyStringRepresentation] = 0
+          })
+        })
+      })
+    }
+    return result;
+  }
+
+  combineToBundles(
+    lookUpTableOfBundleIndices: Record<string, Array<string>>,
+    rowColumnCombinations: Record<string, number>
+  ){
+    let resultList: Array<Record<string, number>> = [];
+    let moduleName: string = Object.keys(this.modules)[0];
+    // key= e.g. "1a-2a-3a"; value= e.g. [["1a", "2a"], ["1a", "3a"]]
+    Object.entries(lookUpTableOfBundleIndices).forEach(([key, valuesArray]) => {
+      let resultDict: Record<string, number> = {...rowColumnCombinations};
+      // value[0] == column
+      // value[1] == row
+      valuesArray.forEach(value => {
+        // get string representation
+        // has to match given string representation, shown in rowColumnCombinations (-implementation)
+        let rowColumnStringRepresentation: string = value[0] + "/" + value[1];
+        // search for variables name, since the modules-data is stored in row-major-structur (you can
+        // only access through rows -> under rows the column name is stored)
+        let variablesNameForGivenOption = "";
+        Object.keys(this.modules[moduleName]).forEach(a => {
+          Object.keys(this.modules[moduleName][a]).forEach(b => {
+            // b === value[1]: 2 preconditions:
+            // 1. variables of rows (and its options) are same as variables of columns (and its options)
+            // 2. value[1] == column name
+            if(b === value[1]){
+              variablesNameForGivenOption = a;
+            }
+          })
+        })
+        if(variablesNameForGivenOption === ""){
+          throw new Error("Row not found.");
+        }
+        // first value[1] then value[0] since value stores the indices in the format: [column, row]
+        resultDict[rowColumnStringRepresentation] = this.modules[moduleName][variablesNameForGivenOption][value[1]][value[0]];
+        });
+      resultList.push(resultDict);
+    })
+    return resultList;
   }
 }
