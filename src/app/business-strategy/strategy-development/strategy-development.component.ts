@@ -61,8 +61,17 @@ export class StrategyDevelopmentComponent implements OnInit {
         this.resultFileName,
         this.resultArray
       );
+      let szenarioResult = this.consistencyMatrix.createSzenarios();
+      console.log("szenario Result: ");
+      console.log(szenarioResult);
     };
     fileReader.readAsArrayBuffer(this.file);
+  }
+
+
+  downloadDocument(event: Event){
+    let bundles = this.consistencyMatrix.createbundles()
+    // this.exportDocumentJsonToSheet()
   }
 
   exportDocumentJsonToSheet() {
