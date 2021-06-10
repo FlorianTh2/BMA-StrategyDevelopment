@@ -1,5 +1,5 @@
 import { IBundle } from "./bundle.interface";
 
 export interface IBundleMatrix {
-  bundles: Array<IBundle>;
+  bundles: Array<Record<string, number>>;
 }

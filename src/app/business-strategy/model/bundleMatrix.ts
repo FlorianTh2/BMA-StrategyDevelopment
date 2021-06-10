@@ -1,10 +1,11 @@
 import { IBundleMatrix } from "./bundleMatrix.interface";
-import { IBundle } from "./bundle.interface";
+import { ClusterMembershipMatrix } from "./clusterMembershipMatrix";
+import { BundleUsageMatrix } from "./bundleUsageMatrix";
 
 export class BundleMatrix implements IBundleMatrix {
-  bundles: Array<IBundle>;
+  bundles: Array<Record<string, number>>;
 
-  constructor(bundles: Array<IBundle>) {
+  constructor(bundles: Array<Record<string, number>> = []) {
     this.bundles = bundles;
   }
 }

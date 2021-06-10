@@ -3,6 +3,10 @@ import * as XLSX from "xlsx";
 import { Sheet2JSONOpts } from "xlsx";
 import { ConcistencyMatrix } from "../model/consistencyMatrix";
 import { IBundleMatrix } from "../model/bundleMatrix.interface";
+import { BundleMatrix } from "../model/bundleMatrix";
+import { ISheetsJsonRepresentation } from "../model/sheetsJsonRepresentation.interface";
+import { ClusterMembershipMatrix } from "../model/clusterMembershipMatrix";
+import { BundleUsageMatrix } from "../model/bundleUsageMatrix";
 
 @Component({
   selector: "app-strategy-development",
@@ -17,7 +21,11 @@ export class StrategyDevelopmentComponent implements OnInit {
   resultFileName: string;
   resultArray: Array<Array<any>>;
   workbookKonsistenzmatrix: XLSX.WorkBook;
+  // consistencyMatrix -> bundleMatrix -> clusterMembershipMatrix -> bundleUsageMatrix
   consistencyMatrix: ConcistencyMatrix;
+  bundleMatrix: BundleMatrix;
+  clusterMembershipMatrix: ClusterMembershipMatrix;
+  bundleUsageMatrix: BundleUsageMatrix;
 
   constructor() {}
 
@@ -29,19 +37,18 @@ export class StrategyDevelopmentComponent implements OnInit {
     if (fileList) {
       if (fileList.length !== 1) throw new Error("Cannot use multiple files");
       this.file = fileList.item(0);
-      this.uploadDocumentSheetToJson();
+      this.uploadConsistencyMatrixSheetToJson();
     }
   }
 
   // https://stackoverflow.com/questions/28782074/excel-to-json-javascript-code
-  uploadDocumentSheetToJson() {
+  uploadConsistencyMatrixSheetToJson(): void {
     let fileReader = new FileReader();
     fileReader.onloadend = (e) => {
       var fileReaderResult = e.target.result as ArrayBufferLike;
       // new array to handle xls AND xlsx AND csv
       var fileReaderResultCasted = new Uint8Array(fileReaderResult);
       var workbook = XLSX.read(fileReaderResultCasted, { type: "array" });
-      this.workbookKonsistenzmatrix = workbook;
       var result = {};
       workbook.SheetNames.forEach(function (sheetName) {
         var sheet: Array<Array<any>> = XLSX.utils.sheet_to_json(
@@ -55,21 +62,29 @@ export class StrategyDevelopmentComponent implements OnInit {
       let resultKeys = Object.keys(result) as string[];
       let firstSheetArray = result[resultKeys[0]];
 
-      // taken only first sheet for now
-      this.resultFileName = resultKeys[0];
-      this.resultArray = firstSheetArray;
+      let returnResult = {
+        // taken only first sheet for now
+        resultFileName: resultKeys[0],
+        workbook: workbook,
+        resultDataAoA: firstSheetArray
+      } as ISheetsJsonRepresentation;
+
+      this.resultFileName = returnResult.resultFileName;
+      this.resultArray = returnResult.resultDataAoA;
+      this.workbookKonsistenzmatrix = returnResult.workbook;
+
       this.consistencyMatrix = new ConcistencyMatrix(
         this.resultFileName,
         this.resultArray
       );
-      let createdbundles: IBundleMatrix = this.consistencyMatrix.createbundles();
-      this.exportBundlesToSheet(createdbundles);
+
+      this.bundleMatrix = this.consistencyMatrix.createbundles();
     };
     fileReader.readAsArrayBuffer(this.file);
   }
 
-  exportBundlesToSheet(bundles: IBundleMatrix) {
-    let resultArray = this.exportBundlesConvertToAoA(bundles);
+  exportBundlesToSheet(bundles: BundleMatrix) {
+    let resultArray: string[][] = this.exportBundlesConvertToAoA(bundles);
     console.log("result array string");
     this.exportBundlesDownloadToUser(resultArray);
   }
@@ -85,14 +100,14 @@ export class StrategyDevelopmentComponent implements OnInit {
         })
       )
     );
-    let bundleKeys = Object.keys(bundles.bundles[0].bundle);
+    let bundleKeys = Object.keys(bundles.bundles[0]);
     console.log(bundleKeys);
     resultArray = resultArray.concat(
       bundleKeys.map((b, index) => {
         let row = [];
         row.push(bundleKeys[index]);
         bundles.bundles.forEach((c) => {
-          row.push(c.bundle[bundleKeys[index]]);
+          row.push(c[bundleKeys[index]]);
         });
         return row;
       })
@@ -110,7 +125,9 @@ export class StrategyDevelopmentComponent implements OnInit {
     XLSX.writeFile(wb, "strategiebündel.xlsx");
   }
 
-  downloadDocument(event: Event) {}
+  downloadDocument(event: Event) {
+    this.exportBundlesToSheet(this.bundleMatrix);
+  }
 
   exportDocumentJsonToSheet() {
     var fileName = this.resultFileName;
@@ -120,5 +137,68 @@ export class StrategyDevelopmentComponent implements OnInit {
     var wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, workSheet, fileName);
     XLSX.writeFile(wb, "strategiebündel.xlsx");
+  }
+
+  uploadClusterMembershipMatrix(event: Event) {
+    const element = event.currentTarget as HTMLInputElement;
+    let fileList: FileList | null = element.files;
+    if (fileList) {
+      if (fileList.length !== 1) throw new Error("Cannot use multiple files");
+      this.file = fileList.item(0);
+      this.uploadClusterMembershipMatrixSheetToJson();
+    }
+  }
+
+  uploadClusterMembershipMatrixSheetToJson(): void {
+    let fileReader = new FileReader();
+    fileReader.onloadend = (e) => {
+      var fileReaderResult = e.target.result as ArrayBufferLike;
+      // new array to handle xls AND xlsx AND csv
+      var fileReaderResultCasted = new Uint8Array(fileReaderResult);
+      var workbook = XLSX.read(fileReaderResultCasted, { type: "array" });
+      var result = {};
+      workbook.SheetNames.forEach(function (sheetName) {
+        var sheet: Array<Array<any>> = XLSX.utils.sheet_to_json(
+          workbook.Sheets[sheetName],
+          {
+            header: 1
+          }
+        );
+        result[sheetName] = sheet;
+      });
+      let resultKeys = Object.keys(result) as string[];
+      let firstSheetArray = result[resultKeys[0]];
+
+      let returnResult = {
+        // taken only first sheet for now
+        resultFileName: resultKeys[0],
+        workbook: workbook,
+        resultDataAoA: firstSheetArray
+      } as ISheetsJsonRepresentation;
+
+      this.clusterMembershipMatrix = new ClusterMembershipMatrix(
+        returnResult.resultFileName,
+        returnResult.resultDataAoA
+      );
+
+      this.bundleUsageMatrix = this.generateBundleUsageMatrix(
+        this.consistencyMatrix,
+        this.bundleMatrix,
+        this.clusterMembershipMatrix
+      );
+
+      console.log("result bundleUsageMatrix:");
+      console.log(this.bundleUsageMatrix);
+    };
+    fileReader.readAsArrayBuffer(this.file);
+  }
+
+  generateBundleUsageMatrix(
+    consistencyMatrix: ConcistencyMatrix,
+    bundleMatrix: BundleMatrix,
+    clusterMemberShipMatrix: ClusterMembershipMatrix
+  ): BundleUsageMatrix {
+    console.log("generate bundle usageMatrix");
+    return null;
   }
 }

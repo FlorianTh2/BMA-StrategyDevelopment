@@ -1,6 +1,6 @@
 import { IConcistencyMatrix } from "./consistencyMatrix.interface";
 import { IBundleMatrix } from "./bundleMatrix.interface";
-import { IBundle } from "./bundle.interface";
+import { BundleMatrix } from "./bundleMatrix";
 
 export class ConcistencyMatrix implements IConcistencyMatrix {
   name: string;
@@ -50,7 +50,7 @@ export class ConcistencyMatrix implements IConcistencyMatrix {
     console.log(this.modules);
   }
 
-  createbundles(): IBundleMatrix {
+  createbundles(): BundleMatrix {
     let szenarios = this.createSzenarios();
     let lookUpTableOfBundleIndices: Record<string, Array<string>> = {};
     szenarios.forEach((a) => {
@@ -69,7 +69,7 @@ export class ConcistencyMatrix implements IConcistencyMatrix {
     );
     console.log("rowColumnCombinations");
     // console.log(rowColumnCombinations);
-    let bundles: IBundleMatrix = this.combineToBundles(
+    let bundles: BundleMatrix = this.combineToBundles(
       lookUpTableOfBundleIndices,
       rowColumnCombinations
     );
@@ -169,8 +169,8 @@ export class ConcistencyMatrix implements IConcistencyMatrix {
   combineToBundles(
     lookUpTableOfBundleIndices: Record<string, Array<string>>,
     rowColumnCombinations: Record<string, number>
-  ): IBundleMatrix {
-    let resultList: IBundle[] = [];
+  ): BundleMatrix {
+    let resultList: BundleMatrix = new BundleMatrix();
     let moduleName: string = Object.keys(this.modules)[0];
     // key= e.g. "1a-2a-3a"; value= e.g. [["1a", "2a"], ["1a", "3a"]]
     Object.entries(lookUpTableOfBundleIndices).forEach(([key, valuesArray]) => {
@@ -202,8 +202,8 @@ export class ConcistencyMatrix implements IConcistencyMatrix {
           variablesNameForGivenOption
         ][value[1]][value[0]];
       });
-      resultList.push({ bundle: resultDict } as IBundle);
+      resultList.bundles.push(resultDict);
     });
-    return { bundles: resultList } as IBundleMatrix;
+    return resultList;
   }
 }
