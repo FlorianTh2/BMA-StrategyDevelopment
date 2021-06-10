@@ -79,6 +79,8 @@ export class StrategyDevelopmentComponent implements OnInit {
       );
 
       this.bundleMatrix = this.consistencyMatrix.createbundles();
+      // .reduceToConsistentBundles();
+      console.log(this.bundleMatrix);
     };
     fileReader.readAsArrayBuffer(this.file);
   }

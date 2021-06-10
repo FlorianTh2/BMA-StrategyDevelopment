@@ -15,9 +15,10 @@ export class ConcistencyMatrix implements IConcistencyMatrix {
     this.parseToInternalDict(data);
   }
 
+  // ignores option- (= option-name) -column
   parseToInternalDict(inputArray: Array<Array<any>>) {
     // console.log(inputArray);
-    let optionNames = inputArray[0].slice(3).map((a) => a.trim());
+    let optionNames = inputArray[0].slice(4).map((a) => a.trim());
     // console.log(optionNames);
     // console.log(inputArray);
     inputArray.map((row, rowIndex) => {
@@ -28,15 +29,16 @@ export class ConcistencyMatrix implements IConcistencyMatrix {
           ...(this.modules[row[0].trim()]
             ? this.modules[row[0].trim()][row[1].trim()]
             : {}),
-          [row[2].trim()]: Object.assign(
+          // ignore optionsname column
+          [row[3].trim()]: Object.assign(
             {},
             ...optionNames
               .map((optionName, optionNameIndex) => {
                 let oneOptionOfRow = {
                   [optionName]:
-                    row[3 + optionNameIndex] !== undefined
-                      ? typeof row[3 + optionNameIndex] === "number"
-                        ? row[3 + optionNameIndex]
+                    row[4 + optionNameIndex] !== undefined
+                      ? typeof row[4 + optionNameIndex] === "number"
+                        ? row[4 + optionNameIndex]
                         : undefined
                       : undefined
                 };
@@ -170,6 +172,8 @@ export class ConcistencyMatrix implements IConcistencyMatrix {
     lookUpTableOfBundleIndices: Record<string, Array<string>>,
     rowColumnCombinations: Record<string, number>
   ): BundleMatrix {
+    console.log("here");
+    console.log(lookUpTableOfBundleIndices);
     let resultList: BundleMatrix = new BundleMatrix();
     let moduleName: string = Object.keys(this.modules)[0];
     // key= e.g. "1a-2a-3a"; value= e.g. [["1a", "2a"], ["1a", "3a"]]
@@ -198,9 +202,10 @@ export class ConcistencyMatrix implements IConcistencyMatrix {
           throw new Error("Row not found.");
         }
         // first value[1] then value[0] since value stores the indices in the format: [column, row]
-        resultDict[rowColumnStringRepresentation] = this.modules[moduleName][
+        let resultValue: number = this.modules[moduleName][
           variablesNameForGivenOption
         ][value[1]][value[0]];
+        resultDict[rowColumnStringRepresentation] = resultValue;
       });
       resultList.bundles.push(resultDict);
     });
