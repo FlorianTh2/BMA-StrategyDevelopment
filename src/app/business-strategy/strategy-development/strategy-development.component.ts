@@ -2,6 +2,7 @@ import { Component, OnInit } from "@angular/core";
 import * as XLSX from "xlsx";
 import { Sheet2JSONOpts } from "xlsx";
 import { ConcistencyMatrix } from "../model/consistencyMatrix";
+import { IBundleMatrix } from "../model/bundleMatrix.interface";
 
 @Component({
   selector: "app-strategy-development",
@@ -61,42 +62,45 @@ export class StrategyDevelopmentComponent implements OnInit {
         this.resultFileName,
         this.resultArray
       );
-      let createbundles: Array<Record<string, number>> = this.consistencyMatrix.createbundles();
-      this.exportBundlesToSheet(createbundles);
+      let createdbundles: IBundleMatrix = this.consistencyMatrix.createbundles();
+      this.exportBundlesToSheet(createdbundles);
     };
     fileReader.readAsArrayBuffer(this.file);
   }
 
-  exportBundlesToSheet(bundles: Array<Record<string, number>>){
+  exportBundlesToSheet(bundles: IBundleMatrix) {
     let resultArray = this.exportBundlesConvertToAoA(bundles);
-    console.log("result array string")
-    console.log(resultArray);
+    console.log("result array string");
     this.exportBundlesDownloadToUser(resultArray);
   }
 
-  exportBundlesConvertToAoA(bundles: Array<Record<string, number>>){
+  exportBundlesConvertToAoA(bundles: IBundleMatrix) {
     let resultArray: Array<Array<string>> = [];
-    resultArray.push(["Paare"].concat(
-      bundles.map((a, index) => {
-        return "B" + index;
-      })
-    ));
-    let bundleKeys = Object.keys(bundles[0]);
-    console.log(bundleKeys)
+    resultArray.push(
+      ["Paare"].concat(
+        bundles.bundles.map((a, index) => {
+          let headerCellString = "B" + (index + 1);
+          // console.log(headerCellString);
+          return headerCellString;
+        })
+      )
+    );
+    let bundleKeys = Object.keys(bundles.bundles[0].bundle);
+    console.log(bundleKeys);
     resultArray = resultArray.concat(
       bundleKeys.map((b, index) => {
-        let row = []
-        row.push(bundleKeys[index])
-        bundles.forEach(c => {
-          row.push(c[bundleKeys[index]])
-        })
+        let row = [];
+        row.push(bundleKeys[index]);
+        bundles.bundles.forEach((c) => {
+          row.push(c.bundle[bundleKeys[index]]);
+        });
         return row;
       })
-    )
+    );
     return resultArray;
   }
 
-  exportBundlesDownloadToUser(bundles: Array<Array<string>>){
+  exportBundlesDownloadToUser(bundles: Array<Array<string>>) {
     var fileName = this.resultFileName;
     // if we use workbook and NOT the resulting array it must be:
     // .json_to_sheet or something like that
@@ -106,9 +110,7 @@ export class StrategyDevelopmentComponent implements OnInit {
     XLSX.writeFile(wb, "strategiebündel.xlsx");
   }
 
-
-  downloadDocument(event: Event){
-  }
+  downloadDocument(event: Event) {}
 
   exportDocumentJsonToSheet() {
     var fileName = this.resultFileName;

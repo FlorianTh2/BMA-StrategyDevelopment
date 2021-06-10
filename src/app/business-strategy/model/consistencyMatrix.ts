@@ -1,7 +1,10 @@
 import { IConcistencyMatrix } from "./consistencyMatrix.interface";
+import { IBundleMatrix } from "./bundleMatrix.interface";
+import { IBundle } from "./bundle.interface";
 
 export class ConcistencyMatrix implements IConcistencyMatrix {
   name: string;
+  // <moduleName, <variablenName, <optionNameRow, <optionNameColumn, value>>>>>
   modules: Record<
     string,
     Record<string, Record<string, Record<string, number>>>
@@ -14,16 +17,17 @@ export class ConcistencyMatrix implements IConcistencyMatrix {
 
   parseToInternalDict(inputArray: Array<Array<any>>) {
     // console.log(inputArray);
-    let optionNames = inputArray[0].slice(3).map(a => a.trim());
-    console.log(optionNames);
-    console.log("inputArray")
-    console.log(inputArray)
+    let optionNames = inputArray[0].slice(3).map((a) => a.trim());
+    // console.log(optionNames);
+    // console.log(inputArray);
     inputArray.map((row, rowIndex) => {
       if (rowIndex == 0) return;
       this.modules[row[0].trim()] = {
         ...this.modules[row[0].trim()],
         [row[1].trim()]: {
-          ...(this.modules[row[0].trim()] ? this.modules[row[0].trim()][row[1].trim()] : {}),
+          ...(this.modules[row[0].trim()]
+            ? this.modules[row[0].trim()][row[1].trim()]
+            : {}),
           [row[2].trim()]: Object.assign(
             {},
             ...optionNames
@@ -32,8 +36,8 @@ export class ConcistencyMatrix implements IConcistencyMatrix {
                   [optionName]:
                     row[3 + optionNameIndex] !== undefined
                       ? typeof row[3 + optionNameIndex] === "number"
-                      ? row[3 + optionNameIndex]
-                      : undefined
+                        ? row[3 + optionNameIndex]
+                        : undefined
                       : undefined
                 };
                 return oneOptionOfRow;
@@ -46,54 +50,75 @@ export class ConcistencyMatrix implements IConcistencyMatrix {
     console.log(this.modules);
   }
 
-  createbundles(): Array<Record<string, number>>{
+  createbundles(): IBundleMatrix {
     let szenarios = this.createSzenarios();
     let lookUpTableOfBundleIndices: Record<string, Array<string>> = {};
-    szenarios.forEach(a => {
+    szenarios.forEach((a) => {
       let stringSzenarioRespresentation = a.join(" & ");
-      lookUpTableOfBundleIndices[stringSzenarioRespresentation] = this.createSzenarioOptionsKombination(a);
-    })
+      lookUpTableOfBundleIndices[
+        stringSzenarioRespresentation
+      ] = this.createSzenarioOptionsKombination(a);
+    });
     console.log("lookUpTableOfBundleIndices");
-    console.log(lookUpTableOfBundleIndices)
-    let rowColumnCombinations: Record<string, number> = this.createPossibleRowColumnPairCombinations(this.modules[Object.keys(this.modules)[0]])
-    console.log("rowColumnCombinations")
-    console.log(rowColumnCombinations);
-    let bundles = this.combineToBundles(lookUpTableOfBundleIndices, rowColumnCombinations);
+    // console.log(lookUpTableOfBundleIndices);
+    let rowColumnCombinations: Record<
+      string,
+      number
+    > = this.createPossibleRowColumnPairCombinations(
+      this.modules[Object.keys(this.modules)[0]]
+    );
+    console.log("rowColumnCombinations");
+    // console.log(rowColumnCombinations);
+    let bundles: IBundleMatrix = this.combineToBundles(
+      lookUpTableOfBundleIndices,
+      rowColumnCombinations
+    );
     console.log("bundles:");
-    console.log(bundles);
+    // console.log(bundles);
     return bundles;
   }
 
   // remainingVariables: startinput = all Variables
   // currently only for 1 module: thats why remainingVariables: this.modules[0]
-  createSzenarios(){
-    let moduleNames: string[] = Object.keys(this.modules)
-    let variableNames: string[] = Object.keys(this.modules[moduleNames[0]])
-    console.log(variableNames)
-    return this.createSzenariosIntern(this.modules[moduleNames[0]], [], variableNames);
+  createSzenarios() {
+    let moduleNames: string[] = Object.keys(this.modules);
+    let variableNames: string[] = Object.keys(this.modules[moduleNames[0]]);
+    console.log(variableNames);
+    return this.createSzenariosIntern(
+      this.modules[moduleNames[0]],
+      [],
+      variableNames
+    );
   }
 
   createSzenariosIntern(
-    currentVariablesData: Record<string, Record<string, Record<string, number>>>,
+    currentVariablesData: Record<
+      string,
+      Record<string, Record<string, number>>
+    >,
     currentOptions: string[] = [],
     remainingVariables: string[] = []
-  ): string[][]
-  {
-    if(remainingVariables.length > 0){
+  ): string[][] {
+    if (remainingVariables.length > 0) {
       // get variable
       // get all options of this variable
       // iterate through all options of this variable
       //    return this.createSzenario(data, currentOptions.add(currentOption), remainingVariables.removeFirst())
       let currentVariable: string = remainingVariables[0];
-      let optionsOfThisVariable: string[] = Object.keys(currentVariablesData[currentVariable]);
-      let resultOfOfRecursions = optionsOfThisVariable.map(a => {
+      let optionsOfThisVariable: string[] = Object.keys(
+        currentVariablesData[currentVariable]
+      );
+      let resultOfOfRecursions = optionsOfThisVariable.map((a) => {
         return this.createSzenariosIntern(
           currentVariablesData,
           [...currentOptions, a],
           remainingVariables.slice(1)
-        )
-      })
-      let flattendResultOfRecursions = [].concat.apply([], resultOfOfRecursions);
+        );
+      });
+      let flattendResultOfRecursions = [].concat.apply(
+        [],
+        resultOfOfRecursions
+      );
       return flattendResultOfRecursions;
     }
     // [] since we want e.g. [[option0, option1, option2]]
@@ -103,40 +128,40 @@ export class ConcistencyMatrix implements IConcistencyMatrix {
     return [currentOptions];
   }
 
-
   // input: e.g. ["1A", "2A", "3A"]
-  createSzenarioOptionsKombination(options: string[]){
+  createSzenarioOptionsKombination(options: string[]) {
     let combinationsArray = [];
     while (options.length > 1) {
       let baseOption = options[0];
       let toCombineOptions = options.slice(1);
-      let combineResult = toCombineOptions.forEach(a => {
+      let combineResult = toCombineOptions.forEach((a) => {
         combinationsArray.push([baseOption, a]);
-      })
+      });
       options = toCombineOptions;
     }
     return combinationsArray;
   }
 
   createPossibleRowColumnPairCombinations(
-    currentVariablesData: Record<string, Record<string, Record<string, number>>>,
-  ): Record<string, number>
-  {
+    currentVariablesData: Record<string, Record<string, Record<string, number>>>
+  ): Record<string, number> {
     let remainingVariables: string[] = Object.keys(currentVariablesData);
     let result = {};
     while (remainingVariables.length > 1) {
       let currentVariable: string = remainingVariables[0];
-      let optionsOfThisVariable: string[] = Object.keys(currentVariablesData[currentVariable]);
+      let optionsOfThisVariable: string[] = Object.keys(
+        currentVariablesData[currentVariable]
+      );
       remainingVariables = remainingVariables.slice(1);
-      optionsOfThisVariable.forEach(a => {
-        remainingVariables.forEach(b => {
+      optionsOfThisVariable.forEach((a) => {
+        remainingVariables.forEach((b) => {
           let keysOfCombineVariable = Object.keys(currentVariablesData[b]);
-          keysOfCombineVariable.forEach(c => {
+          keysOfCombineVariable.forEach((c) => {
             let keyStringRepresentation = a + "/" + c;
-            result[keyStringRepresentation] = 0
-          })
-        })
-      })
+            result[keyStringRepresentation] = 0;
+          });
+        });
+      });
     }
     return result;
   }
@@ -144,39 +169,41 @@ export class ConcistencyMatrix implements IConcistencyMatrix {
   combineToBundles(
     lookUpTableOfBundleIndices: Record<string, Array<string>>,
     rowColumnCombinations: Record<string, number>
-  ): Array<Record<string, number>>{
-    let resultList: Array<Record<string, number>> = [];
+  ): IBundleMatrix {
+    let resultList: IBundle[] = [];
     let moduleName: string = Object.keys(this.modules)[0];
     // key= e.g. "1a-2a-3a"; value= e.g. [["1a", "2a"], ["1a", "3a"]]
     Object.entries(lookUpTableOfBundleIndices).forEach(([key, valuesArray]) => {
-      let resultDict: Record<string, number> = {...rowColumnCombinations};
+      let resultDict: Record<string, number> = { ...rowColumnCombinations };
       // value[0] == column
       // value[1] == row
-      valuesArray.forEach(value => {
+      valuesArray.forEach((value) => {
         // get string representation
-        // has to match given string representation, shown in rowColumnCombinations (-implementation)
+        // has to match given string representation, shown in rowColumnCombinations() (-implementation)
         let rowColumnStringRepresentation: string = value[0] + "/" + value[1];
         // search for variables name, since the modules-data is stored in row-major-structur (you can
         // only access through rows -> under rows the column name is stored)
         let variablesNameForGivenOption = "";
-        Object.keys(this.modules[moduleName]).forEach(a => {
-          Object.keys(this.modules[moduleName][a]).forEach(b => {
+        Object.keys(this.modules[moduleName]).forEach((a) => {
+          Object.keys(this.modules[moduleName][a]).forEach((b) => {
             // b === value[1]: 2 preconditions:
             // 1. variables of rows (and its options) are same as variables of columns (and its options)
             // 2. value[1] == column name
-            if(b === value[1]){
+            if (b === value[1]) {
               variablesNameForGivenOption = a;
             }
-          })
-        })
-        if(variablesNameForGivenOption === ""){
+          });
+        });
+        if (variablesNameForGivenOption === "") {
           throw new Error("Row not found.");
         }
         // first value[1] then value[0] since value stores the indices in the format: [column, row]
-        resultDict[rowColumnStringRepresentation] = this.modules[moduleName][variablesNameForGivenOption][value[1]][value[0]];
-        });
-      resultList.push(resultDict);
-    })
-    return resultList;
+        resultDict[rowColumnStringRepresentation] = this.modules[moduleName][
+          variablesNameForGivenOption
+        ][value[1]][value[0]];
+      });
+      resultList.push({ bundle: resultDict } as IBundle);
+    });
+    return { bundles: resultList } as IBundleMatrix;
   }
 }
