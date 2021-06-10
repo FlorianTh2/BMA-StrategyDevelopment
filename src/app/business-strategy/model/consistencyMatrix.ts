@@ -17,7 +17,6 @@ export class ConcistencyMatrix implements IConcistencyMatrix {
 
   // ignores option- (= option-name) -column
   parseToInternalDict(inputArray: Array<Array<any>>) {
-    // console.log(inputArray);
     let optionNames = inputArray[0].slice(4).map((a) => a.trim());
     // console.log(optionNames);
     // console.log(inputArray);
@@ -49,7 +48,6 @@ export class ConcistencyMatrix implements IConcistencyMatrix {
         }
       };
     });
-    console.log(this.modules);
   }
 
   createbundles(): BundleMatrix {
@@ -62,7 +60,7 @@ export class ConcistencyMatrix implements IConcistencyMatrix {
       ] = this.createSzenarioOptionsKombination(a);
     });
     console.log("lookUpTableOfBundleIndices");
-    // console.log(lookUpTableOfBundleIndices);
+    console.log(lookUpTableOfBundleIndices);
     let rowColumnCombinations: Record<
       string,
       number
@@ -71,13 +69,11 @@ export class ConcistencyMatrix implements IConcistencyMatrix {
     );
     console.log("rowColumnCombinations");
     // console.log(rowColumnCombinations);
-    let bundles: BundleMatrix = this.combineToBundles(
+
+    return this.combineToBundles(
       lookUpTableOfBundleIndices,
       rowColumnCombinations
     );
-    console.log("bundles:");
-    // console.log(bundles);
-    return bundles;
   }
 
   // remainingVariables: startinput = all Variables
@@ -85,7 +81,6 @@ export class ConcistencyMatrix implements IConcistencyMatrix {
   createSzenarios() {
     let moduleNames: string[] = Object.keys(this.modules);
     let variableNames: string[] = Object.keys(this.modules[moduleNames[0]]);
-    console.log(variableNames);
     return this.createSzenariosIntern(
       this.modules[moduleNames[0]],
       [],
@@ -172,9 +167,8 @@ export class ConcistencyMatrix implements IConcistencyMatrix {
     lookUpTableOfBundleIndices: Record<string, Array<string>>,
     rowColumnCombinations: Record<string, number>
   ): BundleMatrix {
-    console.log("here");
-    console.log(lookUpTableOfBundleIndices);
     let resultList: BundleMatrix = new BundleMatrix();
+    let resultSzenarioNameList: string[] = [];
     let moduleName: string = Object.keys(this.modules)[0];
     // key= e.g. "1a-2a-3a"; value= e.g. [["1a", "2a"], ["1a", "3a"]]
     Object.entries(lookUpTableOfBundleIndices).forEach(([key, valuesArray]) => {
@@ -207,6 +201,10 @@ export class ConcistencyMatrix implements IConcistencyMatrix {
         ][value[1]][value[0]];
         resultDict[rowColumnStringRepresentation] = resultValue;
       });
+
+      // they do not map except they share the same index for same szenarioCombination
+      // ONLY THE INDEX
+      resultList.bundleSzenarioStrings.push(key);
       resultList.bundles.push(resultDict);
     });
     return resultList;

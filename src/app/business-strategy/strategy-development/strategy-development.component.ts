@@ -79,13 +79,11 @@ export class StrategyDevelopmentComponent implements OnInit {
       );
 
       this.bundleMatrix = this.consistencyMatrix.createbundles();
-      // .reduceToConsistentBundles();
-      console.log(this.bundleMatrix);
     };
     fileReader.readAsArrayBuffer(this.file);
   }
 
-  exportBundlesToSheet(bundles: BundleMatrix) {
+  exportBundlesToSheet(bundles: BundleMatrix, szenarioStrings: string[] = []) {
     let resultArray: string[][] = this.exportBundlesConvertToAoA(bundles);
     console.log("result array string");
     this.exportBundlesDownloadToUser(resultArray);
@@ -93,6 +91,15 @@ export class StrategyDevelopmentComponent implements OnInit {
 
   exportBundlesConvertToAoA(bundles: IBundleMatrix) {
     let resultArray: Array<Array<string>> = [];
+    // first row
+    resultArray.push(
+      ["Options-Kombinationen"].concat(
+        bundles.bundleSzenarioStrings.map((a) => {
+          return a;
+        })
+      )
+    );
+    // second row
     resultArray.push(
       ["Paare"].concat(
         bundles.bundles.map((a, index) => {
@@ -127,8 +134,13 @@ export class StrategyDevelopmentComponent implements OnInit {
     XLSX.writeFile(wb, "strategiebündel.xlsx");
   }
 
-  downloadDocument(event: Event) {
+  downloadBundles(event: Event) {
     this.exportBundlesToSheet(this.bundleMatrix);
+  }
+
+  downloadOnlyConsistentBundles(event: Event) {
+    let consistentBundleReturn = this.bundleMatrix.reduceToConsistentBundles();
+    this.exportBundlesToSheet(consistentBundleReturn);
   }
 
   exportDocumentJsonToSheet() {
