@@ -1,12 +1,12 @@
-import { Cluster } from "./cluster";
+import { ClusterGroup } from "./clusterGroup";
 
 export interface IBundleUsageMatrix {
   // Array
-  //  cluster:
+  //  clusterGroups:
   //    name
   //    options:
   //      name:
   //      usagePercent
   //    bundles: Bundles[]
-  cluster: Cluster[];
+  clusterGroups: ClusterGroup[];
 }

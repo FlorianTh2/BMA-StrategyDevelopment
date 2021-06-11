@@ -1,3 +1,3 @@
 export interface IClusterMembershipMatrix {
-  clusterMemberShipDict: Record<string, number>;
+  clusterMemberShipDict: Record<string, string>;
 }

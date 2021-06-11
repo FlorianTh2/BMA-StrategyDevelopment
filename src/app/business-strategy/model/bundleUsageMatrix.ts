@@ -1,6 +1,10 @@
 import { IBundleUsageMatrix } from "./IBundleUsageMatrix.interface";
-import { Cluster } from "./cluster";
+import { ClusterGroup } from "./clusterGroup";
 
 export class BundleUsageMatrix implements IBundleUsageMatrix {
-  cluster: Cluster[];
+  clusterGroups: ClusterGroup[];
+
+  constructor(clusterGroups: ClusterGroup[] = []) {
+    this.clusterGroups = clusterGroups;
+  }
 }

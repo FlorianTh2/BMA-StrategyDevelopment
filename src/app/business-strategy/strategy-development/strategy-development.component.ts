@@ -7,6 +7,9 @@ import { BundleMatrix } from "../model/bundleMatrix";
 import { ISheetsJsonRepresentation } from "../model/sheetsJsonRepresentation.interface";
 import { ClusterMembershipMatrix } from "../model/clusterMembershipMatrix";
 import { BundleUsageMatrix } from "../model/bundleUsageMatrix";
+import { ClusterGroup } from "../model/clusterGroup";
+import * as cluster from "cluster";
+import { Bundle } from "../model/bundle";
 
 @Component({
   selector: "app-strategy-development",
@@ -211,7 +214,7 @@ export class StrategyDevelopmentComponent implements OnInit {
   ): BundleUsageMatrix {
     console.log("generate bundle usageMatrix");
     // consider only those bundles from bundleMatrix whos name appear in clusterMemberShipMatrix
-    let selectedBundleMatrix = new BundleMatrix(
+    let selectedBundleMatrix: BundleMatrix = new BundleMatrix(
       bundleMatrix.bundles
         .map((a) => {
           if (a.name in clusterMemberShipMatrix.clusterMemberShipDict) {
@@ -222,6 +225,58 @@ export class StrategyDevelopmentComponent implements OnInit {
         .filter((a) => a !== null)
     );
     console.log(selectedBundleMatrix);
-    return null;
+    console.log("now");
+
+    let clusterNameToBundleNameMapping = clusterMemberShipMatrix.createClusterToBundleMappingWithSelectedKey(
+      selectedBundleMatrix.bundles.map((a) => {
+        return a.name;
+      })
+    );
+    console.log("selected bundle matrix");
+    console.log(selectedBundleMatrix);
+
+    let result = new BundleUsageMatrix(
+      Object.entries(clusterNameToBundleNameMapping).map(([key, value]) => {
+        let clusterGroup = new ClusterGroup();
+        clusterGroup.name = key;
+        clusterGroup.bundles = value.map((a) => {
+          // has to exist, thats why we can directly [0]
+          return selectedBundleMatrix.bundles.filter((b) => {
+            return b.name === a;
+          })[0];
+        });
+        console.log(clusterGroup);
+        // get a random options dict (random since all optionsDict should have same structure)
+        clusterGroup.options = { ...clusterGroup.bundles[0].bundleData };
+        // set all values to 0
+        Object.entries(clusterGroup.options).forEach(
+          ([optionsKey, optionsValue]) => {
+            clusterGroup.options[key] = 0;
+          }
+        );
+
+        // build dict: variablenname -> optionsName -> counterOfItsAppearences
+        // group under variablename is needed since later we want to aggregate
+        // all optionCounts UNDER 1 VARIABLE
+        let internalCounterDict: Record<string, Record<string, number>> = {};
+        // if not even 1 bundle exists, idk throw error
+        let pairNamesOfBundle: string[] = Object(clusterGroup.bundles[0]).keys;
+        let pairNamesOfBundleDivided: string[][] = pairNamesOfBundle.map(
+          (a) => {
+            return a.split("/");
+          }
+        );
+        // foreach cluster
+        //  foreach bundle in cluster
+        clusterGroup.bundles.map((a) => {
+          //
+          return null;
+        });
+        return clusterGroup;
+      })
+    );
+    console.log("resultt");
+    console.log(result);
+    return result;
   }
 }

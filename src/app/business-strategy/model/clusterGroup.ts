@@ -1,8 +1,8 @@
 import { Bundle } from "./bundle";
 
-export class Cluster {
+export class ClusterGroup {
   // Array
-  //  cluster:
+  //  clusterGroups:
   //    name
   //    options:
   //      name:
