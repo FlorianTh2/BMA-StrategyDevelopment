@@ -1,6 +1,7 @@
 import { IConcistencyMatrix } from "./consistencyMatrix.interface";
 import { IBundleMatrix } from "./bundleMatrix.interface";
 import { BundleMatrix } from "./bundleMatrix";
+import { Bundle } from "./bundle";
 
 export class ConcistencyMatrix implements IConcistencyMatrix {
   name: string;
@@ -168,45 +169,45 @@ export class ConcistencyMatrix implements IConcistencyMatrix {
     rowColumnCombinations: Record<string, number>
   ): BundleMatrix {
     let resultList: BundleMatrix = new BundleMatrix();
-    let resultSzenarioNameList: string[] = [];
     let moduleName: string = Object.keys(this.modules)[0];
     // key= e.g. "1a-2a-3a"; value= e.g. [["1a", "2a"], ["1a", "3a"]]
-    Object.entries(lookUpTableOfBundleIndices).forEach(([key, valuesArray]) => {
-      let resultDict: Record<string, number> = { ...rowColumnCombinations };
-      // value[0] == column
-      // value[1] == row
-      valuesArray.forEach((value) => {
-        // get string representation
-        // has to match given string representation, shown in rowColumnCombinations() (-implementation)
-        let rowColumnStringRepresentation: string = value[0] + "/" + value[1];
-        // search for variables name, since the modules-data is stored in row-major-structur (you can
-        // only access through rows -> under rows the column name is stored)
-        let variablesNameForGivenOption = "";
-        Object.keys(this.modules[moduleName]).forEach((a) => {
-          Object.keys(this.modules[moduleName][a]).forEach((b) => {
-            // b === value[1]: 2 preconditions:
-            // 1. variables of rows (and its options) are same as variables of columns (and its options)
-            // 2. value[1] == column name
-            if (b === value[1]) {
-              variablesNameForGivenOption = a;
-            }
+    Object.entries(lookUpTableOfBundleIndices).forEach(
+      ([key, valuesArray], index) => {
+        let resultDict: Record<string, number> = { ...rowColumnCombinations };
+        // value[0] == column
+        // value[1] == row
+        valuesArray.forEach((value) => {
+          // get string representation
+          // has to match given string representation, shown in rowColumnCombinations() (-implementation)
+          let rowColumnStringRepresentation: string = value[0] + "/" + value[1];
+          // search for variables name, since the modules-data is stored in row-major-structur (you can
+          // only access through rows -> under rows the column name is stored)
+          let variablesNameForGivenOption = "";
+          Object.keys(this.modules[moduleName]).forEach((a) => {
+            Object.keys(this.modules[moduleName][a]).forEach((b) => {
+              // b === value[1]: 2 preconditions:
+              // 1. variables of rows (and its options) are same as variables of columns (and its options)
+              // 2. value[1] == column name
+              if (b === value[1]) {
+                variablesNameForGivenOption = a;
+              }
+            });
           });
+          if (variablesNameForGivenOption === "") {
+            throw new Error("Row not found.");
+          }
+          // first value[1] then value[0] since value stores the indices in the format: [column, row]
+          let resultValue: number = this.modules[moduleName][
+            variablesNameForGivenOption
+          ][value[1]][value[0]];
+          resultDict[rowColumnStringRepresentation] = resultValue;
         });
-        if (variablesNameForGivenOption === "") {
-          throw new Error("Row not found.");
-        }
-        // first value[1] then value[0] since value stores the indices in the format: [column, row]
-        let resultValue: number = this.modules[moduleName][
-          variablesNameForGivenOption
-        ][value[1]][value[0]];
-        resultDict[rowColumnStringRepresentation] = resultValue;
-      });
 
-      // they do not map except they share the same index for same szenarioCombination
-      // ONLY THE INDEX
-      resultList.bundleSzenarioStrings.push(key);
-      resultList.bundles.push(resultDict);
-    });
+        // they do not map except they share the same index for same szenarioCombination
+        // ONLY THE INDEX
+        resultList.bundles.push(new Bundle(resultDict, key, "B" + (index + 1)));
+      }
+    );
     return resultList;
   }
 }

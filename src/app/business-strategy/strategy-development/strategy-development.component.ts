@@ -94,29 +94,26 @@ export class StrategyDevelopmentComponent implements OnInit {
     // first row
     resultArray.push(
       ["Options-Kombinationen"].concat(
-        bundles.bundleSzenarioStrings.map((a) => {
-          return a;
+        bundles.bundles.map((a) => {
+          return a.bundleSzenarioCombinationString;
         })
       )
     );
     // second row
     resultArray.push(
       ["Paare"].concat(
-        bundles.bundles.map((a, index) => {
-          let headerCellString = "B" + (index + 1);
-          // console.log(headerCellString);
-          return headerCellString;
+        bundles.bundles.map((a) => {
+          return a.name;
         })
       )
     );
-    let bundleKeys = Object.keys(bundles.bundles[0]);
-    console.log(bundleKeys);
+    let bundleKeys = Object.keys(bundles.bundles[0].bundleData);
     resultArray = resultArray.concat(
       bundleKeys.map((b, index) => {
         let row = [];
         row.push(bundleKeys[index]);
         bundles.bundles.forEach((c) => {
-          row.push(c[bundleKeys[index]]);
+          row.push(c.bundleData[bundleKeys[index]]);
         });
         return row;
       })
