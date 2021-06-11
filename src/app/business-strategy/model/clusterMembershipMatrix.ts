@@ -10,6 +10,7 @@ export class ClusterMembershipMatrix implements IClusterMembershipMatrix {
     console.log(this.clusterMemberShipDict);
   }
 
+  // result: bundleName -> clusterNumber (not clusterNumber -> bundleName)
   parseToInternalDict(inputArray: Array<Array<any>>): Record<string, number> {
     console.log(inputArray);
     let resultDict: Record<string, number> = {};

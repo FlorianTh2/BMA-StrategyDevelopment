@@ -210,6 +210,18 @@ export class StrategyDevelopmentComponent implements OnInit {
     clusterMemberShipMatrix: ClusterMembershipMatrix
   ): BundleUsageMatrix {
     console.log("generate bundle usageMatrix");
+    // consider only those bundles from bundleMatrix whos name appear in clusterMemberShipMatrix
+    let selectedBundleMatrix = new BundleMatrix(
+      bundleMatrix.bundles
+        .map((a) => {
+          if (a.name in clusterMemberShipMatrix.clusterMemberShipDict) {
+            return a;
+          }
+          return null;
+        })
+        .filter((a) => a !== null)
+    );
+    console.log(selectedBundleMatrix);
     return null;
   }
 }
