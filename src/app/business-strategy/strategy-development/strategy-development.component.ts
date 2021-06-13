@@ -212,7 +212,6 @@ export class StrategyDevelopmentComponent implements OnInit {
     bundleMatrix: BundleMatrix,
     clusterMemberShipMatrix: ClusterMembershipMatrix
   ): BundleUsageMatrix {
-    console.log("generate bundle usageMatrix");
     // consider only those bundles from bundleMatrix whos name appear in clusterMemberShipMatrix
     let selectedBundleMatrix: BundleMatrix = new BundleMatrix(
       bundleMatrix.bundles
@@ -224,16 +223,12 @@ export class StrategyDevelopmentComponent implements OnInit {
         })
         .filter((a) => a !== null)
     );
-    console.log(selectedBundleMatrix);
-    console.log("now");
 
     let clusterNameToBundleNameMapping = clusterMemberShipMatrix.createClusterToBundleMappingWithSelectedKey(
       selectedBundleMatrix.bundles.map((a) => {
         return a.name;
       })
     );
-    console.log("selected bundle matrix");
-    console.log(selectedBundleMatrix);
 
     let result = new BundleUsageMatrix(
       Object.entries(clusterNameToBundleNameMapping).map(([key, value]) => {
@@ -245,9 +240,15 @@ export class StrategyDevelopmentComponent implements OnInit {
             return b.name === a;
           })[0];
         });
-        console.log(clusterGroup);
         // get a random options dict (random since all optionsDict should have same structure)
-        clusterGroup.options = { ...clusterGroup.bundles[0].bundleData };
+        let optionsDict = {};
+        Object.keys(clusterGroup.bundles[0].bundleData).forEach((b) => {
+          let splitOptionsCombination = b.split("/");
+          splitOptionsCombination.forEach((c) => {
+            optionsDict[c] = 0;
+          });
+        });
+        clusterGroup.options = optionsDict;
         // set all values to 0
         Object.entries(clusterGroup.options).forEach(
           ([optionsKey, optionsValue]) => {
@@ -260,23 +261,128 @@ export class StrategyDevelopmentComponent implements OnInit {
         // all optionCounts UNDER 1 VARIABLE
         let internalCounterDict: Record<string, Record<string, number>> = {};
         // if not even 1 bundle exists, idk throw error
-        let pairNamesOfBundle: string[] = Object(clusterGroup.bundles[0]).keys;
+        let pairNamesOfBundle: string[] = Object.keys(clusterGroup.bundles[0]);
         let pairNamesOfBundleDivided: string[][] = pairNamesOfBundle.map(
           (a) => {
             return a.split("/");
           }
         );
-        // foreach cluster
-        //  foreach bundle in cluster
-        clusterGroup.bundles.map((a) => {
-          //
-          return null;
+        let keysWhichAreNotZero = clusterGroup.bundles
+          .map((a) => {
+            return Object.entries(a.bundleData)
+              .filter(([keyBundle, valueBundle]) => {
+                return valueBundle != 0;
+              })
+              .map((a) => {
+                // after this line, we will ignore the value stored after the key
+                // let separatKeysToSingleOptions: string[] = keysWhichAreNotZero
+                // return [a[0].split("/"), a[1]];
+                return a[0].split("/");
+              })
+              .reduce((a, b) => a.concat(b), []);
+          })
+          .reduce((a, b) => a.concat(b), []);
+
+        // find options corresponding variable name and count up (+1) in internal dict
+        // here only one module is considered
+        let moduleNameConsistencyMatrix = Object.keys(
+          consistencyMatrix.modules
+        )[0];
+        // name shortening
+        let mcm = moduleNameConsistencyMatrix;
+        keysWhichAreNotZero.forEach((a) => {
+          Object.entries(consistencyMatrix.modules[mcm]).forEach(
+            ([keyVariable, valueVariable]) => {
+              if (valueVariable[a] != undefined) {
+                if (internalCounterDict[keyVariable] == undefined) {
+                  internalCounterDict[keyVariable] = {
+                    [a]: 1
+                  };
+                } else if (internalCounterDict[keyVariable][a] == undefined) {
+                  internalCounterDict[keyVariable][a] = 1;
+                } else {
+                  internalCounterDict[keyVariable][a] =
+                    internalCounterDict[keyVariable][a] + 1;
+                }
+              }
+            }
+          );
         });
+        console.log("internal");
+        console.log(internalCounterDict);
+        Object.entries(internalCounterDict).forEach(
+          ([
+            keyOfVariableInternalCounterDict,
+            valueOfVariableInternalCounterDict
+          ]) => {
+            let sumOfAllOptionsOfThisVariable = Object.entries(
+              valueOfVariableInternalCounterDict
+            ).reduce((a, [keyOfReduce, valueOfReduce]) => a + valueOfReduce, 0);
+            Object.entries(valueOfVariableInternalCounterDict).forEach(
+              ([optionsKey, optionsValue]) => {
+                console.log(optionsValue);
+                clusterGroup.options[optionsKey] =
+                  (optionsValue / sumOfAllOptionsOfThisVariable) * 100;
+              }
+            );
+          }
+        );
+        console.log("clustergroup options");
+        console.log(clusterGroup.options);
         return clusterGroup;
       })
     );
-    console.log("resultt");
-    console.log(result);
     return result;
+  }
+
+  downloadBundleUsageMatrix($event: Event) {
+    console.log("download");
+    console.log(this.bundleUsageMatrix);
+    let resultArray: string[][] = this.exportBundleUsageMatrixConvertToAoA(
+      this.consistencyMatrix,
+      this.bundleUsageMatrix
+    );
+    console.log("result array string");
+    this.exportBundleUsageMatrixDownloadToUser(resultArray);
+  }
+
+  exportBundleUsageMatrixDownloadToUser(
+    bundleUsageMatrix: Array<Array<string>>
+  ) {
+    var fileName = "ausprägungsmatrix";
+    // if we use workbook and NOT the resulting array it must be:
+    // .json_to_sheet or something like that
+    var workSheet = XLSX.utils.aoa_to_sheet(bundleUsageMatrix);
+    var wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, workSheet, fileName);
+    XLSX.writeFile(wb, fileName + ".xlsx");
+  }
+
+  private exportBundleUsageMatrixConvertToAoA(
+    consistencyMatrix: ConcistencyMatrix,
+    bundleUsageMatrix: BundleUsageMatrix
+  ) {
+    let resultArray: Array<Array<string>> = [];
+    resultArray.push(
+      ["Modul", "Variable", "Option"].concat(
+        bundleUsageMatrix.clusterGroups.map((a) => "Cluster " + a.name)
+      )
+    );
+    // for now no more than one module
+    let consistencyMatrixModuleName = Object.keys(consistencyMatrix.modules)[0];
+    Object.keys(consistencyMatrix.modules[consistencyMatrixModuleName]).forEach(
+      (a) => {
+        Object.keys(
+          consistencyMatrix.modules[consistencyMatrixModuleName][a]
+        ).forEach((b) => {
+          let valueList = bundleUsageMatrix.clusterGroups.map((c) => {
+            return c.options[b].toString();
+          });
+          resultArray.push([consistencyMatrixModuleName, a, b, ...valueList]);
+        });
+      }
+    );
+
+    return resultArray;
   }
 }
