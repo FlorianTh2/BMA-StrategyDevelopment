@@ -376,7 +376,7 @@ export class StrategyDevelopmentComponent implements OnInit {
           consistencyMatrix.modules[consistencyMatrixModuleName][a]
         ).forEach((b) => {
           let valueList = bundleUsageMatrix.clusterGroups.map((c) => {
-            return c.options[b].toString();
+            return c.options[b].toFixed(2).toString().replace(".", ",");
           });
           resultArray.push([consistencyMatrixModuleName, a, b, ...valueList]);
         });
