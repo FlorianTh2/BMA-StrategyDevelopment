@@ -12,38 +12,48 @@
     <button mat-raised-button color="" (click)="fileInput.click()">Konsistenzmatrix hochladen</button>
     <input hidden type="file" (change)="fileChanged($event)" #fileInput id="file">
 
+    <div style="height: 25px"></div>
+
+    <ng-container *ngIf="consistencyMatrix">
+      <div>
+        Ihre Konsistenzmatrix wurde erfolgreich hochgeladen.
+      </div>
+    </ng-container>
+
+<!--    <div *ngIf="resultArray">-->
+<!--        <div *ngFor="let row of resultArray">-->
+<!--          <div *ngFor="let cell of row" class="display-cell">-->
+<!--            {{cell}}-->
+<!--          </div>-->
+<!--        </div>-->
+<!--    </div>-->
+<!--  </div>-->
+
     <div style="height: 100px"></div>
 
-    <div *ngIf="resultArray">
-        <div *ngFor="let row of resultArray">
-          <div *ngFor="let cell of row" class="display-cell">
-<!--            <ng-container *ngIf="cell">-->
-            {{cell}}
-<!--            </ng-container>-->
-<!--            <ng-container *ngIf="!cell">-->
-<!--              -->
-<!--            </ng-container>-->
-          </div>
+    <button mat-raised-button color="" (click)="downloadBundles($event)">Download alle Strategiebündel</button>
+
+    <div style="height: 100px"></div>
+
+    <button mat-raised-button color="" (click)="downloadOnlyConsistentBundles($event)">Download nur konsistente Strategiebündel</button>
+
+    <div style="height: 100px"></div>
+
+    <button mat-raised-button color="" (click)="clusterMembershipMatrixInput.click()">ClusterMembership-Matrix hochladen</button>
+    <input hidden type="file" (change)="uploadClusterMembershipMatrix($event)" #clusterMembershipMatrixInput id="uploadClusterMembershipMatrix">
+
+    <div style="height: 25px"></div>
+
+      <ng-container *ngIf="clusterMembershipMatrix">
+        <div>
+          Ihre ClusterMembershipMatrix wurde erfolgreich hochgeladen.
         </div>
-    </div>
+      </ng-container>
+
+    <div style="height: 100px"></div>
+
+    <button mat-raised-button color="" (click)="downloadBundleUsageMatrix($event)">Download Ausprägungsmatrix</button>
+
+    <div style="height: 100px"></div>
   </div>
-
-  <div style="height: 100px"></div>
-
-  <button mat-raised-button color="" (click)="downloadBundles($event)">Download alle Strategiebündel</button>
-
-  <div style="height: 100px"></div>
-
-  <button mat-raised-button color="" (click)="downloadOnlyConsistentBundles($event)">Download nur konsistente Strategiebündel</button>
-
-  <div style="height: 100px"></div>
-
-  <button mat-raised-button color="" (click)="clusterMembershipMatrixInput.click()">ClusterMembership-Matrix hochladen</button>
-  <input hidden type="file" (change)="uploadClusterMembershipMatrix($event)" #clusterMembershipMatrixInput id="uploadClusterMembershipMatrix">
-
-  <div style="height: 100px"></div>
-
-  <button mat-raised-button color="" (click)="downloadBundleUsageMatrix($event)">Download Ausprägungsmatrix</button>
-
-  <div style="height: 100px"></div>
 </div>
