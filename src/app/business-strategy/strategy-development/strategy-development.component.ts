@@ -386,6 +386,11 @@ export class StrategyDevelopmentComponent implements OnInit {
     return resultArray;
   }
 
+  // https://stackoverflow.com/questions/48535736/sheetjs-how-to-format-column
+  // https://github.com/SheetJS/sheetjs/issues/675
+  // https://github.com/SheetJS/sheetjs/issues/1166
+  // https://jsfiddle.net/1ny97xrb/1/
+  // https://github.com/SheetJS/sheetjs/issues/966
   private formatWorksheetToNumbers(
     worksheet,
     startColumn: number,
