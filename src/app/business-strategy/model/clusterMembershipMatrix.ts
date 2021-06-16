@@ -13,7 +13,7 @@ export class ClusterMembershipMatrix implements IClusterMembershipMatrix {
 
   // result: bundleName -> clusterNumber (not clusterNumber -> bundleName)
   parseToInternalDict(inputArray: Array<Array<any>>): Record<string, string> {
-    console.log(inputArray);
+    // console.log(inputArray);
     let resultDict: Record<string, string> = {};
     // cut header row
     inputArray = inputArray.slice(1);

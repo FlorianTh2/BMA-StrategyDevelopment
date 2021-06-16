@@ -202,7 +202,6 @@ export class StrategyDevelopmentComponent implements OnInit {
       );
 
       console.log("result bundleUsageMatrix:");
-      console.log(this.bundleUsageMatrix);
     };
     fileReader.readAsArrayBuffer(this.file);
   }
@@ -309,7 +308,7 @@ export class StrategyDevelopmentComponent implements OnInit {
           );
         });
         console.log("internal");
-        console.log(internalCounterDict);
+        // console.log(internalCounterDict);
         Object.entries(internalCounterDict).forEach(
           ([
             keyOfVariableInternalCounterDict,
@@ -320,15 +319,14 @@ export class StrategyDevelopmentComponent implements OnInit {
             ).reduce((a, [keyOfReduce, valueOfReduce]) => a + valueOfReduce, 0);
             Object.entries(valueOfVariableInternalCounterDict).forEach(
               ([optionsKey, optionsValue]) => {
-                console.log(optionsValue);
                 clusterGroup.options[optionsKey] =
                   (optionsValue / sumOfAllOptionsOfThisVariable) * 100;
               }
             );
           }
         );
-        console.log("clustergroup options");
-        console.log(clusterGroup.options);
+        // console.log("clustergroup options");
+        // console.log(clusterGroup.options);
         return clusterGroup;
       })
     );
@@ -337,8 +335,7 @@ export class StrategyDevelopmentComponent implements OnInit {
 
   downloadBundleUsageMatrix($event: Event) {
     console.log("download");
-    console.log(this.bundleUsageMatrix);
-    let resultArray: string[][] = this.exportBundleUsageMatrixConvertToAoA(
+    let resultArray: any[][] = this.exportBundleUsageMatrixConvertToAoA(
       this.consistencyMatrix,
       this.bundleUsageMatrix
     );
@@ -353,6 +350,9 @@ export class StrategyDevelopmentComponent implements OnInit {
     // if we use workbook and NOT the resulting array it must be:
     // .json_to_sheet or something like that
     var workSheet = XLSX.utils.aoa_to_sheet(bundleUsageMatrix);
+    // format to output numbers instead of string-type
+    this.formatWorksheetToNumbers(workSheet, 3, bundleUsageMatrix);
+
     var wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, workSheet, fileName);
     XLSX.writeFile(wb, fileName + ".xlsx");
@@ -361,7 +361,7 @@ export class StrategyDevelopmentComponent implements OnInit {
   private exportBundleUsageMatrixConvertToAoA(
     consistencyMatrix: ConcistencyMatrix,
     bundleUsageMatrix: BundleUsageMatrix
-  ) {
+  ): string[][] {
     let resultArray: Array<Array<string>> = [];
     resultArray.push(
       ["Modul", "Variable", "Option"].concat(
@@ -376,7 +376,7 @@ export class StrategyDevelopmentComponent implements OnInit {
           consistencyMatrix.modules[consistencyMatrixModuleName][a]
         ).forEach((b) => {
           let valueList = bundleUsageMatrix.clusterGroups.map((c) => {
-            return c.options[b].toFixed(2).toString().replace(".", ",");
+            return c.options[b].toFixed(2);
           });
           resultArray.push([consistencyMatrixModuleName, a, b, ...valueList]);
         });
@@ -384,5 +384,33 @@ export class StrategyDevelopmentComponent implements OnInit {
     );
 
     return resultArray;
+  }
+
+  private formatWorksheetToNumbers(
+    worksheet,
+    startColumn: number,
+    matrix: string[][]
+  ) {
+    const format = "0.00";
+    let endColumn = startColumn + matrix[0].length;
+    let arrayWithColumns = Array.from(
+      { length: endColumn - startColumn },
+      (v, k) => k + startColumn
+    );
+    for (let col of arrayWithColumns) {
+      this.formatColumn(worksheet, col, format);
+    }
+  }
+
+  private formatColumn(worksheet, col, fmt) {
+    const range = XLSX.utils.decode_range(worksheet["!ref"]);
+    // note: range.s.r + 1 skips the header row
+    for (let row = range.s.r + 1; row <= range.e.r; ++row) {
+      const ref = XLSX.utils.encode_cell({ r: row, c: col });
+      if (worksheet[ref]) {
+        worksheet[ref].t = "n";
+        worksheet[ref].z = fmt;
+      }
+    }
   }
 }
