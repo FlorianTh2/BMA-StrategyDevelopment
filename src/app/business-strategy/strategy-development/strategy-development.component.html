@@ -1,16 +1,16 @@
-<div class="">
+<div class="" style="padding: 100px">
   <div>
-        <h1>
-          Geschäftsstrategie - Self Service
-        </h1>
-        <h3>
-          Erstellen Sie ihre individuelle Geschäftsstrategie
-        </h3>
+    <h1>
+      Geschäftsstrategie - Self Service
+    </h1>
+    <h3>
+      Erstellen Sie ihre individuelle Geschäftsstrategie
+    </h3>
   </div>
   <div>
 
     <button mat-raised-button color="" (click)="fileInput.click()">Konsistenzmatrix hochladen</button>
-    <input hidden type="file" (change)="fileChanged($event)" #fileInput id="file">
+    <input hidden type="file" (change)="uploadConsistencyMatrix($event)" #fileInput id="file">
 
     <div style="height: 25px"></div>
 
@@ -20,40 +20,5 @@
       </div>
     </ng-container>
 
-<!--    <div *ngIf="resultArray">-->
-<!--        <div *ngFor="let row of resultArray">-->
-<!--          <div *ngFor="let cell of row" class="display-cell">-->
-<!--            {{cell}}-->
-<!--          </div>-->
-<!--        </div>-->
-<!--    </div>-->
-<!--  </div>-->
-
-    <div style="height: 100px"></div>
-
-    <button mat-raised-button color="" (click)="downloadBundles($event)">Download alle Strategiebündel</button>
-
-    <div style="height: 100px"></div>
-
-    <button mat-raised-button color="" (click)="downloadOnlyConsistentBundles($event)">Download nur konsistente Strategiebündel</button>
-
-    <div style="height: 100px"></div>
-
-    <button mat-raised-button color="" (click)="clusterMembershipMatrixInput.click()">ClusterMembership-Matrix hochladen</button>
-    <input hidden type="file" (change)="uploadClusterMembershipMatrix($event)" #clusterMembershipMatrixInput id="uploadClusterMembershipMatrix">
-
-    <div style="height: 25px"></div>
-
-      <ng-container *ngIf="clusterMembershipMatrix">
-        <div>
-          Ihre ClusterMembershipMatrix wurde erfolgreich hochgeladen.
-        </div>
-      </ng-container>
-
-    <div style="height: 100px"></div>
-
-    <button mat-raised-button color="" (click)="downloadBundleUsageMatrix($event)">Download Ausprägungsmatrix</button>
-
-    <div style="height: 100px"></div>
   </div>
 </div>
