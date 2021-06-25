@@ -59,7 +59,9 @@ export class ConcistencyMatrix {
 
   createbundles(): BundleMatrix {
     console.log("create bundles");
+    console.time("loop");
     let szenarios = this.createScenarios(this.metadataByVariable);
+    console.timeEnd("loop");
     console.log(szenarios.length);
     // console.log("done");
     // console.log(szenarios);
@@ -73,14 +75,15 @@ export class ConcistencyMatrix {
     let variables = Object.entries(currentVariablesData).map(([aKey, aValue]) =>
       Object.keys(aValue.options)
     );
-    let indexStore: number[] = variables.map((a) => 0);
+    const indexStore: number[] = variables.map((a) => 0);
     let scenarioStore: string[][] = [];
     let run = true;
+    let currentArrayIndex = 0;
     while (run) {
       if (scenarioStore.length < 500_000) {
         scenarioStore.push(indexStore.map((a, aIndex) => variables[aIndex][a]));
       }
-      // acts as both: "add one" and "there is a overflow"
+      // overflow acts as both: "add one" and "there is a overflow"
       let overflow = true;
       let indexStoreAddingIndex = indexStore.length - 1;
       while (overflow) {
