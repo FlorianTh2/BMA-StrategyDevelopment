@@ -1,7 +1,8 @@
 import { Component, OnDestroy, OnInit } from "@angular/core";
 import * as XLSX from "xlsx";
 import { ISheetsJsonRepresentation } from "../v-1-strategy-development/model/sheetsJsonRepresentation.interface";
-import { ConcistencyMatrix } from "./models/ConcistencyMatrix";
+import { ConcistencyMatrix } from "./models/concistencyMatrix";
+import { Subject } from "rxjs";
 
 @Component({
   selector: "app-strategy-development",
@@ -12,6 +13,7 @@ export class StrategyDevelopmentComponent implements OnInit, OnDestroy {
   workbookKonsistenzmatrix: XLSX.WorkBook;
   consistencyMatrix: ConcistencyMatrix;
   bundleMatrix: {};
+  destroy$: Subject<boolean> = new Subject<boolean>();
 
   constructor() {}
 
@@ -52,5 +54,8 @@ export class StrategyDevelopmentComponent implements OnInit, OnDestroy {
     }
   }
 
-  ngOnDestroy(): void {}
+  ngOnDestroy(): void {
+    this.destroy$.next(true);
+    this.destroy$.unsubscribe();
+  }
 }
