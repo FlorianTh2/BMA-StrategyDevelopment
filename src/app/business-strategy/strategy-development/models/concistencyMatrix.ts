@@ -4,7 +4,7 @@ import { MetadataVariable, MetadataVariableOption } from "./metadataVariable";
 export class ConcistencyMatrix {
   array: number[][];
   metadataByVariable: Record<string, MetadataVariable>;
-  maxBundles: number = 3; //500_000;
+  maxBundles: number = 500_000;
   maxSelectedBundles: number = 2; //16_000;
 
   constructor(data: Array<Array<any>>) {
@@ -75,34 +75,38 @@ export class ConcistencyMatrix {
     let variables = Object.entries(currentVariablesData).map(([aKey, aValue]) =>
       Object.keys(aValue.options)
     );
-    const indexStore: number[] = variables.map((a) => 0);
+    let indexStore: number[] = variables.map((a) => 0);
     let scenarioStore: string[][] = [];
     let run = true;
-    let currentArrayIndex = 0;
     while (run) {
-      if (scenarioStore.length < 500_000) {
-        scenarioStore.push(indexStore.map((a, aIndex) => variables[aIndex][a]));
+      if (scenarioStore.length < this.maxBundles) {
+        const bundleOptionStrings = indexStore.map(
+          (a, aIndex) => variables[aIndex][a]
+        );
+        scenarioStore.push(bundleOptionStrings);
       }
-      // overflow acts as both: "add one" and "there is a overflow"
-      let overflow = true;
-      let indexStoreAddingIndex = indexStore.length - 1;
-      while (overflow) {
-        if (
-          indexStore[indexStoreAddingIndex] <
-          variables[indexStoreAddingIndex].length - 1
-        ) {
-          indexStore[indexStoreAddingIndex] += 1;
-          overflow = false;
-        } else if (indexStoreAddingIndex == 0) {
-          overflow = false;
-          run = false;
-        } else {
-          indexStore[indexStoreAddingIndex] = 0;
-          indexStoreAddingIndex--;
-        }
-      }
+      run = this.increaseIndexStore(variables, indexStore);
     }
     return scenarioStore;
+  }
+
+  // returns if first index of indexStore has not reached max-value
+  increaseIndexStore(variables: string[][], indexStore: number[]) {
+    let indexStoreAddingIndex = indexStore.length - 1;
+    while (true) {
+      if (
+        indexStore[indexStoreAddingIndex] <
+        variables[indexStoreAddingIndex].length - 1
+      ) {
+        indexStore[indexStoreAddingIndex] += 1;
+        return true;
+      } else if (indexStoreAddingIndex == 0) {
+        return false;
+      } else {
+        indexStore[indexStoreAddingIndex] = 0;
+        indexStoreAddingIndex--;
+      }
+    }
   }
 
   // let currentVariable = remainingVariables[0];

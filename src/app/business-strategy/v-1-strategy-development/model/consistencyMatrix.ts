@@ -53,6 +53,7 @@ export class ConcistencyMatrix implements IConcistencyMatrix {
 
   createbundles(): BundleMatrix {
     let szenarios = this.createSzenarios();
+    ///
     let lookUpTableOfBundleIndices: Record<string, Array<string>> = {};
     szenarios.forEach((a) => {
       let stringSzenarioRespresentation = a.join(" & ");
