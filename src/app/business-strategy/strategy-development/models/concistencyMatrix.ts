@@ -30,10 +30,12 @@ export class ConcistencyMatrix {
         metadataByVariable[row[0].trim()].numberOptions += 1;
       } else {
         metadataByVariable[row[0].trim()] = {
+          id: row[0].trim(),
           startIndex: rowIndex,
           numberOptions: 1,
           options: {
             [row[2].trim()]: {
+              id: row[2].trim(),
               name: row[1].trim(),
               index: rowIndex
             }
@@ -73,17 +75,17 @@ export class ConcistencyMatrix {
   ): string[][] {
     console.log("create szenarios");
     let variables = Object.entries(currentVariablesData).map(([aKey, aValue]) =>
-      Object.keys(aValue.options)
+      Object.values(aValue.options)
     );
     let indexStore: number[] = variables.map((a) => 0);
     let scenarioStore: string[][] = [];
     let run = true;
     while (run) {
       if (scenarioStore.length < this.maxBundles) {
-        const bundleOptionStrings = indexStore.map(
-          (a, aIndex) => variables[aIndex][a]
-        );
-        scenarioStore.push(bundleOptionStrings);
+        const bundle = indexStore.map((a, aIndex) => {
+          return variables[aIndex][a].id;
+        });
+        scenarioStore.push(bundle);
       }
       run = this.increaseIndexStore(variables, indexStore);
     }
@@ -91,7 +93,10 @@ export class ConcistencyMatrix {
   }
 
   // returns if first index of indexStore has not reached max-value
-  increaseIndexStore(variables: string[][], indexStore: number[]) {
+  increaseIndexStore(
+    variables: MetadataVariableOption[][],
+    indexStore: number[]
+  ) {
     let indexStoreAddingIndex = indexStore.length - 1;
     while (true) {
       if (
