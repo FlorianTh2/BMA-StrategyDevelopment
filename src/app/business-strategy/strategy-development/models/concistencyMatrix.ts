@@ -1,5 +1,6 @@
 import { BundleMatrix } from "./bundleMatrix";
 import { MetadataVariable, MetadataVariableOption } from "./metadataVariable";
+import { Bundle } from "./bundle";
 
 export class ConcistencyMatrix {
   array: number[][];
@@ -24,6 +25,7 @@ export class ConcistencyMatrix {
     dataInput.forEach((row: any[], rowIndex: number) => {
       if (metadataByVariable[row[0].trim()]) {
         metadataByVariable[row[0].trim()].options[row[2].trim()] = {
+          id: row[2].trim(),
           name: row[1].trim(),
           index: rowIndex
         } as MetadataVariableOption;
@@ -62,26 +64,29 @@ export class ConcistencyMatrix {
   createbundles(): BundleMatrix {
     console.log("create bundles");
     console.time("loop");
-    let szenarios = this.createScenarios(this.metadataByVariable);
+    console.log(this.metadataByVariable);
+    let szenarios = this.createScenarios(this.array, this.metadataByVariable);
     console.timeEnd("loop");
-    console.log(szenarios.length);
+    // console.log(szenarios.length);
     // console.log("done");
-    // console.log(szenarios);
+    console.log(szenarios);
     return null;
   }
 
   createScenarios(
-    currentVariablesData: Record<string, MetadataVariable>
-  ): string[][] {
+    currentVariablesData: number[][],
+    currentVariablesMetaData: Record<string, MetadataVariable>
+  ): BundleMatrix {
     console.log("create szenarios");
-    let variables = Object.entries(currentVariablesData).map(([aKey, aValue]) =>
-      Object.values(aValue.options)
-    );
+    let variables = Object.entries(
+      currentVariablesMetaData
+    ).map(([aKey, aValue]) => Object.values(aValue.options));
     let indexStore: number[] = variables.map((a) => 0);
-    let scenarioStore: string[][] = [];
+    let bundleStore: Bundle[] = [];
+    let runIndex = 1;
     let run = true;
     while (run) {
-      if (scenarioStore.length < this.maxBundles) {
+      if (bundleStore.length < this.maxBundles) {
         // get option-metadataobjects based on indexStore
         // in matrix: column-key
         const bundleOptions = this.indexStoreReturnVariables(
@@ -90,15 +95,33 @@ export class ConcistencyMatrix {
         );
         // get all bundleoptions combinations (there should be a value in the matrix)
         // in matrix: row-keys of the selected options (not all possible row-keys)
-        const OptionCombinations = this.createBundleOptionsKombination(
+        const optionCombinations: MetadataVariableOption[][] = this.createBundleOptionsKombination(
           bundleOptions
         );
-
-        scenarioStore.push(bundle);
+        let bundle: Bundle = {
+          name: "bundle " + runIndex,
+          bundleSzenarioCombinationString: bundleOptions
+            .map((a) => a.id)
+            .join(" & "),
+          bundleData: optionCombinations.map(
+            (a) => currentVariablesData[a[1].index][a[0].index]
+          ),
+          bundleMetaData: optionCombinations.map((a) => {
+            return a.map((b) => b.id);
+          })
+        } as Bundle;
+        bundleStore.push(bundle);
       }
+      runIndex++;
       run = this.increaseIndexStore(variables, indexStore);
     }
-    return scenarioStore;
+    let bundleMatrix = {
+      bundles: bundleStore,
+      bundleMatrixRowColumnCombinations: this.createAllRowColumnPairCombinations(
+        this.metadataByVariable
+      )
+    } as BundleMatrix;
+    return bundleMatrix;
   }
 
   indexStoreReturnVariables(
@@ -156,6 +179,7 @@ export class ConcistencyMatrix {
   }
 
   // input: e.g. ["1A", "2A", "3A"]
+  // output e.g. [["1A", "2A"], ["1A", "3A"], ["2A", "3A"]]
   createBundleOptionsKombination(options: MetadataVariableOption[]) {
     let combinationsArray: MetadataVariableOption[][] = [];
     for (let a = 0; a < options.length; a++) {
@@ -164,5 +188,26 @@ export class ConcistencyMatrix {
       }
     }
     return combinationsArray;
+  }
+
+  // input: e.g. this.metadataByVariable with 3_2 (3 variables, 2 options each)
+  // output e.g. [["1A", "2A"], ["1A", "2B"], ["1A", "3A"], ["1A", "3B"], ["1B", "2A"], ["1B", "2B"], ["1B", "3A"], ["1B", "3B"], ["2A", "3A"], ["2A", "3B"], ["2B", "3A"], ["2B", "3B"]]
+  createAllRowColumnPairCombinations(
+    currentVariablesData: Record<string, MetadataVariable>
+  ): string[][] {
+    let variables: string[][] = Object.values(currentVariablesData).map((a) =>
+      Object.keys(a.options)
+    );
+    let result: string[][] = [];
+    for (let a = 0; a < variables.length; a++) {
+      for (let b = 0; b < variables[a].length; b++) {
+        for (let c = a + 1; c < variables.length; c++) {
+          for (let d = 0; d < variables[c].length; d++) {
+            result.push([variables[a][b], variables[c][d]]);
+          }
+        }
+      }
+    }
+    return result;
   }
 }
