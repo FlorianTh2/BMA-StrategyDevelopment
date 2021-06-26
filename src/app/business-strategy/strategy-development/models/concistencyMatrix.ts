@@ -1,12 +1,13 @@
 import { BundleMatrix } from "./bundleMatrix";
 import { MetadataVariable, MetadataVariableOption } from "./metadataVariable";
 import { Bundle } from "./bundle";
+import { Meta } from "@angular/platform-browser";
 
 export class ConcistencyMatrix {
   array: number[][];
   metadataByVariable: Record<string, MetadataVariable>;
-  maxBundles: number = 500_000;
-  maxSelectedBundles: number = 2; //16_000;
+  maxIterations: number = 500_000;
+  maxBundles: number = 16_000;
 
   constructor(data: Array<Array<any>>) {
     console.log("constructor");
@@ -64,12 +65,12 @@ export class ConcistencyMatrix {
   createbundles(): BundleMatrix {
     console.log("create bundles");
     console.time("loop");
-    console.log(this.metadataByVariable);
+    // console.log(this.metadataByVariable);
     let szenarios = this.createScenarios(this.array, this.metadataByVariable);
     console.timeEnd("loop");
-    // console.log(szenarios.length);
+    console.log(szenarios.bundles.length);
     // console.log("done");
-    console.log(szenarios);
+    // console.log(szenarios);
     return null;
   }
 
@@ -78,42 +79,41 @@ export class ConcistencyMatrix {
     currentVariablesMetaData: Record<string, MetadataVariable>
   ): BundleMatrix {
     console.log("create szenarios");
-    let variables = Object.entries(
+    let variables: MetadataVariableOption[][] = Object.entries(
       currentVariablesMetaData
     ).map(([aKey, aValue]) => Object.values(aValue.options));
     let indexStore: number[] = variables.map((a) => 0);
     let bundleStore: Bundle[] = [];
-    let runIndex = 1;
-    let run = true;
-    while (run) {
+    let minConsistencyValue = -1;
+    const numberBundles = variables.reduce((acc, item) => {
+      return acc * item.length;
+    }, 1);
+    for (let a = 0; a < numberBundles && a < this.maxIterations; a++) {
+      const bundle = this.createBundle(
+        indexStore,
+        currentVariablesData,
+        variables,
+        a
+      );
+      let isConsistent = true;
+      bundle.bundleData.forEach((b) => {
+        if (b === 1) {
+          isConsistent = false;
+          return;
+        }
+      });
+      if (!isConsistent) continue;
+      if (bundle.consistence < minConsistencyValue) continue;
       if (bundleStore.length < this.maxBundles) {
-        // get option-metadataobjects based on indexStore
-        // in matrix: column-key
-        const bundleOptions = this.indexStoreReturnVariables(
-          indexStore,
-          variables
-        );
-        // get all bundleoptions combinations (there should be a value in the matrix)
-        // in matrix: row-keys of the selected options (not all possible row-keys)
-        const optionCombinations: MetadataVariableOption[][] = this.createBundleOptionsKombination(
-          bundleOptions
-        );
-        let bundle: Bundle = {
-          name: "bundle " + runIndex,
-          bundleSzenarioCombinationString: bundleOptions
-            .map((a) => a.id)
-            .join(" & "),
-          bundleData: optionCombinations.map(
-            (a) => currentVariablesData[a[1].index][a[0].index]
-          ),
-          bundleMetaData: optionCombinations.map((a) => {
-            return a.map((b) => b.id);
-          })
-        } as Bundle;
         bundleStore.push(bundle);
+      } else if (bundleStore.length === this.maxBundles) {
+        bundleStore.sort((b, c) => b.consistence - c.consistence);
+
+        // sort + sorted insert
+      } else {
+        // sorted insert
       }
-      runIndex++;
-      run = this.increaseIndexStore(variables, indexStore);
+      this.increaseIndexStore(variables, indexStore);
     }
     let bundleMatrix = {
       bundles: bundleStore,
@@ -122,6 +122,35 @@ export class ConcistencyMatrix {
       )
     } as BundleMatrix;
     return bundleMatrix;
+  }
+
+  createBundle(
+    indexStore: number[],
+    currentVariablesData: number[][],
+    variables: MetadataVariableOption[][],
+    runIndex: number
+  ) {
+    // get option-metadataobjects based on indexStore
+    // in matrix: column-key
+    const bundleOptions = this.indexStoreReturnVariables(indexStore, variables);
+    // get all bundleoptions combinations (there should be a value in the matrix)
+    // in matrix: row-keys of the selected options (not all possible row-keys)
+    const optionCombinations: MetadataVariableOption[][] = this.createBundleOptionsKombination(
+      bundleOptions
+    );
+    return {
+      name: "bundle " + runIndex,
+      consistence: optionCombinations.reduce((acc, a) => {
+        return acc + currentVariablesData[a[1].index][a[0].index];
+      }, 0),
+      bundleSzenarioCombinationString: bundleOptions
+        .map((a) => a.id)
+        .join(" & "),
+      bundleData: optionCombinations.map(
+        (a) => currentVariablesData[a[1].index][a[0].index]
+      ),
+      bundleMetaData: optionCombinations
+    } as Bundle;
   }
 
   indexStoreReturnVariables(
@@ -145,9 +174,9 @@ export class ConcistencyMatrix {
         variables[indexStoreAddingIndex].length - 1
       ) {
         indexStore[indexStoreAddingIndex] += 1;
-        return true;
+        return;
       } else if (indexStoreAddingIndex == 0) {
-        return false;
+        return;
       } else {
         indexStore[indexStoreAddingIndex] = 0;
         indexStoreAddingIndex--;
@@ -190,6 +219,22 @@ export class ConcistencyMatrix {
     return combinationsArray;
   }
 
+  // // input: e.g. ["1A", "2A", "3A"]
+  // // output e.g. [["1A", "2A"], ["1A", "3A"], ["2A", "3A"]]
+  // createBundleOptionsKombination(options: MetadataVariableOption[]) {
+  //   let combinationsArray: BundleMetaData[] = [];
+  //   for (let a = 0; a < options.length; a++) {
+  //     for (let b = a + 1; b < options.length; b++) {
+  //       combinationsArray.push({
+  //         row: options[b].index,
+  //         column: options[b].index,
+  //         id: [options[a].id, options[b].id]
+  //       });
+  //     }
+  //   }
+  //   return combinationsArray;
+  // }
+
   // input: e.g. this.metadataByVariable with 3_2 (3 variables, 2 options each)
   // output e.g. [["1A", "2A"], ["1A", "2B"], ["1A", "3A"], ["1A", "3B"], ["1B", "2A"], ["1B", "2B"], ["1B", "3A"], ["1B", "3B"], ["2A", "3A"], ["2A", "3B"], ["2B", "3A"], ["2B", "3B"]]
   createAllRowColumnPairCombinations(
@@ -211,3 +256,9 @@ export class ConcistencyMatrix {
     return result;
   }
 }
+
+// interface BundleMetaData {
+//   row: number;
+//   column: number;
+//   id: string[];
+// }
