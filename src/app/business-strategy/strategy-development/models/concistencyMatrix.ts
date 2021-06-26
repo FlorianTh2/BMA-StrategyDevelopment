@@ -82,14 +82,32 @@ export class ConcistencyMatrix {
     let run = true;
     while (run) {
       if (scenarioStore.length < this.maxBundles) {
-        const bundle = indexStore.map((a, aIndex) => {
-          return variables[aIndex][a].id;
-        });
+        // get option-metadataobjects based on indexStore
+        // in matrix: column-key
+        const bundleOptions = this.indexStoreReturnVariables(
+          indexStore,
+          variables
+        );
+        // get all bundleoptions combinations (there should be a value in the matrix)
+        // in matrix: row-keys of the selected options (not all possible row-keys)
+        const OptionCombinations = this.createBundleOptionsKombination(
+          bundleOptions
+        );
+
         scenarioStore.push(bundle);
       }
       run = this.increaseIndexStore(variables, indexStore);
     }
     return scenarioStore;
+  }
+
+  indexStoreReturnVariables(
+    indexStore: number[],
+    variables: MetadataVariableOption[][]
+  ) {
+    return indexStore.map((a, aIndex) => {
+      return variables[aIndex][a];
+    });
   }
 
   // returns if first index of indexStore has not reached max-value
@@ -135,5 +153,16 @@ export class ConcistencyMatrix {
       else high = mid;
     }
     return low;
+  }
+
+  // input: e.g. ["1A", "2A", "3A"]
+  createBundleOptionsKombination(options: MetadataVariableOption[]) {
+    let combinationsArray: MetadataVariableOption[][] = [];
+    for (let a = 0; a < options.length; a++) {
+      for (let b = a + 1; b < options.length; b++) {
+        combinationsArray.push([options[a], options[b]]);
+      }
+    }
+    return combinationsArray;
   }
 }
