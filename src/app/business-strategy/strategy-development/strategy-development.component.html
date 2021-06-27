@@ -20,5 +20,21 @@
       </div>
     </ng-container>
 
+    <div style="height: 100px"></div>
+
+    <button mat-raised-button color="" (click)="createBundles($event)">Erstelle konsistente Strategiebündel</button>
+
+    <div style="height: 50px"></div>
+
+    <ng-container *ngIf="bundleMatrix">
+      <div>
+        Die Strategiebündel wurden nun erstellt.
+      </div>
+    </ng-container>
+
+    <div style="height: 50px"></div>
+
+    <button mat-raised-button color="" (click)="downloadBundles($event)">Download konsistente Strategiebündel</button>
+
   </div>
 </div>

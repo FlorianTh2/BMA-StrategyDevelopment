@@ -8,11 +8,9 @@ export class ConcistencyMatrix {
   array: number[][];
   metadataByVariable: Record<string, MetadataVariable>;
   maxIterations: number = 500_000;
-  maxBundles: number = 16_000;
+  maxBundles: number = 4_000;
 
   constructor(data: Array<Array<any>>) {
-    console.log("constructor");
-    // console.log(data);
     let parseResult = this.parseAoAToConsistencyMatrix(data);
     this.array = parseResult.array;
     this.metadataByVariable = parseResult.metadataByVariable;
@@ -55,31 +53,17 @@ export class ConcistencyMatrix {
     });
 
     console.log("finished parsingAoAToConsistencyMatrix");
-    // console.log(resultArray);
-    // console.log(metadataByVariable);
     return {
       metadataByVariable: metadataByVariable,
       array: resultArray
     };
   }
 
-  createbundles(): BundleMatrix {
-    console.log("create bundles");
-    console.time("loop");
-    // console.log(this.metadataByVariable);
-    let szenarios = this.createScenarios(this.array, this.metadataByVariable);
-    console.timeEnd("loop");
-    console.log(szenarios.bundles.length);
-    console.log("done");
-    console.log(szenarios);
-    return null;
-  }
-
-  createScenarios(
+  createBundleMatrix(
     currentVariablesData: number[][],
     currentVariablesMetaData: Record<string, MetadataVariable>
   ): BundleMatrix {
-    console.log("create szenarios");
+    console.log("createBundleMatrix");
     let variables: MetadataVariableOption[][] = Object.entries(
       currentVariablesMetaData
     ).map(([aKey, aValue]) => Object.values(aValue.options));
@@ -135,12 +119,13 @@ export class ConcistencyMatrix {
     const rowColumnCombination = this.createAllRowColumnPairCombinations(
       this.metadataByVariable
     );
-    const denseBundleData = this.bundleDataToDense(
+    const bundleDense = this.bundleDataToDense(
       bundleStore,
       rowColumnCombination
     );
     let bundleMatrix: BundleMatrix = {
-      bundles: denseBundleData,
+      bundles: bundleDense.data,
+      bundleMetaData: bundleDense.metaData,
       bundleMatrixRowColumnCombinations: rowColumnCombination
     };
     return bundleMatrix;
@@ -308,12 +293,30 @@ export class ConcistencyMatrix {
     data: number[][];
     metaData: BundleData[];
   } {
-    return null;
+    const resultData: number[][] = [];
+    const resultMetaData: BundleData[] = [];
+    const defaultBundle: number[] = rowColumnCombination.map((a) => 0);
+    const lookupIndexTable: Record<string, number> = {};
+    rowColumnCombination.forEach((a, index) => {
+      lookupIndexTable[a.join("/")] = index;
+    });
+    bundleStore.forEach((a) => {
+      const dataItem: number[] = [...defaultBundle];
+      a.bundleData.forEach((b, bIndex) => {
+        const index =
+          lookupIndexTable[a.bundleMetaData[bIndex].map((c) => c.id).join("/")];
+        dataItem[index] = b;
+      });
+      const metaData: BundleData = {
+        name: a.name,
+        bundleSzenarioCombinationString: a.bundleSzenarioCombinationString
+      };
+      resultData.push(dataItem);
+      resultMetaData.push(metaData);
+    });
+    return {
+      data: resultData,
+      metaData: resultMetaData
+    };
   }
 }
-
-// interface BundleMetaData {
-//   row: number;
-//   column: number;
-//   id: string[];
-// }

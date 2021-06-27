@@ -1,8 +1,8 @@
 import { BundleData } from "./bundleData";
 
 export class BundleMatrix {
-  // each bundle has at the same index as the bundle a bundleMetaData-object
-  bundle: number[][];
+  // each bundles has at the same index as the bundle a bundleMetaData-object
+  bundles: number[][];
   bundleMetaData: BundleData[];
   // stores all possible bundleMatrixRowColumnCombinations
   // needed since the bundles only store metadata about at which index they got a value (in a sparse manner)
