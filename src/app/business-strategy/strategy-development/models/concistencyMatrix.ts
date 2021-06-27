@@ -2,6 +2,7 @@ import { BundleMatrix } from "./bundleMatrix";
 import { MetadataVariable, MetadataVariableOption } from "./metadataVariable";
 import { Bundle } from "./bundle";
 import { Meta } from "@angular/platform-browser";
+import { BundleData } from "./bundleData";
 
 export class ConcistencyMatrix {
   array: number[][];
@@ -69,7 +70,7 @@ export class ConcistencyMatrix {
     let szenarios = this.createScenarios(this.array, this.metadataByVariable);
     console.timeEnd("loop");
     console.log(szenarios.bundles.length);
-    // console.log("done");
+    console.log("done");
     console.log(szenarios);
     return null;
   }
@@ -96,25 +97,17 @@ export class ConcistencyMatrix {
         variables,
         a
       );
-      // bundleStore.push(bundle);
-      let isConsistent = true;
-      bundle.bundleData.forEach((b) => {
-        if (b === 1) {
-          isConsistent = false;
-          return;
-        }
-      });
-      if (!isConsistent) continue;
-      // if bundleStore is full and bundles consistencyValue is lower than current minConsistencyValue
+
+      // 1. = bundle is not consistent
+      // 2. if bundleStore is full and bundles consistencyValue is lower than current minConsistencyValue
       //  discard bundle
       if (
-        bundleStore.length == this.maxBundles &&
-        bundle.consistence < minConsistencyValue
+        bundle == null ||
+        (bundleStore.length == this.maxBundles &&
+          bundle.consistence < minConsistencyValue)
       ) {
+        this.increaseIndexStore(variables, indexStore);
         continue;
-      }
-      if (bundle.consistence < minConsistencyValue) {
-        minConsistencyValue = bundle.consistence;
       }
       if (bundleStore.length < this.maxBundles) {
         const index = this.binarySearchDescendingInputValues(
@@ -135,16 +128,21 @@ export class ConcistencyMatrix {
         );
         bundleStore.splice(index, 0, bundle);
       }
+      // set new minConsistence
+      minConsistencyValue = bundleStore[0].consistence;
       this.increaseIndexStore(variables, indexStore);
     }
-    console.log("a");
-    console.log(a);
-    let bundleMatrix = {
-      bundles: bundleStore,
-      bundleMatrixRowColumnCombinations: this.createAllRowColumnPairCombinations(
-        this.metadataByVariable
-      )
-    } as BundleMatrix;
+    const rowColumnCombination = this.createAllRowColumnPairCombinations(
+      this.metadataByVariable
+    );
+    const denseBundleData = this.bundleDataToDense(
+      bundleStore,
+      rowColumnCombination
+    );
+    let bundleMatrix: BundleMatrix = {
+      bundles: denseBundleData,
+      bundleMatrixRowColumnCombinations: rowColumnCombination
+    };
     return bundleMatrix;
   }
 
@@ -159,9 +157,18 @@ export class ConcistencyMatrix {
     const bundleOptions = this.indexStoreReturnVariables(indexStore, variables);
     // get all bundleoptions combinations (there should be a value in the matrix)
     // in matrix: row-keys of the selected options (not all possible row-keys)
-    const optionCombinations: MetadataVariableOption[][] = this.createBundleOptionsKombination(
-      bundleOptions
-    );
+    const optionCombinations: MetadataVariableOption[][] =
+      this.createBundleOptionsKombination(bundleOptions);
+    let isConsistent = true;
+    optionCombinations.forEach((a) => {
+      if (currentVariablesData[a[1].index][a[0].index] == 1) {
+        isConsistent = false;
+        return;
+      }
+    });
+    if (!isConsistent) {
+      return null;
+    }
     return {
       name: "bundle " + runIndex,
       consistence: optionCombinations.reduce((acc, a) => {
@@ -292,6 +299,16 @@ export class ConcistencyMatrix {
       }
     }
     return result;
+  }
+
+  bundleDataToDense(
+    bundleStore: Bundle[],
+    rowColumnCombination: string[][]
+  ): {
+    data: number[][];
+    metaData: BundleData[];
+  } {
+    return null;
   }
 }
 
