@@ -36,5 +36,16 @@
 
     <button mat-raised-button color="" (click)="downloadBundles($event)">Download konsistente Strategiebündel</button>
 
+    <div style="height: 100px"></div>
+
+    <button mat-raised-button color="" (click)="startClusteranalysis($event)">Starte Clusteranalyse (Ellenbogen-Methode)</button>
+
+    <div style="height: 50px"></div>
+
+    <ng-container *ngIf="clusterAnalysisRunning">
+      <div>
+        Berechnungen der Clusteranalyse laufen...
+      </div>
+    </ng-container>
   </div>
 </div>

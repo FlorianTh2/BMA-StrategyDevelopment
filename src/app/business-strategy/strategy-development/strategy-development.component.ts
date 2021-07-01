@@ -5,6 +5,7 @@ import { ConcistencyMatrix } from "./models/concistencyMatrix";
 import { Subject } from "rxjs";
 import { IBundleMatrix } from "../v-1-strategy-development/model/bundleMatrix.interface";
 import { BundleMatrix } from "./models/bundleMatrix";
+import { Kmeans } from "./models/kmeans";
 
 @Component({
   selector: "app-strategy-development",
@@ -16,6 +17,7 @@ export class StrategyDevelopmentComponent implements OnInit, OnDestroy {
   consistencyMatrix: ConcistencyMatrix;
   bundleMatrix: BundleMatrix;
   destroy$: Subject<boolean> = new Subject<boolean>();
+  clusterAnalysisRunning: boolean = false;
 
   constructor() {}
 
@@ -112,5 +114,25 @@ export class StrategyDevelopmentComponent implements OnInit, OnDestroy {
     var wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, workSheet, fileName);
     XLSX.writeFile(wb, fileName + ".xlsx");
+  }
+
+  startClusteranalysis($event: MouseEvent) {
+    this.clusterAnalysisRunning = true;
+    const exampleData = [
+      [0.83685684, 2.13635938],
+      [-1.4136581, 7.40962324],
+      [1.15521298, 5.09961887],
+      [-1.01861632, 7.81491465],
+      [1.27135141, 1.89254207],
+      [3.43761754, 0.26165417],
+      [-1.80822253, 1.59701749],
+      [1.41372442, 4.38117707],
+      [-0.20493217, 8.43209665],
+      [-0.71109961, 8.66043846]
+    ];
+    const kmeans = new Kmeans(5, 0, 2);
+    kmeans.find_clusters(exampleData);
+    this.clusterAnalysisRunning = false;
+    console.log(kmeans.inertia);
   }
 }
