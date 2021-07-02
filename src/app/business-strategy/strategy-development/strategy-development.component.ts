@@ -146,8 +146,8 @@ export class StrategyDevelopmentComponent implements OnInit, OnDestroy {
       a++
     ) {
       const kmeans = new Kmeans(a, 2);
-      // kmeans.find_clusters(this.bundleMatrix.bundles);
-      kmeans.find_clusters(exampleDate);
+      kmeans.find_clusters(this.bundleMatrix.bundles);
+      // kmeans.find_clusters(exampleDate);
       this.clusterAnalysisResults[a] = {
         labels: kmeans.labels,
         centroids: kmeans.centroids,

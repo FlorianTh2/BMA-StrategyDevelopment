@@ -19,7 +19,7 @@ export class BasicLineChartComponent implements OnInit {
   // dont work directly on svg, instead work on group of svg
   private g1: any;
   private tooltip: any;
-  private margin = { top: 10, right: 30, bottom: 30, left: 60 };
+  private margin = { top: 10, right: 60, bottom: 75, left: 60 };
   private height: number = 400 - this.margin.top - this.margin.bottom;
   private width: number = 800 - this.margin.left - this.margin.right;
   private colorData: string = "#3D4D5D";
@@ -32,10 +32,15 @@ export class BasicLineChartComponent implements OnInit {
   }
 
   initChart(): void {
+    const maxValue = Math.max(...this.data.map((a) => a.indexData));
+    // give 5px per digit more to properly display leftaxislabel
+    this.margin.left =
+      this.margin.left +
+      [...maxValue.toString()].reduce((aAcc, a) => aAcc + 5, 0);
     this.svg = d3
       .select("#chart")
       .append("svg")
-      .attr("width", this.width + this.margin.left + this.margin.right)
+      .attr("width", this.width + this.margin.left + +this.margin.right)
       .attr("height", this.height + this.margin.top + this.margin.bottom);
 
     this.g1 = this.svg
@@ -78,7 +83,10 @@ export class BasicLineChartComponent implements OnInit {
 
     const yscale = d3
       .scaleLinear()
-      .domain([0, Math.max(...this.data.map((a) => a.indexData))])
+      .domain([
+        Math.min(...this.data.map((a) => a.indexData)),
+        Math.max(...this.data.map((a) => a.indexData))
+      ])
       .nice()
       .range([this.height, 0]);
 
@@ -91,6 +99,16 @@ export class BasicLineChartComponent implements OnInit {
       .attr("transform", "translate(0," + this.height + ")")
       .call(d3.axisBottom(xscale));
 
+    const axisBottomLabel = g1
+      .selectAll(".gAxisBottomLabel")
+      .data([-1])
+      .enter()
+      .append("text")
+      .attr("class", "gAxisBottomLabel")
+      .attr("x", this.width / 2)
+      .attr("y", this.height + this.margin.top + this.margin.bottom / 2)
+      .text("Anzahl der Bündel");
+
     const axisLeft = g1
       .selectAll(".gAxisLeft")
       .data([-1])
@@ -98,6 +116,19 @@ export class BasicLineChartComponent implements OnInit {
       .append("g")
       .attr("class", "gAxisLeft")
       .call(d3.axisLeft(yscale));
+
+    const axisLeftLabel = g1
+      .selectAll(".gAxisLeftLabel")
+      .data([-1])
+      .enter()
+      .append("text")
+      .attr("class", "gAxisLeftLabel")
+      // it shows up somehow in the middle but did not fully understand that x-calculation
+      .attr("x", -this.margin.left)
+      .attr("y", -this.margin.left / 2)
+      .attr("transform", "rotate(-90)")
+      .style("text-anchor", "middle")
+      .text("Aggregierter Abstand");
 
     const pathLineWithLineObjects = g1
       .selectAll(".pathline")
@@ -162,7 +193,7 @@ export class BasicLineChartComponent implements OnInit {
       .append("rect")
       .attr("class", "legend-rect")
       .attr("x", this.width + this.margin.left + this.margin.right - 175)
-      .attr("y", (a) => 0)
+      .attr("y", 0)
       .attr("width", 10)
       .attr("height", 10)
       .attr("fill", this.colorData);
