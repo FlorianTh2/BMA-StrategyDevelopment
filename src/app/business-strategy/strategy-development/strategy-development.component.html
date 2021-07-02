@@ -47,5 +47,11 @@
         Berechnungen der Clusteranalyse laufen...
       </div>
     </ng-container>
+
+    <ng-container *ngIf="dictIsEmpty(clusterAnalysisResults)">
+      <div>
+        <app-basic-line-chart [data]="getScatterPlotInput(clusterAnalysisResults)"></app-basic-line-chart>
+      </div>
+    </ng-container>
   </div>
 </div>

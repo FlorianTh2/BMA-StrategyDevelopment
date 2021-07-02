@@ -6,6 +6,9 @@ import { Subject } from "rxjs";
 import { IBundleMatrix } from "../v-1-strategy-development/model/bundleMatrix.interface";
 import { BundleMatrix } from "./models/bundleMatrix";
 import { Kmeans } from "./models/kmeans";
+import * as seedrandom from "seedrandom";
+import { ClusterResult } from "./models/clusterResult";
+import { ScatterPlotData } from "../../shared/models/scatterPlotData";
 
 @Component({
   selector: "app-strategy-development",
@@ -18,6 +21,7 @@ export class StrategyDevelopmentComponent implements OnInit, OnDestroy {
   bundleMatrix: BundleMatrix;
   destroy$: Subject<boolean> = new Subject<boolean>();
   clusterAnalysisRunning: boolean = false;
+  clusterAnalysisResults: Record<number, ClusterResult> = [];
 
   constructor() {}
 
@@ -116,9 +120,12 @@ export class StrategyDevelopmentComponent implements OnInit, OnDestroy {
     XLSX.writeFile(wb, fileName + ".xlsx");
   }
 
+  setClusterAnalysisRunStatus(running: boolean) {
+    this.clusterAnalysisRunning = running;
+  }
+
   startClusteranalysis($event: MouseEvent) {
-    this.clusterAnalysisRunning = true;
-    const exampleData = [
+    const exampleDate: number[][] = [
       [0.83685684, 2.13635938],
       [-1.4136581, 7.40962324],
       [1.15521298, 5.09961887],
@@ -130,9 +137,40 @@ export class StrategyDevelopmentComponent implements OnInit, OnDestroy {
       [-0.20493217, 8.43209665],
       [-0.71109961, 8.66043846]
     ];
-    const kmeans = new Kmeans(5, 0, 2);
-    kmeans.find_clusters(exampleData);
-    this.clusterAnalysisRunning = false;
-    console.log(kmeans.inertia);
+    this.setClusterAnalysisRunStatus(true);
+    const minConsideredClusterNumber = 1;
+    const maxConsideredClusterNumber = 10;
+    for (
+      let a = minConsideredClusterNumber;
+      a < maxConsideredClusterNumber;
+      a++
+    ) {
+      const kmeans = new Kmeans(a, 2);
+      // kmeans.find_clusters(this.bundleMatrix.bundles);
+      kmeans.find_clusters(exampleDate);
+      this.clusterAnalysisResults[a] = {
+        labels: kmeans.labels,
+        centroids: kmeans.centroids,
+        inertia: kmeans.inertia,
+        neededIterations: kmeans.iterations,
+        numberClusters: kmeans.numClusters
+      } as ClusterResult;
+    }
+    this.setClusterAnalysisRunStatus(false);
+  }
+
+  dictIsEmpty(dict: Record<any, any>) {
+    return Object.keys(dict).length != 0;
+  }
+
+  getScatterPlotInput(
+    clusterAnalysisResults: Record<number, ClusterResult>
+  ): ScatterPlotData[] {
+    return Object.values(clusterAnalysisResults).map((a) => {
+      return {
+        indexName: a.numberClusters.toString(),
+        indexData: a.inertia
+      } as ScatterPlotData;
+    });
   }
 }

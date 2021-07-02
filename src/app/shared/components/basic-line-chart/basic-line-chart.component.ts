@@ -1,0 +1,183 @@
+import { Component, Input, OnInit, ViewEncapsulation } from "@angular/core";
+import { InputMaturityModelSpiderChart } from "../../models/InputMaturityModelSpiderChart";
+import { ScatterPlotData } from "../../models/scatterPlotData";
+import * as d3 from "d3";
+
+@Component({
+  selector: "app-basic-line-chart",
+  templateUrl: "./basic-line-chart.component.html",
+  styleUrls: ["./basic-line-chart.component.scss"],
+  encapsulation: ViewEncapsulation.None
+})
+export class BasicLineChartComponent implements OnInit {
+  @Input()
+  // [[x,y], ...]
+  data: ScatterPlotData[];
+
+  hostElement: any;
+  private svg: any;
+  // dont work directly on svg, instead work on group of svg
+  private g1: any;
+  private tooltip: any;
+  private margin = { top: 10, right: 30, bottom: 30, left: 60 };
+  private height: number = 400 - this.margin.top - this.margin.bottom;
+  private width: number = 800 - this.margin.left - this.margin.right;
+  private colorData: string = "#3D4D5D";
+
+  constructor() {}
+
+  ngOnInit(): void {
+    this.initChart();
+    this.createdConnectedScatterPlot(this.g1);
+  }
+
+  initChart(): void {
+    this.svg = d3
+      .select("#chart")
+      .append("svg")
+      .attr("width", this.width + this.margin.left + this.margin.right)
+      .attr("height", this.height + this.margin.top + this.margin.bottom);
+
+    this.g1 = this.svg
+      // dont work on svg, instead work on one group of svg
+      .append("g")
+      .attr(
+        "transform",
+        "translate(" + this.margin.left + "," + this.margin.top + ")"
+      );
+  }
+
+  // https://www.d3-graph-gallery.com/graph/connectedscatter_basic.html
+  // https://stackoverflow.com/a/51676326/11244995
+  createdConnectedScatterPlot(g1) {
+    // base structure:
+    //  selectAll(nameX) -> data -> enter -> append -> attr(class, nameX)
+    //  nameX has to match
+    //
+    // short: after append g, you work with g
+    //
+    // long:
+    //  search for all .gPartialModelAxes in the scope of g1 (i.e. on all elements within g1 (but i guess only one level below g1))
+    //  fill with data, foreach datapoint in data applies following (here only one taken)
+    //  enter to apply data
+    //  append g
+    //  on this appended g, set class: gPartialModelAxes (so next time g1.selectAll(".gPartialModelAxes"))
+    //    searches for elements with classes gPartialModelAxes, it will find the new appended g with the given class
+    //
+    // g1.selectAll(".gPartialModelAxes")
+    //   .data([1])
+    //   .enter()
+    //   .append("g")
+    //   .attr("class", "gPartialModelAxes");
+
+    const xscale = d3
+      .scaleBand()
+      .domain(this.data.map((a) => a.indexName))
+      .rangeRound([0, this.width])
+      .padding(0.1);
+
+    const yscale = d3
+      .scaleLinear()
+      .domain([0, Math.max(...this.data.map((a) => a.indexData))])
+      .nice()
+      .range([this.height, 0]);
+
+    const axisBottom = g1
+      .selectAll(".gAxisBottom")
+      .data([-1])
+      .enter()
+      .append("g")
+      .attr("class", "gAxisBottom")
+      .attr("transform", "translate(0," + this.height + ")")
+      .call(d3.axisBottom(xscale));
+
+    const axisLeft = g1
+      .selectAll(".gAxisLeft")
+      .data([-1])
+      .enter()
+      .append("g")
+      .attr("class", "gAxisLeft")
+      .call(d3.axisLeft(yscale));
+
+    const pathLineWithLineObjects = g1
+      .selectAll(".pathline")
+      .data([this.data])
+      .enter()
+      .append("path")
+      .attr("class", "pathline")
+      .attr("fill", "none")
+      .attr("stroke", this.colorData)
+      .attr("stroke-width", 1.5)
+      .attr("class", "line")
+      .attr(
+        "d",
+        d3
+          .line()
+          // @ts-ignore
+          .x(function (d: ScatterPlotData) {
+            return xscale(d.indexName) + xscale.bandwidth() / 2;
+          })
+          // @ts-ignore
+          .y(function (d: ScatterPlotData) {
+            return yscale(d.indexData);
+          })
+      );
+
+    const scatterPointsOnPathLine = g1
+      .selectAll(".gPathpoints")
+      .data([-1])
+      .enter()
+      .append("g")
+      .attr("class", "gPathpoints")
+      .selectAll(".pathpoints")
+      .data(this.data)
+      .enter()
+      .append("circle")
+      .attr("class", "pathpoints")
+      .attr("cx", function (d: ScatterPlotData) {
+        return xscale(d.indexName) + xscale.bandwidth() / 2;
+      })
+      .attr("cy", function (d: ScatterPlotData) {
+        return yscale(d.indexData);
+      })
+      .attr("r", 5)
+      .attr("fill", this.colorData);
+
+    // create legend
+    const gLegend = this.svg
+      .selectAll(".g-legend")
+      // random value to be able to enter()
+      .data([1])
+      .enter()
+      .append("g")
+      .attr("class", "g-legend")
+      .attr("height", 100)
+      .attr("width", 300);
+
+    // create legend color squares
+    gLegend
+      .selectAll(".legend-rect")
+      .data(["Anzahl der Cluster"])
+      .enter()
+      .append("rect")
+      .attr("class", "legend-rect")
+      .attr("x", this.width + this.margin.left + this.margin.right - 175)
+      .attr("y", (a) => 0)
+      .attr("width", 10)
+      .attr("height", 10)
+      .attr("fill", this.colorData);
+
+    // create legend-text
+    gLegend
+      .selectAll(".legend-text")
+      .data(["Anzahl der Cluster"])
+      .enter()
+      .append("text")
+      .attr("class", "legend-text")
+      .attr("x", this.width + this.margin.left + this.margin.right - 150)
+      .attr("y", (a, b) => b * 20 + 10)
+      .attr("cursor", "pointer")
+      .attr("font-size", "11px")
+      .text((a) => a);
+  }
+}

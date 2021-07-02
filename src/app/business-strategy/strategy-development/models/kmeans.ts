@@ -2,26 +2,23 @@ import * as seedrandom from "seedrandom";
 
 export class Kmeans {
   // labels of each point (for each point: the index of its centroid-point)
-  labels: number[];
+  public labels: number[];
   // sum of euclidean distances of each data-point to its centroid-point
-  inertia: number;
+  public inertia: number;
   // number of needed iterations
-  iterations: number;
+  public iterations: number;
   // cordinates of centroids
-  centroids: number[][];
+  public centroids: number[][];
   // number of cluster this algorithm should take into consideration
-  numClusters: number;
-  // randomState to get same results with same input
-  randomState: number;
+  public numClusters: number;
   // tolerance indicates the "round" factor which is applied at pairwise_euclidean_distances_argmin
   // (and not directly on euclidean distance) to only affect the actual kmeans-algorithm
   // to not be affacted by changes which are very small
   // suggested: 1e-2 (2 decimal digits)
-  tolerance: number;
+  public tolerance: number;
 
-  constructor(numClusters: number, randomState: number, tolerance: number) {
+  constructor(numClusters: number, tolerance: number) {
     this.numClusters = numClusters;
-    this.randomState = randomState;
     this.tolerance = tolerance;
   }
 
@@ -86,10 +83,15 @@ export class Kmeans {
   }
 
   find_clusters(data: number[][]) {
-    // in script: i
+    if (data.length < this.numClusters) {
+      throw "you can not request more cluster than data-points you have.";
+    }
+    // in script: randomIndices === i
     const randomIndices = [];
     for (let a = 0; a < this.numClusters; a++) {
-      randomIndices.push(this.getRandomArbitrary(0, data.length));
+      randomIndices.push(
+        Math.floor(this.getRandomArbitrary(0, data.length - 1, a))
+      );
     }
     this.centroids = randomIndices.map((a) => data[a]);
     this.iterations = 0;
@@ -99,32 +101,46 @@ export class Kmeans {
         data,
         this.centroids
       );
-      let new_centroids = [];
+      let new_centroids: number[][] = [];
       for (let a = 0; a < this.numClusters; a++) {
-        const a_center_datapoints_indeces = this.labels.filter((b) => b === a);
-        const a_center_datapoints = a_center_datapoints_indeces.map(
-          (b) => data[b]
-        );
-        const a_center = this.get_mean(a_center_datapoints);
-        new_centroids.push(a_center);
+        const a_center_datapoints_indices = this.labels.filter((b) => b === a);
+        if (a_center_datapoints_indices.length == 0) {
+          new_centroids.push(this.centroids[a]);
+        } else {
+          const a_center_datapoints = a_center_datapoints_indices.map(
+            (b) => data[b]
+          );
+          const a_center = this.get_mean(a_center_datapoints);
+          new_centroids.push(a_center);
+        }
       }
+      this.iterations += 1;
+      this.inertia = this.euclidean_inertia(this.centroids, data, this.labels);
       if (this.arraysEqual(this.centroids, new_centroids)) {
         break;
       }
       this.centroids = new_centroids;
-      this.inertia = this.euclidean_inertia(this.centroids, data, this.labels);
-      this.iterations += 1;
     }
   }
 
   // https://www.npmjs.com/package/seedrandom
-  getRandomArbitrary(min, max) {
-    return seedrandom(this.randomState) * (max - min) + min;
+  // get with same counter same result
+  // returns with different counter different result
+  getRandomArbitrary(min: number, max: number, counter: number) {
+    const randomSeed = seedrandom(counter)();
+    const result = randomSeed * (max - min) + min;
+    return result;
   }
 
-  arraysEqual(arr0, arr1) {
+  arraysEqual(arr0: number[][], arr1: number[][]): boolean {
     for (let a = 0; a < arr0.length; ++a) {
-      if (arr0[a] !== arr1[a]) return false;
+      for (let b = 0; b < arr0[a].length; ++b) {
+        if (
+          arr0[a][b].toFixed(this.tolerance) !==
+          arr1[a][b].toFixed(this.tolerance)
+        )
+          return false;
+      }
     }
     return true;
   }
