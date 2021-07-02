@@ -1,5 +1,8 @@
 import { Component, Input, OnInit, ViewEncapsulation } from "@angular/core";
-import { InputMaturityModelSpiderChart } from "../../models/InputMaturityModelSpiderChart";
+import {
+  InputMaturityModelSpiderChart,
+  InputSubUserPartialModelSpiderChart
+} from "../../models/InputMaturityModelSpiderChart";
 import { ScatterPlotData } from "../../models/scatterPlotData";
 import * as d3 from "d3";
 
@@ -50,6 +53,18 @@ export class BasicLineChartComponent implements OnInit {
         "transform",
         "translate(" + this.margin.left + "," + this.margin.top + ")"
       );
+
+    // init/prepare tooltip for following definition of edge-point-hover
+    this.tooltip = d3
+      .select("#chart")
+      .append("div")
+      .style("position", "absolute")
+      .style("visibility", "hidden")
+      .style("background-color", "white")
+      .style("border", "solid")
+      .style("border-width", "1px")
+      .style("border-radius", "5px")
+      .style("padding", "10px");
   }
 
   // https://www.d3-graph-gallery.com/graph/connectedscatter_basic.html
@@ -74,6 +89,8 @@ export class BasicLineChartComponent implements OnInit {
     //   .enter()
     //   .append("g")
     //   .attr("class", "gPartialModelAxes");
+
+    const module = this;
 
     const xscale = d3
       .scaleBand()
@@ -172,7 +189,17 @@ export class BasicLineChartComponent implements OnInit {
         return yscale(d.indexData);
       })
       .attr("r", 5)
-      .attr("fill", this.colorData);
+      .attr("fill", this.colorData)
+      .on("mouseover", function (event, data: ScatterPlotData) {
+        module.tooltip
+          .html("<div>Inertia: " + data.indexData + "</div>")
+          .style("left", module.getXTooltip(this, module.tooltip))
+          .style("top", module.getYTooltip(this, module.tooltip))
+          .style("visibility", "visible");
+      })
+      .on("mouseout", () => {
+        module.tooltip.style("visibility", "hidden");
+      });
 
     // create legend
     const gLegend = this.svg
@@ -210,5 +237,23 @@ export class BasicLineChartComponent implements OnInit {
       .attr("cursor", "pointer")
       .attr("font-size", "11px")
       .text((a) => a);
+  }
+
+  // keep in mind where the tooltip div spawns: only with right x+y at the buttom-left-corner of edge
+  getXTooltip(currentObject, tooltipSelection): string {
+    return (
+      currentObject.getBoundingClientRect().x -
+      tooltipSelection.node().getBoundingClientRect().width / 2 +
+      currentObject.getBoundingClientRect().width / 2 +
+      "px"
+    );
+  }
+
+  getYTooltip(currentObject, tooltipSelection): string {
+    return (
+      currentObject.getBoundingClientRect().y -
+      tooltipSelection.node().getBoundingClientRect().height +
+      "px"
+    );
   }
 }
