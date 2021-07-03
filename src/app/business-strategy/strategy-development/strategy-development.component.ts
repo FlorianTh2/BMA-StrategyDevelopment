@@ -22,6 +22,11 @@ export class StrategyDevelopmentComponent implements OnInit, OnDestroy {
   destroy$: Subject<boolean> = new Subject<boolean>();
   clusterAnalysisRunning: boolean = false;
   clusterAnalysisResults: Record<number, ClusterResult> = [];
+  selectedNumberOfClusters: number = 1;
+  maxConsideredClusters: number = 10;
+  minConsideredClusters: number = 1;
+  maxIterations: number = 500_000;
+  maxStoredBundles: number = 4_000;
 
   constructor() {}
 
@@ -67,6 +72,8 @@ export class StrategyDevelopmentComponent implements OnInit, OnDestroy {
   }
 
   createBundles($event: MouseEvent) {
+    this.consistencyMatrix._maxIterations = this.maxIterations;
+    this.consistencyMatrix._maxBundles = this.maxStoredBundles;
     console.time("createBundleMatrix");
     this.bundleMatrix = this.consistencyMatrix.createBundleMatrix(
       this.consistencyMatrix.array,
@@ -138,11 +145,9 @@ export class StrategyDevelopmentComponent implements OnInit, OnDestroy {
       [-0.71109961, 8.66043846]
     ];
     this.setClusterAnalysisRunStatus(true);
-    const minConsideredClusterNumber = 1;
-    const maxConsideredClusterNumber = 10;
     for (
-      let a = minConsideredClusterNumber;
-      a < maxConsideredClusterNumber;
+      let a = this.minConsideredClusters;
+      a < this.maxConsideredClusters;
       a++
     ) {
       const kmeans = new Kmeans(a, 2);
@@ -172,5 +177,49 @@ export class StrategyDevelopmentComponent implements OnInit, OnDestroy {
         indexData: a.inertia
       } as ScatterPlotData;
     });
+  }
+
+  setSelectedNumberOfClusters(event) {
+    if (event.target.value > this.maxConsideredClusters) {
+      this.selectedNumberOfClusters = this.maxConsideredClusters;
+    } else if (event.target.value < this.minConsideredClusters) {
+      console.log("hi");
+      this.selectedNumberOfClusters = this.minConsideredClusters;
+    } else {
+      this.selectedNumberOfClusters = parseInt(event.target.value);
+    }
+    console.log(this.selectedNumberOfClusters);
+  }
+
+  setMinConsideredClusters(event) {
+    this.minConsideredClusters = event.target.value;
+  }
+
+  setMaxConsideredClusters(event) {
+    this.maxConsideredClusters = event.target.value;
+  }
+
+  getNumberOfVariablesConsistencyMatrix(): number {
+    return this.consistencyMatrix.getNumberOfVariables();
+  }
+
+  getNumberOfOptionsConsistencyMatrix(): number {
+    return this.consistencyMatrix.getNumberOfOptions();
+  }
+
+  getMaxIterations(): number {
+    return this.consistencyMatrix.getMaxNumberOfBundles(
+      this.consistencyMatrix.convertVariablesDictToList(
+        this.consistencyMatrix.metadataByVariable
+      )
+    );
+  }
+
+  setMaxIterations(event): void {
+    this.maxIterations = event.target.value;
+  }
+
+  setMaxStoredBundles(event): void {
+    this.maxStoredBundles = event.target.value;
   }
 }

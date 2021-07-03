@@ -7,13 +7,20 @@ import { BundleData } from "./bundleData";
 export class ConcistencyMatrix {
   array: number[][];
   metadataByVariable: Record<string, MetadataVariable>;
-  maxIterations: number = 500_000;
-  maxBundles: number = 4_000;
+  _maxIterations: number = 500_000;
+  _maxBundles: number = 4_000;
 
   constructor(data: Array<Array<any>>) {
     let parseResult = this.parseAoAToConsistencyMatrix(data);
     this.array = parseResult.array;
     this.metadataByVariable = parseResult.metadataByVariable;
+  }
+
+  set maxBundles(value: number) {
+    this._maxBundles = value;
+  }
+  set maxIterations(value: number) {
+    this._maxIterations = value;
   }
 
   parseAoAToConsistencyMatrix(dataInputWithHeader: Array<Array<any>>) {
@@ -64,17 +71,15 @@ export class ConcistencyMatrix {
     currentVariablesMetaData: Record<string, MetadataVariable>
   ): BundleMatrix {
     console.log("createBundleMatrix");
-    let variables: MetadataVariableOption[][] = Object.entries(
+    let variables: MetadataVariableOption[][] = this.convertVariablesDictToList(
       currentVariablesMetaData
-    ).map(([aKey, aValue]) => Object.values(aValue.options));
+    );
     let indexStore: number[] = variables.map((a) => 0);
     let bundleStore: Bundle[] = [];
     let minConsistencyValue = -1;
-    const numberBundles = variables.reduce((acc, item) => {
-      return acc * item.length;
-    }, 1);
+    const numberBundles = this.getMaxNumberOfBundles(variables);
     let a;
-    for (a = 0; a < numberBundles && a < this.maxIterations; a++) {
+    for (a = 0; a < numberBundles && a < this._maxIterations; a++) {
       const bundle = this.createBundle(
         indexStore,
         currentVariablesData,
@@ -87,13 +92,13 @@ export class ConcistencyMatrix {
       //  discard bundle
       if (
         bundle == null ||
-        (bundleStore.length == this.maxBundles &&
+        (bundleStore.length == this._maxBundles &&
           bundle.consistence < minConsistencyValue)
       ) {
         this.increaseIndexStore(variables, indexStore);
         continue;
       }
-      if (bundleStore.length < this.maxBundles) {
+      if (bundleStore.length < this._maxBundles) {
         const index = this.binarySearchDescendingInputValues(
           bundleStore,
           bundle.consistence
@@ -200,12 +205,19 @@ export class ConcistencyMatrix {
     }
   }
 
-  // let currentVariable = remainingVariables[0];
-  // let currentOptions: string[] = Object.keys(
-  //   metadataByVariable[currentVariable].options
-  // );
-  // remainingVariables = remainingVariables.slice(1);
-  // remainingVariables.forEach((a) => {});
+  getMaxNumberOfBundles(variables: MetadataVariableOption[][]): number {
+    return variables.reduce((acc, item) => {
+      return acc * item.length;
+    }, 1);
+  }
+
+  convertVariablesDictToList(
+    currentVariablesMetaData: Record<string, MetadataVariable>
+  ): MetadataVariableOption[][] {
+    return Object.entries(currentVariablesMetaData).map(([aKey, aValue]) =>
+      Object.values(aValue.options)
+    );
+  }
 
   // https://stackoverflow.com/questions/1344500/efficient-way-to-insert-a-number-into-a-sorted-array-of-numbers
   // https://stackoverflow.com/questions/22697936/binary-search-in-javascript
@@ -248,22 +260,6 @@ export class ConcistencyMatrix {
     }
     return combinationsArray;
   }
-
-  // // input: e.g. ["1A", "2A", "3A"]
-  // // output e.g. [["1A", "2A"], ["1A", "3A"], ["2A", "3A"]]
-  // createBundleOptionsKombination(options: MetadataVariableOption[]) {
-  //   let combinationsArray: BundleMetaData[] = [];
-  //   for (let a = 0; a < options.length; a++) {
-  //     for (let b = a + 1; b < options.length; b++) {
-  //       combinationsArray.push({
-  //         row: options[b].index,
-  //         column: options[b].index,
-  //         id: [options[a].id, options[b].id]
-  //       });
-  //     }
-  //   }
-  //   return combinationsArray;
-  // }
 
   // input: e.g. this.metadataByVariable with 3_2 (3 variables, 2 options each)
   // output e.g. [["1A", "2A"], ["1A", "2B"], ["1A", "3A"], ["1A", "3B"], ["1B", "2A"], ["1B", "2B"], ["1B", "3A"], ["1B", "3B"], ["2A", "3A"], ["2A", "3B"], ["2B", "3A"], ["2B", "3B"]]
@@ -318,5 +314,15 @@ export class ConcistencyMatrix {
       data: resultData,
       metaData: resultMetaData
     };
+  }
+
+  getNumberOfVariables(): number {
+    return Object.keys(this.metadataByVariable).length;
+  }
+
+  getNumberOfOptions(): number {
+    return Object.values(this.metadataByVariable).reduce((aAcc, a) => {
+      return aAcc + a.numberOptions;
+    }, 0);
   }
 }

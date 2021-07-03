@@ -9,6 +9,9 @@
   </div>
   <div>
 
+    <h5>
+      Konsistenzmatrix hochladen
+    </h5>
     <button mat-raised-button color="" (click)="fileInput.click()">Konsistenzmatrix hochladen</button>
     <input hidden type="file" (change)="uploadConsistencyMatrix($event)" #fileInput id="file">
 
@@ -16,11 +19,58 @@
 
     <ng-container *ngIf="consistencyMatrix">
       <div>
-        Ihre Konsistenzmatrix wurde erfolgreich hochgeladen.
+        Ihre Konsistenzmatrix wurde erfolgreich hochgeladen. Sie hat folgende Parameter:
+        <div style="height: 25px"></div>
+        <div>
+          Anzahl Variablen: [{{getNumberOfVariablesConsistencyMatrix()}}]
+        </div>
+        <div style="height: 10px"></div>
+        <div>
+          Anzahl Optionen: [{{getNumberOfOptionsConsistencyMatrix()}}]
+        </div>
       </div>
     </ng-container>
 
     <div style="height: 100px"></div>
+
+    <h5>
+      Erstellung Strategiebündel
+    </h5>
+    Allgemeine Information
+    <br>
+    Die Bündelerstellung erstellt für jede mögliche Optionskombination ein mögliches Bündel. Dabei existieren dabei m^n verschiedene Bündel, wobei m = Anzahl der Operationen, n = Anzahl der Variablen ist.
+    Jedes einzelne Bündel hat dabei (n/2) * (n-1) verschiedene Optionen, wobei n = Anzahl der Variablen.
+    Beispiel: 10 Variablen mit je 5 Optionen: 5^10 = ~9.77 Millionen Bündel, wobei jedes einzelne Bündel 45 Optionskombinationen enthällt. Dies ergibt somit ca. 45 Millionen Rechenoperationen.
+    Die Anzahl der Bündel steigt dabei exponentiell. Die Berechnung praktische Berechnung findet im Frontend statt.
+    Eine Richtlinie ist dabei folgende: 45 Mio. Rechenoperationen = ca. 30s.
+
+    Es werden somit optionale Limitierungen eingeführt.
+    <div>
+    Bitte geben Sie ein Limit für die zu betrachteten Bündel an:
+    Empfohlen ist ein Limit auf ca. 500.000 Iterationen um eine verzögerungsfreie Betrachtung zu gewährleisten.
+      <br>
+      Bitte geben Sie ebenfalls ein Limit für die Anzahl der zu speichernden (konsistentesten) Bündel an.
+      Dies ist notwendig da die Anzahl der Bündel und der Optionskombinationen pro Bündel speicherintensiv ist und der Browser ein Limit von ca. 2GB hat.
+      Beispiel: 10 Variablen je 5 Optionen = 45 Mio. Speichereinheiten. 45 Mio * 4 Byte = ca. 180 MB Rohspeicherplatz.
+      Empfohlen ist ein Limit auf ca. 4.000 Bündel um eine verzögerungsfreie Betrachtung zu gewährleisten.
+    <div style="height: 25px"></div>
+    <ng-container *ngIf="consistencyMatrix">
+      Für die aktuelle Konsistenzmatrix sind maximal: [{{getMaxIterations()}}] Bündel / Iterationen zu durchlaufen.
+      Die Gleiche Anzahl an Bündeln ist maximal speicherbar.
+    </ng-container>
+    </div>
+    <div style="height: 25px"></div>
+    <div>
+      Bitte geben Sie ein Limit für die zu betrachteten / durchlaufenden Bündel an:
+      <input matInput type="number" value="{{maxIterations}}" (input)="setMaxIterations($event)"  />
+    </div>
+    <div style="height: 20px"></div>
+    <div>
+      Bitte geben Sie ein Limit für die zu speichernden Bündel an:
+      <input matInput type="number" value="{{maxStoredBundles}}" (input)="setMaxStoredBundles($event)"  />
+    </div>
+
+    <div style="height: 20px"></div>
 
     <button mat-raised-button color="" (click)="createBundles($event)">Erstelle konsistente Strategiebündel</button>
 
@@ -28,15 +78,41 @@
 
     <ng-container *ngIf="bundleMatrix">
       <div>
-        Die Strategiebündel wurden nun erstellt.
+        Innerhalb von [{{maxIterations}}] wurden [{{bundleMatrix.bundles.length}}] Bündel erstellt.
       </div>
     </ng-container>
 
     <div style="height: 50px"></div>
-
+    <h5>
+      Download der konsistentesten Bündel
+    </h5>
+    Der Download der konsistenten Bündel hängt ab von 1. Der Anzahl der gespeicherten Bündel und 2. der Optionskombinationen pro Bündel ab.
+    Beispiel: 10 Variablen je 5 Optionen, wobei 4.000 Bündel gespeichert wurden: 4000 Bündel  * 45 Optionskombinationen = 180.000 Speichereinheiten.
+    Der Download erfolgt im Excel-Format. 180.000 Speichereinheiten entspricht einer Downloadgröße von ca. 200 MB. 200 MB benötigen ca. 20 Sekunden zum Schreiben der Datei.
+    <div style="height: 25px"></div>
     <button mat-raised-button color="" (click)="downloadBundles($event)">Download konsistente Strategiebündel</button>
 
     <div style="height: 100px"></div>
+
+    <div>
+      Für die Clusteranalyse geben Sie bitte die zu betrachtete minimale Clusteranzahl und maximale Clusteranzahl an.
+      <br>
+      Empfohlen ist eine Clusteranalyse im Bereich 1-10.
+      <br>
+      <div style="height: 20px"></div>
+
+      Minimale Grenze (ab 1):
+      <div style="height: 20px"></div>
+
+      <input matInput type="number" value="{{minConsideredClusters}}" (input)="setMinConsideredClusters($event)"  />
+      <div style="height: 20px"></div>
+
+      Maximale Grenze (ab 1):
+      <div style="height: 20px"></div>
+
+      <input matInput type="number" value="{{maxConsideredClusters}}" (input)="setMaxConsideredClusters($event)"  />
+      <div style="height: 20px"></div>
+    </div>
 
     <button mat-raised-button color="" (click)="startClusteranalysis($event)">Starte Clusteranalyse (Ellenbogen-Methode)</button>
 
@@ -52,6 +128,17 @@
       <div>
         <app-basic-line-chart [data]="getScatterPlotInput(clusterAnalysisResults)"></app-basic-line-chart>
       </div>
+
+      <div style="height: 50px"></div>
+      Bitte entnehmen Sie der Ellenogenkurve eine angemessene Clusteranzahl und geben Sie diese für folgende Berechnungen an.
+      <br>
+      Die Anzahl muss zwischen [{{minConsideredClusters}}] und [{{maxConsideredClusters}}] liegen.
+      <br>
+      <div style="height: 10px"></div>
+      <input matInput type="number" min="{{minConsideredClusters}}" max="{{maxConsideredClusters}}" (keypress)="setSelectedNumberOfClusters($event)" value="{{selectedNumberOfClusters}}" (input)="setSelectedNumberOfClusters($event)"  />
     </ng-container>
+
+
+
   </div>
 </div>
