@@ -62,12 +62,20 @@
     <div style="height: 25px"></div>
     <div>
       Bitte geben Sie ein Limit für die zu betrachteten / durchlaufenden Bündel an:
+      <br>
+      <mat-form-field class="example-full-width" appearance="fill">
+        <mat-label>Maximale Iterationen</mat-label>
       <input matInput type="number" value="{{maxIterations}}" (input)="setMaxIterations($event)"  />
+      </mat-form-field>
     </div>
     <div style="height: 20px"></div>
     <div>
       Bitte geben Sie ein Limit für die zu speichernden Bündel an:
+      <br>
+      <mat-form-field class="example-full-width" appearance="fill">
+        <mat-label>Größe Bündelspeicher</mat-label>
       <input matInput type="number" value="{{maxStoredBundles}}" (input)="setMaxStoredBundles($event)"  />
+      </mat-form-field>
     </div>
 
     <div style="height: 20px"></div>
@@ -83,6 +91,7 @@
     </ng-container>
 
     <div style="height: 50px"></div>
+
     <h5>
       Download der konsistentesten Bündel
     </h5>
@@ -94,6 +103,24 @@
 
     <div style="height: 100px"></div>
 
+    <h5>
+      Clusteranalyse
+    </h5>
+    <div>
+      Für die Clusteranalyse gibt es einige Parameter. Bitten legen Sie diese nachfolgend fest.
+    </div>
+    <div>
+      Bitte geben Sie das Clusterverfahren an, mit dem die Clusteranalyse erfolgen soll.
+      <br>
+      <mat-form-field appearance="fill">
+        <mat-label>Clusterverfahren</mat-label>
+        <mat-select [(ngModel)]="selectedClusterAlgorithm">
+          <mat-option *ngFor="let clusterAlgorithm of clusterAlgorithms" [value]="clusterAlgorithm.value">
+            {{clusterAlgorithm.viewValue}}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+    </div>
     <div>
       Für die Clusteranalyse geben Sie bitte die zu betrachtete minimale Clusteranzahl und maximale Clusteranzahl an.
       <br>
@@ -104,15 +131,25 @@
       Minimale Grenze (ab 1):
       <div style="height: 20px"></div>
 
+      <div style="height: 10px"></div>
+      <mat-form-field class="example-full-width" appearance="fill">
+      <mat-label>Minimale Clusterzahl</mat-label>
       <input matInput type="number" value="{{minConsideredClusters}}" (input)="setMinConsideredClusters($event)"  />
+      </mat-form-field>
       <div style="height: 20px"></div>
 
       Maximale Grenze (ab 1):
       <div style="height: 20px"></div>
 
+      <mat-form-field class="example-full-width" appearance="fill">
+        <mat-label>Maximale Clusterzahl</mat-label>
       <input matInput type="number" value="{{maxConsideredClusters}}" (input)="setMaxConsideredClusters($event)"  />
+      </mat-form-field>
       <div style="height: 20px"></div>
     </div>
+
+
+
 
     <button mat-raised-button color="" (click)="startClusteranalysis($event)">Starte Clusteranalyse (Ellenbogen-Methode)</button>
 
@@ -124,7 +161,7 @@
       </div>
     </ng-container>
 
-    <ng-container *ngIf="dictIsEmpty(clusterAnalysisResults)">
+    <ng-container *ngIf="!dictIsEmpty(clusterAnalysisResults)">
       <div>
         <app-basic-line-chart [data]="getScatterPlotInput(clusterAnalysisResults)"></app-basic-line-chart>
       </div>
@@ -135,7 +172,10 @@
       Die Anzahl muss zwischen [{{minConsideredClusters}}] und [{{maxConsideredClusters}}] liegen.
       <br>
       <div style="height: 10px"></div>
+      <mat-form-field class="example-full-width" appearance="fill">
+        <mat-label>Anzahl der Cluster</mat-label>
       <input matInput type="number" min="{{minConsideredClusters}}" max="{{maxConsideredClusters}}" (keypress)="setSelectedNumberOfClusters($event)" value="{{selectedNumberOfClusters}}" (input)="setSelectedNumberOfClusters($event)"  />
+      </mat-form-field>
     </ng-container>
 
 

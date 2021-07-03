@@ -9,6 +9,7 @@ import { Kmeans } from "./models/kmeans";
 import * as seedrandom from "seedrandom";
 import { ClusterResult } from "./models/clusterResult";
 import { ScatterPlotData } from "../../shared/models/scatterPlotData";
+import { ClusterAlgorithm } from "./models/clusterAlgorithm";
 
 @Component({
   selector: "app-strategy-development",
@@ -27,6 +28,13 @@ export class StrategyDevelopmentComponent implements OnInit, OnDestroy {
   minConsideredClusters: number = 1;
   maxIterations: number = 500_000;
   maxStoredBundles: number = 4_000;
+  clusterAlgorithms: ClusterAlgorithm[] = [
+    {
+      value: "kmeans",
+      viewValue: "Kmeans-Algorithmus"
+    }
+  ];
+  private selectedClusterAlgorithm: string;
 
   constructor() {}
 
@@ -132,40 +140,43 @@ export class StrategyDevelopmentComponent implements OnInit, OnDestroy {
   }
 
   startClusteranalysis($event: MouseEvent) {
-    const exampleDate: number[][] = [
-      [0.83685684, 2.13635938],
-      [-1.4136581, 7.40962324],
-      [1.15521298, 5.09961887],
-      [-1.01861632, 7.81491465],
-      [1.27135141, 1.89254207],
-      [3.43761754, 0.26165417],
-      [-1.80822253, 1.59701749],
-      [1.41372442, 4.38117707],
-      [-0.20493217, 8.43209665],
-      [-0.71109961, 8.66043846]
-    ];
-    this.setClusterAnalysisRunStatus(true);
-    for (
-      let a = this.minConsideredClusters;
-      a < this.maxConsideredClusters;
-      a++
-    ) {
-      const kmeans = new Kmeans(a, 2);
-      kmeans.find_clusters(this.bundleMatrix.bundles);
-      // kmeans.find_clusters(exampleDate);
-      this.clusterAnalysisResults[a] = {
-        labels: kmeans.labels,
-        centroids: kmeans.centroids,
-        inertia: kmeans.inertia,
-        neededIterations: kmeans.iterations,
-        numberClusters: kmeans.numClusters
-      } as ClusterResult;
+    // switch between selectedClusterAlgorithms
+    if (this.selectedClusterAlgorithm == "kmeans") {
+      const exampleDate: number[][] = [
+        [0.83685684, 2.13635938],
+        [-1.4136581, 7.40962324],
+        [1.15521298, 5.09961887],
+        [-1.01861632, 7.81491465],
+        [1.27135141, 1.89254207],
+        [3.43761754, 0.26165417],
+        [-1.80822253, 1.59701749],
+        [1.41372442, 4.38117707],
+        [-0.20493217, 8.43209665],
+        [-0.71109961, 8.66043846]
+      ];
+      this.setClusterAnalysisRunStatus(true);
+      for (
+        let a = this.minConsideredClusters;
+        a < this.maxConsideredClusters;
+        a++
+      ) {
+        const kmeans = new Kmeans(a, 2);
+        kmeans.find_clusters(this.bundleMatrix.bundles);
+        // kmeans.find_clusters(exampleDate);
+        this.clusterAnalysisResults[a] = {
+          labels: kmeans.labels,
+          centroids: kmeans.centroids,
+          inertia: kmeans.inertia,
+          neededIterations: kmeans.iterations,
+          numberClusters: kmeans.numClusters
+        } as ClusterResult;
+      }
+      this.setClusterAnalysisRunStatus(false);
     }
-    this.setClusterAnalysisRunStatus(false);
   }
 
   dictIsEmpty(dict: Record<any, any>) {
-    return Object.keys(dict).length != 0;
+    return Object.keys(dict).length == 0;
   }
 
   getScatterPlotInput(
