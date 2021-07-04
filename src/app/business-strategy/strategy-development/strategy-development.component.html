@@ -176,6 +176,22 @@
         <mat-label>Anzahl der Cluster</mat-label>
       <input matInput type="number" min="{{minConsideredClusters}}" max="{{maxConsideredClusters}}" (keypress)="setSelectedNumberOfClusters($event)" value="{{selectedNumberOfClusters}}" (input)="setSelectedNumberOfClusters($event)"  />
       </mat-form-field>
+      <div style="height: 25px"></div>
+      Aktuell wurde intern die Clusteranalyse für [{{selectedNumberOfClusters}}] Cluster registriert. Somit wird mit den Ergebnissen dieser Analyse nachfolgend weiter gearbeitet.
+    </ng-container>
+
+    <div style="height: 100px"></div>
+    Alternativ können Sie die Clusteranalyse in einem externen Werkzeug erstellen und die Ergebnisse hier hochladen.
+    <div style="height: 25px"></div>
+    <button mat-raised-button color="" (click)="clusterMembershipMatrixInput.click()">ClusterMembership-Matrix hochladen</button>
+    <input hidden type="file" (change)="uploadClusterMembershipMatrix($event)" #clusterMembershipMatrixInput id="uploadClusterMembershipMatrix">
+
+    <div style="height: 25px"></div>
+
+    <ng-container *ngIf="clusterMembershipMatrix">
+      <div>
+        Ihre ClusterMembershipMatrix wurde erfolgreich hochgeladen.
+      </div>
     </ng-container>
 
 

@@ -10,6 +10,8 @@ import * as seedrandom from "seedrandom";
 import { ClusterResult } from "./models/clusterResult";
 import { ScatterPlotData } from "../../shared/models/scatterPlotData";
 import { ClusterAlgorithm } from "./models/clusterAlgorithm";
+import { ClusterMembershipMatrix } from "./models/clusterMembershipMatrix";
+import { WorkBook } from "xlsx";
 
 @Component({
   selector: "app-strategy-development",
@@ -34,7 +36,9 @@ export class StrategyDevelopmentComponent implements OnInit, OnDestroy {
       viewValue: "Kmeans-Algorithmus"
     }
   ];
-  private selectedClusterAlgorithm: string;
+  selectedClusterAlgorithm: string = this.clusterAlgorithms[0].value;
+  clusterMembershipMatrix: ClusterMembershipMatrix;
+  workbookClusterMembershipMatrix: WorkBook;
 
   constructor() {}
 
@@ -172,6 +176,12 @@ export class StrategyDevelopmentComponent implements OnInit, OnDestroy {
         } as ClusterResult;
       }
       this.setClusterAnalysisRunStatus(false);
+      this.clusterMembershipMatrix = new ClusterMembershipMatrix(
+        this.bundleMatrix
+      );
+      this.clusterMembershipMatrix.parseClusterResultToInternalDict(
+        this.clusterAnalysisResults[this.selectedNumberOfClusters]
+      );
     }
   }
 
@@ -199,6 +209,9 @@ export class StrategyDevelopmentComponent implements OnInit, OnDestroy {
     } else {
       this.selectedNumberOfClusters = parseInt(event.target.value);
     }
+    this.clusterMembershipMatrix.parseClusterResultToInternalDict(
+      this.clusterAnalysisResults[this.selectedNumberOfClusters]
+    );
     console.log(this.selectedNumberOfClusters);
   }
 
@@ -232,5 +245,45 @@ export class StrategyDevelopmentComponent implements OnInit, OnDestroy {
 
   setMaxStoredBundles(event): void {
     this.maxStoredBundles = event.target.value;
+  }
+
+  uploadClusterMembershipMatrix(event: Event) {
+    const element = event.currentTarget as HTMLInputElement;
+    let fileList: FileList | null = element.files;
+    if (fileList) {
+      if (fileList.length !== 1) {
+        throw new Error("Cannot use multiple files");
+      }
+      let file: File = fileList.item(0);
+      // https://stackoverflow.com/questions/28782074/excel-to-json-javascript-code
+      let fileReader = new FileReader();
+      fileReader.onloadend = (e) => {
+        var fileReaderResult = e.target.result as ArrayBufferLike;
+        // new array to handle xls AND xlsx AND csv
+        var fileReaderResultCasted = new Uint8Array(fileReaderResult);
+        this.workbookClusterMembershipMatrix = XLSX.read(
+          fileReaderResultCasted,
+          {
+            type: "array"
+          }
+        );
+
+        // only first sheet for now
+        var resultAoA: Array<Array<any>> = XLSX.utils.sheet_to_json(
+          this.workbookClusterMembershipMatrix.Sheets[
+            this.workbookClusterMembershipMatrix.SheetNames[0]
+          ],
+          {
+            header: 1
+          }
+        );
+
+        this.clusterMembershipMatrix = new ClusterMembershipMatrix(
+          this.bundleMatrix
+        );
+        this.clusterMembershipMatrix.parseFromAoAToInternalDict(resultAoA);
+      };
+      fileReader.readAsArrayBuffer(file);
+    }
   }
 }
