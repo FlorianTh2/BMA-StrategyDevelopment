@@ -197,7 +197,7 @@ export class BasicLineChartComponent implements OnInit {
         console.log(data.indexData);
         let bbox = this.getBBox();
         module.tooltip
-          .html("<div>Inertia: " + data.indexData + "</div>")
+          .html("<div>Inertia: " + data.indexData.toFixed(2) + "</div>")
           .style("left", module.getXTooltip(this, module.tooltip))
           .style("top", module.getYTooltip(this, module.tooltip))
           .style("visibility", "visible");
@@ -247,6 +247,7 @@ export class BasicLineChartComponent implements OnInit {
   // keep in mind where the tooltip div spawns: only with right x+y at the buttom-left-corner of edge
   getXTooltip(currentObject, tooltipSelection): string {
     return (
+      window.pageXOffset +
       currentObject.getBoundingClientRect().x -
       tooltipSelection.node().getBoundingClientRect().width / 2 +
       currentObject.getBoundingClientRect().width / 2 +
@@ -255,7 +256,6 @@ export class BasicLineChartComponent implements OnInit {
   }
 
   getYTooltip(currentObject, tooltipSelection): string {
-    // return window.pageYOffset + currentObject.getBoundingClientRect().y + "px";
     return (
       window.pageYOffset +
       currentObject.getBoundingClientRect().y -
