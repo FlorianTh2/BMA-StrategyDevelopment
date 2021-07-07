@@ -1,53 +1,69 @@
 import { ConcistencyMatrix } from "./concistencyMatrix";
 import { ClusterMembershipMatrix } from "./clusterMembershipMatrix";
-import { MetadataClusterGroup } from "./metadataClusterGroup";
 import { BundleMatrix } from "./bundleMatrix";
-import { MetadataVariable } from "./metadataVariable";
+import { MetadataBundleUsageVariable, MetadataBundleUsageVariableOption } from "./metadataBundleUsageVariable";
+import { ClusterGroup } from "../../v-1-strategy-development/model/clusterGroup";
 
 export class BundleUsageMatrix {
-  array: number[][];
-  metadataByVariable: MetadataVariable[];
-  clusterGroups: MetadataClusterGroup[];
+  // vertical row labels x
+  // ° o o o o o o
+  // x o o o o o o
+  // x o o o o o o
+  // x o o o o o o
+  // x o o o o o o
+  metadataBundleUsageVariables: MetadataBundleUsageVariable[];
+  clusterGroups: ClusterGroup[];
 
   constructor(
     consistencyMatrix: ConcistencyMatrix,
+    bundleMatrix: BundleMatrix,
     clusterMembershipMatrix: ClusterMembershipMatrix
-  ) {}
+  ) {
+    this.generateBundleUsageMatrix(consistencyMatrix, bundleMatrix, clusterMembershipMatrix);
+  }
 
   generateBundleUsageMatrix(
     consistencyMatrix: ConcistencyMatrix,
     bundleMatrix: BundleMatrix,
     clusterMemberShipMatrix: ClusterMembershipMatrix
   ): BundleUsageMatrix {
-    // consider only those bundles from bundleMatrix whos name appear in clusterMemberShipMatrix
-    // let selectedBundleMatrix: BundleMatrix = new BundleMatrix(
-    //   bundleMatrix.bundles
-    //     .map((a) => {
-    //       if (a.name in clusterMemberShipMatrix.clusterMemberShipDict) {
-    //         return a;
-    //       }
-    //       return null;
-    //     })
-    //     .filter((a) => a !== null)
-    // );
-
-    let clusterNameToBundleNameMapping =
-      clusterMemberShipMatrix.createClusterToBundleMappingWithSelectedKey(
-        selectedBundleMatrix.bundles.map((a) => {
-          return a.name;
+    const variablesOptions: Record<string, number> = {};
+    this.metadataBundleUsageVariables = Object.values(consistencyMatrix.metadataByVariable).map((a) => {
+      return {
+        id = a.id,
+        numberOptions = a.numberOptions,
+        startIndex = a.startIndex,
+        options = Object.values(a.options).map((b) => {
+          variablesOptions[b.id] = 0;
+          return {
+            name: b.name,
+            id: b.id,
+            index: b.index
+          } as MetadataBundleUsageVariableOption
         })
-      );
+      } as MetadataBundleUsageVariable
+    });
 
-    let clusterGroups = Object.entries(clusterNameToBundleNameMapping).map(
-      ([key, value]) => {
-        let clusterGroup = new ClusterGroup();
-        clusterGroup.name = key;
-        clusterGroup.bundles = value.map((a) => {
-          // has to exist, thats why we can directly [0]
-          return selectedBundleMatrix.bundles.filter((b) => {
-            return b.name === a;
-          })[0];
-        });
+    Object.entries(clusterMemberShipMatrix.clusterMemberShipDict).forEach(([aKey, aValue], aIndex) => {
+      aValue.forEach((b, bIndex) => {
+      })
+    })
+
+    // let clusterGroups = Object.entries(clusterNameToBundleNameMapping).map(
+    //   ([key, value]) => {
+
+
+    //     let clusterGroup = new ClusterGroup();
+    //     clusterGroup.name = key;
+
+
+    //     clusterGroup.bundles = value.map((a) => {
+    //       // has to exist, thats why we can directly [0]
+    //       return selectedBundleMatrix.bundles.filter((b) => {
+    //         return b.name === a;
+    //       })[0];
+    //     });
+
         // get a random options dict (random since all optionsDict should have same structure)
         let optionsDict = {};
         Object.keys(clusterGroup.bundles[0].bundleData).forEach((b) => {

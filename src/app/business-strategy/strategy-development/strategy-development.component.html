@@ -194,7 +194,22 @@
       </div>
     </ng-container>
 
+    <div style="height: 25px"></div>
 
+    <button mat-raised-button color="" (click)="createBundleUsageMatrix($event)">Erstelle Ausprägungsmatrix</button>
 
+    <div style="height: 25px"></div>
+
+    <ng-container *ngIf="bundleUsageMatrix">
+      <div>
+        Die Ausprägungsmatrix wurde erstellt.
+      </div>
+    </ng-container>
+
+    <div style="height: 25px"></div>
+
+    <button mat-raised-button color="" (click)="downloadBundleUsageMatrix($event)">Ausprägungsmatrix herunterladen</button>
+
+    <div style="height: 25px"></div>
   </div>
 </div>

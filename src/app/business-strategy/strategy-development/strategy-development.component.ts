@@ -12,7 +12,11 @@ import { ScatterPlotData } from "../../shared/models/scatterPlotData";
 import { ClusterAlgorithm } from "./models/clusterAlgorithm";
 import { ClusterMembershipMatrix } from "./models/clusterMembershipMatrix";
 import { WorkBook } from "xlsx";
+import { BundleUsageMatrix } from "./models/bundleUsageMatrix";
 
+// zumachen
+// - wenn man custom hochlädt wird trotzdem angezeigt, dass 500.000 iterationen gemacht wurden
+// -
 @Component({
   selector: "app-strategy-development",
   templateUrl: "./strategy-development.component.html",
@@ -39,6 +43,7 @@ export class StrategyDevelopmentComponent implements OnInit, OnDestroy {
   selectedClusterAlgorithm: string = this.clusterAlgorithms[0].value;
   clusterMembershipMatrix: ClusterMembershipMatrix;
   workbookClusterMembershipMatrix: WorkBook;
+  bundleUsageMatrix: BundleUsageMatrix;
 
   constructor() {}
 
@@ -285,5 +290,13 @@ export class StrategyDevelopmentComponent implements OnInit, OnDestroy {
       };
       fileReader.readAsArrayBuffer(file);
     }
+  }
+
+  createBundleUsageMatrix(event: MouseEvent) {
+    console.log("click create bundleUsageMatrix");
+  }
+
+  downloadBundleUsageMatrix(event: MouseEvent) {
+    console.log("Ausprägungsmatrix herunterladen");
   }
 }
