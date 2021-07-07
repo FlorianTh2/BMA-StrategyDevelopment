@@ -1,7 +1,7 @@
-import { Bundle } from "./bundle";
+import { BundleBUM } from "./bundleBUM";
 
 export class ClusterGroup {
   name: string;
-  options: Record<string, number>;
-  bundles: Bundle[];
+  bundles: BundleBUM[];
+  bundleMatrixRowColumnCombinations: string[][];
 }
