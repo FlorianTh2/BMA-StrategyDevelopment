@@ -1,13 +1,12 @@
 import { ConcistencyMatrix } from "./concistencyMatrix";
 import { ClusterMembershipMatrix } from "./clusterMembershipMatrix";
-import { MetadataClusterGroup } from "./clusterGroup";
+import { MetadataClusterGroup } from "./metadataClusterGroup";
 import { BundleMatrix } from "./bundleMatrix";
 import { MetadataVariable } from "./metadataVariable";
 
 export class BundleUsageMatrix {
   array: number[][];
-  // options: Record<string, number>;
-  metadataByVariable: Record<string, MetadataVariable>;
+  metadataByVariable: MetadataVariable[];
   clusterGroups: MetadataClusterGroup[];
 
   constructor(

@@ -59,6 +59,7 @@ export class BasicLineChartComponent implements OnInit {
       .select("#chart")
       .append("div")
       .style("position", "absolute")
+      .style("z-index", "10")
       .style("visibility", "hidden")
       .style("background-color", "white")
       .style("border", "solid")
@@ -67,6 +68,7 @@ export class BasicLineChartComponent implements OnInit {
       .style("padding", "10px");
   }
 
+  // https://bl.ocks.org/d3noob/a22c42db65eb00d4e369
   // https://www.d3-graph-gallery.com/graph/connectedscatter_basic.html
   // https://stackoverflow.com/a/51676326/11244995
   createdConnectedScatterPlot(g1) {
@@ -191,6 +193,9 @@ export class BasicLineChartComponent implements OnInit {
       .attr("r", 5)
       .attr("fill", this.colorData)
       .on("mouseover", function (event, data: ScatterPlotData) {
+        console.log("sadfasdf");
+        console.log(data.indexData);
+        let bbox = this.getBBox();
         module.tooltip
           .html("<div>Inertia: " + data.indexData + "</div>")
           .style("left", module.getXTooltip(this, module.tooltip))
@@ -250,7 +255,9 @@ export class BasicLineChartComponent implements OnInit {
   }
 
   getYTooltip(currentObject, tooltipSelection): string {
+    // return window.pageYOffset + currentObject.getBoundingClientRect().y + "px";
     return (
+      window.pageYOffset +
       currentObject.getBoundingClientRect().y -
       tooltipSelection.node().getBoundingClientRect().height +
       "px"

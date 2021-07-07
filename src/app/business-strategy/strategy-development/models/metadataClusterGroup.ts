@@ -2,7 +2,7 @@ export interface MetadataClusterGroup {
   name: string;
   startIndex: number;
   numberOptions: number;
-  bundles: Record<string, MetadataClusterGroupBundle>;
+  bundles: MetadataClusterGroupBundle[];
 }
 
 export interface MetadataClusterGroupBundle {
