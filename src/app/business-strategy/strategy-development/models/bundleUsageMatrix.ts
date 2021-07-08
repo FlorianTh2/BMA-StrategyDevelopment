@@ -6,8 +6,8 @@ import {
   MetadataBundleUsageVariableOption
 } from "./metadataBundleUsageVariable";
 import { ClusterGroup } from "./clusterGroup";
-import { Bundle } from "./bundle";
 import { BundleBUM } from "./bundleBUM";
+import { BundleData } from "./bundleData";
 
 export class BundleUsageMatrix {
   // vertical row labels x
@@ -16,8 +16,10 @@ export class BundleUsageMatrix {
   // x o o o o o o
   // x o o o o o o
   // x o o o o o o
+  // applies only for the options attribute in clusterGroup since
+  // the bundle data is in the row-column-combination format
   metadataBundleUsageVariables: MetadataBundleUsageVariable[];
-  clusterGroups: ClusterGroup[];
+  clusterGroups: ClusterGroup[] = [];
 
   constructor(
     consistencyMatrix: ConcistencyMatrix,
@@ -35,16 +37,16 @@ export class BundleUsageMatrix {
     consistencyMatrix: ConcistencyMatrix,
     bundleMatrix: BundleMatrix,
     clusterMemberShipMatrix: ClusterMembershipMatrix
-  ): BundleUsageMatrix {
+  ): void {
     const variablesOptions: Record<string, number> = {};
     this.metadataBundleUsageVariables = Object.values(
       consistencyMatrix.metadataByVariable
     ).map((a) => {
       return {
-        id = a.id,
-        numberOptions = a.numberOptions,
-        startIndex = a.startIndex,
-        options = Object.values(a.options).map((b) => {
+        id: a.id,
+        numberOptions: a.numberOptions,
+        startIndex: a.startIndex,
+        options: Object.values(a.options).map((b) => {
           variablesOptions[b.id] = 0;
           return {
             name: b.name,
@@ -54,6 +56,34 @@ export class BundleUsageMatrix {
         })
       } as MetadataBundleUsageVariable;
     });
+
+    // consider only those bundles from bundleMatrix whos name appear in clusterMemberShipMatrix
+
+    const bundles: number[][] = [];
+    const bundleMetaData: BundleData[] = [];
+    const bundleNameListClusterMembershipMatrix: string[] = [].concat.apply(
+      [],
+      Object.values(clusterMemberShipMatrix.clusterMemberShipDict)
+    );
+    bundleMatrix.bundleMetaData.forEach((a, aIndex) => {
+      const filterResult = bundleNameListClusterMembershipMatrix.filter((b) => {
+        return a.name === b;
+      });
+      if (filterResult.length != 0) {
+        bundles.push(bundleMatrix.bundles[aIndex]);
+        bundleMetaData.push(bundleMatrix.bundleMetaData[aIndex]);
+      }
+    });
+
+    // "selectedBundleMatrix"
+    bundleMatrix = {
+      bundles: bundles,
+      bundleMetaData: bundleMetaData,
+      bundleMatrixRowColumnCombinations:
+        bundleMatrix.bundleMatrixRowColumnCombinations
+    } as BundleMatrix;
+    //
+    // console.log("selectedBundleMatrix: ", bundleMatrix);
 
     let clusterGroups = Object.entries(
       clusterMemberShipMatrix.clusterMemberShipDict
@@ -77,61 +107,42 @@ export class BundleUsageMatrix {
           bundleData: bundleMatrix.bundles[bundleIndex]
         } as BundleBUM;
       });
-
-      /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-      // get a random options dict (random since all optionsDict should have same structure)
-      let optionsDict = {};
-      Object.keys(clusterGroup.bundles[0].bundleData).forEach((b) => {
-        let splitOptionsCombination = b.split("/");
-        splitOptionsCombination.forEach((c) => {
-          optionsDict[c] = 0;
-        });
-      });
-      clusterGroup.options = optionsDict;
-      // set all values to 0
-      Object.entries(clusterGroup.options).forEach(
-        ([optionsKey, optionsValue]) => {
-          clusterGroup.options[key] = 0;
-        }
-      );
+      clusterGroup.options = { ...variablesOptions };
 
       // build dict: variablenname -> optionsName -> counterOfItsAppearences
       // group under variablename is needed since later we want to aggregate
       // all optionCounts UNDER 1 VARIABLE
       let internalCounterDict: Record<string, Record<string, number>> = {};
-      // if not even 1 bundle exists, idk throw error
-      let pairNamesOfBundle: string[] = Object.keys(clusterGroup.bundles[0]);
-      let pairNamesOfBundleDivided: string[][] = pairNamesOfBundle.map((a) => {
-        return a.split("/");
-      });
+      let pairNamesOfBundleDivided: string[][] =
+        clusterGroup.bundleMatrixRowColumnCombinations;
+
       let keysWhichAreNotZero = clusterGroup.bundles
-        .map((a) => {
-          return Object.entries(a.bundleData)
-            .filter(([keyBundle, valueBundle]) => {
-              return valueBundle != 0;
+        .map((b) => {
+          const indexResults = b.bundleData
+            .map((c, cIndex) => {
+              if (c != 0) {
+                return cIndex;
+              }
             })
-            .map((a) => {
-              // after this line, we will ignore the value stored after the key
-              // let separatKeysToSingleOptions: string[] = keysWhichAreNotZero
-              // return [a[0].split("/"), a[1]];
-              return a[0].split("/");
+            .filter((c) => c != undefined);
+          const keysWhichAreNotZeroForThisBundle = indexResults
+            .map((c) => {
+              const keyNames =
+                clusterGroup.bundleMatrixRowColumnCombinations[c];
+              return keyNames;
             })
-            .reduce((a, b) => a.concat(b), []);
+            .reduce((c, d) => c.concat(d), []);
+          return keysWhichAreNotZeroForThisBundle;
         })
-        .reduce((a, b) => a.concat(b), []);
+        .reduce((b, c) => b.concat(c), []);
 
       // find options corresponding variable name and count up (+1) in internal dict
       // here only one module is considered
-      let moduleNameConsistencyMatrix = Object.keys(
-        consistencyMatrix.modules
-      )[0];
       // name shortening
-      let mcm = moduleNameConsistencyMatrix;
       keysWhichAreNotZero.forEach((a) => {
-        Object.entries(consistencyMatrix.modules[mcm]).forEach(
+        Object.entries(consistencyMatrix.metadataByVariable).forEach(
           ([keyVariable, valueVariable]) => {
-            if (valueVariable[a] != undefined) {
+            if (valueVariable.options[a] != undefined) {
               if (internalCounterDict[keyVariable] == undefined) {
                 internalCounterDict[keyVariable] = {
                   [a]: 1
@@ -146,8 +157,7 @@ export class BundleUsageMatrix {
           }
         );
       });
-      console.log("internal");
-      // console.log(internalCounterDict);
+
       Object.entries(internalCounterDict).forEach(
         ([
           keyOfVariableInternalCounterDict,
@@ -164,9 +174,8 @@ export class BundleUsageMatrix {
           );
         }
       );
-      // console.log("clustergroup options");
-      // console.log(clusterGroup.options);
       return clusterGroup;
     });
+    this.clusterGroups = clusterGroups;
   }
 }

@@ -86,7 +86,7 @@
 
     <ng-container *ngIf="bundleMatrix">
       <div>
-        Innerhalb von [{{maxIterations}}] wurden [{{bundleMatrix.bundles.length}}] Bündel erstellt.
+        Innerhalb von [{{consistencyMatrix.iterations}}] Iterationen wurden [{{bundleMatrix.bundles.length}}] Bündel erstellt.
       </div>
     </ng-container>
 
@@ -128,7 +128,7 @@
       <br>
       <div style="height: 20px"></div>
 
-      Minimale Grenze (ab 1):
+      Minimale Grenze: [1]
       <div style="height: 20px"></div>
 
       <div style="height: 10px"></div>
@@ -138,7 +138,7 @@
       </mat-form-field>
       <div style="height: 20px"></div>
 
-      Maximale Grenze (ab 1):
+      Maximale Grenze: [{{this.bundleMatrix?.bundles?.length}}]
       <div style="height: 20px"></div>
 
       <mat-form-field class="example-full-width" appearance="fill">
@@ -169,7 +169,7 @@
       <div style="height: 50px"></div>
       Bitte entnehmen Sie der Ellenbogenkurve eine angemessene Clusteranzahl und geben Sie diese für folgende Berechnungen an.
       <br>
-      Die Anzahl muss zwischen [{{minConsideredClusters}}] und [{{maxConsideredClusters}}] liegen.
+      Die Anzahl muss zwischen [{{minConsideredClusters}}] und [{{getMaxClusterNumber()}}] liegen.
       <br>
       <div style="height: 10px"></div>
       <mat-form-field class="example-full-width" appearance="fill">

@@ -9,6 +9,7 @@ export class ConcistencyMatrix {
   metadataByVariable: Record<string, MetadataVariable>;
   _maxIterations: number = 500_000;
   _maxBundles: number = 4_000;
+  iterations: number;
 
   constructor(data: Array<Array<any>>) {
     let parseResult = this.parseAoAToConsistencyMatrix(data);
@@ -121,6 +122,7 @@ export class ConcistencyMatrix {
       minConsistencyValue = bundleStore[0].consistence;
       this.increaseIndexStore(variables, indexStore);
     }
+    this.iterations = a;
     const rowColumnCombination = this.createAllRowColumnPairCombinations(
       this.metadataByVariable
     );

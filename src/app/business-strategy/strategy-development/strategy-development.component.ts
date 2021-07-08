@@ -292,11 +292,73 @@ export class StrategyDevelopmentComponent implements OnInit, OnDestroy {
     }
   }
 
+  getMaxClusterNumber() {
+    return Object.keys(this.clusterAnalysisResults).length;
+  }
+
   createBundleUsageMatrix(event: MouseEvent) {
     console.log("click create bundleUsageMatrix");
+    this.bundleUsageMatrix = new BundleUsageMatrix(
+      this.consistencyMatrix,
+      this.bundleMatrix,
+      this.clusterMembershipMatrix
+    );
   }
 
   downloadBundleUsageMatrix(event: MouseEvent) {
     console.log("Ausprägungsmatrix herunterladen");
+    let resultAoA: Array<Array<string>> = [];
+    resultAoA.push(
+      ["Variable", "Option"].concat(
+        this.bundleUsageMatrix.clusterGroups.map((a) => "Cluster " + a.name)
+      )
+    );
+    this.bundleUsageMatrix.metadataBundleUsageVariables.forEach((a) => {
+      a.options.forEach((b) => {
+        let valueList = this.bundleUsageMatrix.clusterGroups.map((c) => {
+          return c.options[b.id].toFixed(2);
+        });
+        resultAoA.push([a.id, b.id, ...valueList]);
+      });
+    });
+
+    var fileName = "ausprägungsmatrix";
+    // if we use workbook and NOT the resulting array it must be:
+    // .json_to_sheet or something like that
+    var workSheet = XLSX.utils.aoa_to_sheet(resultAoA);
+    // format to output numbers instead of string-type
+    this.formatWorksheetToNumbers(workSheet, 2, resultAoA);
+
+    var wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, workSheet, fileName);
+    XLSX.writeFile(wb, fileName + ".xlsx");
+  }
+
+  private formatWorksheetToNumbers(
+    worksheet,
+    startColumn: number,
+    matrix: string[][]
+  ) {
+    const format = "0.00";
+    let endColumn = startColumn + matrix[0].length;
+    let arrayWithColumns = Array.from(
+      { length: endColumn - startColumn },
+      (v, k) => k + startColumn
+    );
+    for (let col of arrayWithColumns) {
+      this.formatColumn(worksheet, col, format);
+    }
+  }
+
+  private formatColumn(worksheet, col, fmt) {
+    const range = XLSX.utils.decode_range(worksheet["!ref"]);
+    // note: range.s.r + 1 skips the header row
+    for (let row = range.s.r + 1; row <= range.e.r; ++row) {
+      const ref = XLSX.utils.encode_cell({ r: row, c: col });
+      if (worksheet[ref]) {
+        worksheet[ref].t = "n";
+        worksheet[ref].z = fmt;
+      }
+    }
   }
 }
