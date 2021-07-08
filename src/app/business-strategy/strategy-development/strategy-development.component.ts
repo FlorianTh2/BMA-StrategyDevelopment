@@ -217,6 +217,7 @@ export class StrategyDevelopmentComponent implements OnInit, OnDestroy {
     this.clusterMembershipMatrix.parseClusterResultToInternalDict(
       this.clusterAnalysisResults[this.selectedNumberOfClusters]
     );
+    console.log(this.clusterMembershipMatrix);
     console.log(this.selectedNumberOfClusters);
   }
 
