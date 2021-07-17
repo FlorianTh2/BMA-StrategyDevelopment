@@ -9,10 +9,11 @@ import { Kmeans } from "./models/kmeans";
 import * as seedrandom from "seedrandom";
 import { ClusterResult } from "./models/clusterResult";
 import { ScatterPlotData } from "../../shared/models/scatterPlotData";
-import { ClusterAlgorithm } from "./models/clusterAlgorithm";
+import { ClusterAlgorithmListView } from "./models/clusterAlgorithmListView";
 import { ClusterMembershipMatrix } from "./models/clusterMembershipMatrix";
 import { WorkBook } from "xlsx";
 import { BundleUsageMatrix } from "./models/bundleUsageMatrix";
+import { EuclideanDistance } from "./models/euclideanDistance";
 
 // zumachen
 // - wenn man custom hochlädt wird trotzdem angezeigt, dass 500.000 iterationen gemacht wurden
@@ -34,7 +35,7 @@ export class StrategyDevelopmentComponent implements OnInit, OnDestroy {
   minConsideredClusters: number = 1;
   maxIterations: number = 500_000;
   maxStoredBundles: number = 4_000;
-  clusterAlgorithms: ClusterAlgorithm[] = [
+  clusterAlgorithms: ClusterAlgorithmListView[] = [
     {
       value: "kmeans",
       viewValue: "Kmeans-Algorithmus"
@@ -169,7 +170,7 @@ export class StrategyDevelopmentComponent implements OnInit, OnDestroy {
         a < this.maxConsideredClusters;
         a++
       ) {
-        const kmeans = new Kmeans(a, 2);
+        const kmeans = new Kmeans(a, 2, new EuclideanDistance());
         kmeans.find_clusters(this.bundleMatrix.bundles);
         // kmeans.find_clusters(exampleDate);
         this.clusterAnalysisResults[a] = {
@@ -187,6 +188,8 @@ export class StrategyDevelopmentComponent implements OnInit, OnDestroy {
       this.clusterMembershipMatrix.parseClusterResultToInternalDict(
         this.clusterAnalysisResults[this.selectedNumberOfClusters]
       );
+      console.log("hier0");
+      console.log(this.bundleMatrix.bundles);
     }
   }
 
@@ -217,6 +220,10 @@ export class StrategyDevelopmentComponent implements OnInit, OnDestroy {
     this.clusterMembershipMatrix.parseClusterResultToInternalDict(
       this.clusterAnalysisResults[this.selectedNumberOfClusters]
     );
+
+    // if we select 2 clusters that does not mean that
+    // the clustermembershipmatrix has 2 entries
+    // because all bundles could be assigned to cluster 1 only
     console.log(this.clusterMembershipMatrix);
     console.log(this.selectedNumberOfClusters);
   }

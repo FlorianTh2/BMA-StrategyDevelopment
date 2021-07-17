@@ -1,25 +1,22 @@
 import * as seedrandom from "seedrandom";
+import { ClusterAlgorithm } from "./clusterAlgorithm";
+import { Distance } from "./distance.interface";
+import { EuclideanDistance } from "./euclideanDistance";
 
-export class Kmeans {
-  // labels of each point (for each point: the index of its centroid-point)
-  public labels: number[];
+export class Kmeans extends ClusterAlgorithm {
   // sum of euclidean distances of each data-point to its centroid-point
   public inertia: number;
   // number of needed iterations
   public iterations: number;
   // cordinates of centroids
   public centroids: number[][];
-  // number of cluster this algorithm should take into consideration
-  public numClusters: number;
-  // tolerance indicates the "round" factor which is applied at pairwise_euclidean_distances_argmin
-  // (and not directly on euclidean distance) to only affect the actual kmeans-algorithm
-  // to not be affacted by changes which are very small
-  // suggested: 1e-2 (2 decimal digits)
-  public tolerance: number;
 
-  constructor(numClusters: number, tolerance: number) {
-    this.numClusters = numClusters;
-    this.tolerance = tolerance;
+  constructor(
+    numClusters: number,
+    tolerance: number,
+    distanceAlgorithm: Distance
+  ) {
+    super(numClusters, tolerance, distanceAlgorithm);
   }
 
   euclidean_inertia(
@@ -29,23 +26,13 @@ export class Kmeans {
   ) {
     let totalDistance = 0;
     for (let a = 0; a < data.length; a++) {
-      const localDistance = this.euclidean_distance(
+      const localDistance = this.distanceAlgorithm.calcDistance(
         data[a],
         vectors_of_all_centroids[labels[a]]
       );
       totalDistance += localDistance;
     }
     return totalDistance;
-  }
-
-  euclidean_distance(vector0: number[], vector1: number[]) {
-    let total = 0;
-    let diff = 0;
-    for (let a = 0; a < vector0.length; a++) {
-      diff = vector0[a] - vector1[a];
-      total += diff * diff;
-    }
-    return Math.sqrt(total);
   }
 
   get_mean(vectors: number[][]) {
@@ -63,15 +50,14 @@ export class Kmeans {
   pairwise_euclidean_distances_argmin(data: number[][], centroids: number[][]) {
     const resultIndices = [];
     for (let a = 0; a < data.length; a++) {
-      let currentMinDistance = this.euclidean_distance(
-        data[a],
-        centroids[0]
-      ).toFixed(this.tolerance);
+      let currentMinDistance = this.distanceAlgorithm
+        .calcDistance(data[a], centroids[0])
+        .toFixed(this.tolerance);
       let currentMinDistanceIndex = 0;
       for (let b = 0; b < centroids.length; b++) {
-        const distance = this.euclidean_distance(data[a], centroids[b]).toFixed(
-          this.tolerance
-        );
+        const distance = this.distanceAlgorithm
+          .calcDistance(data[a], centroids[b])
+          .toFixed(this.tolerance);
         if (distance < currentMinDistance) {
           currentMinDistance = distance;
           currentMinDistanceIndex = b;
@@ -82,7 +68,7 @@ export class Kmeans {
     return resultIndices;
   }
 
-  find_clusters(data: number[][]) {
+  find_clusters(data: number[][]): number[] {
     if (data.length < this.numClusters) {
       throw "you can not request more cluster than data-points you have.";
     }
@@ -117,7 +103,7 @@ export class Kmeans {
       this.iterations += 1;
       this.inertia = this.euclidean_inertia(this.centroids, data, this.labels);
       if (this.arraysEqual(this.centroids, new_centroids)) {
-        break;
+        return this.labels;
       }
       this.centroids = new_centroids;
     }

@@ -3,6 +3,7 @@ import { MetadataVariable, MetadataVariableOption } from "./metadataVariable";
 import { Bundle } from "./bundle";
 import { Meta } from "@angular/platform-browser";
 import { BundleData } from "./bundleData";
+import { IndexStore } from "./indexStore";
 
 export class ConcistencyMatrix {
   array: number[][];
@@ -75,7 +76,8 @@ export class ConcistencyMatrix {
     let variables: MetadataVariableOption[][] = this.convertVariablesDictToList(
       currentVariablesMetaData
     );
-    let indexStore: number[] = variables.map((a) => 0);
+    // let indexStore: number[] = variables.map((a) => 0);
+    let indexStore: IndexStore = new IndexStore(variables);
     let bundleStore: Bundle[] = [];
     let minConsistencyValue = -1;
     const numberBundles = this.getMaxNumberOfBundles(variables);
@@ -96,7 +98,7 @@ export class ConcistencyMatrix {
         (bundleStore.length == this._maxBundles &&
           bundle.consistence < minConsistencyValue)
       ) {
-        this.increaseIndexStore(variables, indexStore);
+        indexStore.up();
         continue;
       }
       if (bundleStore.length < this._maxBundles) {
@@ -120,7 +122,7 @@ export class ConcistencyMatrix {
       }
       // set new minConsistence
       minConsistencyValue = bundleStore[0].consistence;
-      this.increaseIndexStore(variables, indexStore);
+      indexStore.up();
     }
     this.iterations = a;
     const rowColumnCombination = this.createAllRowColumnPairCombinations(
@@ -139,14 +141,16 @@ export class ConcistencyMatrix {
   }
 
   createBundle(
-    indexStore: number[],
+    indexStore: IndexStore,
     currentVariablesData: number[][],
     variables: MetadataVariableOption[][],
     runIndex: number
   ) {
     // get option-metadataobjects based on indexStore
     // in matrix: column-key
-    const bundleOptions = this.indexStoreReturnVariables(indexStore, variables);
+    // const bundleOptions = this.indexStoreReturnVariables(indexStore, variables);
+    const bundleOptions =
+      indexStore.getVariablesOptionsBasedOnCurrentIndexStore();
     // get all bundleoptions combinations (there should be a value in the matrix)
     // in matrix: row-keys of the selected options (not all possible row-keys)
     const optionCombinations: MetadataVariableOption[][] =
@@ -174,37 +178,6 @@ export class ConcistencyMatrix {
       ),
       bundleMetaData: optionCombinations
     } as Bundle;
-  }
-
-  indexStoreReturnVariables(
-    indexStore: number[],
-    variables: MetadataVariableOption[][]
-  ) {
-    return indexStore.map((a, aIndex) => {
-      return variables[aIndex][a];
-    });
-  }
-
-  // returns if first index of indexStore has not reached max-value
-  increaseIndexStore(
-    variables: MetadataVariableOption[][],
-    indexStore: number[]
-  ) {
-    let indexStoreAddingIndex = indexStore.length - 1;
-    while (true) {
-      if (
-        indexStore[indexStoreAddingIndex] <
-        variables[indexStoreAddingIndex].length - 1
-      ) {
-        indexStore[indexStoreAddingIndex] += 1;
-        return;
-      } else if (indexStoreAddingIndex == 0) {
-        return;
-      } else {
-        indexStore[indexStoreAddingIndex] = 0;
-        indexStoreAddingIndex--;
-      }
-    }
   }
 
   getMaxNumberOfBundles(variables: MetadataVariableOption[][]): number {

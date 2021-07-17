@@ -33,6 +33,7 @@
     "d3-scale": "^3.2.3",
     "graphql": "^15.5.0",
     "jwt-decode": "^3.1.2",
+    "mathjs": "^9.4.4",
     "rxjs": "~6.6.0",
     "seedrandom": "^3.0.5",
     "tslib": "^2.0.0",
