@@ -126,7 +126,7 @@ export class StrategyDevelopmentComponent implements OnInit, OnDestroy {
     resultArray.push(
       ["Konsistenzwert"].concat(
         this.bundleMatrix.bundleMetaData.map((a) => {
-          return a.consistence.toFixed(2);
+          return a.consistence.toString();
         })
       )
     );
