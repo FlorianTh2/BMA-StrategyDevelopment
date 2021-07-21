@@ -280,7 +280,8 @@ export class ConcistencyMatrix {
       });
       const metaData: BundleData = {
         name: a.name,
-        bundleSzenarioCombinationString: a.bundleSzenarioCombinationString
+        bundleSzenarioCombinationString: a.bundleSzenarioCombinationString,
+        consistence: a.consistence
       };
       resultData.push(dataItem);
       resultMetaData.push(metaData);

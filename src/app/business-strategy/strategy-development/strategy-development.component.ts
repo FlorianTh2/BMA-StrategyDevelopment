@@ -122,6 +122,15 @@ export class StrategyDevelopmentComponent implements OnInit, OnDestroy {
       )
     );
 
+    // third row
+    resultArray.push(
+      ["Konsistenzwert"].concat(
+        this.bundleMatrix.bundleMetaData.map((a) => {
+          return a.consistence.toFixed(2);
+        })
+      )
+    );
+
     for (
       let a = 0;
       a < this.bundleMatrix.bundleMatrixRowColumnCombinations.length;
