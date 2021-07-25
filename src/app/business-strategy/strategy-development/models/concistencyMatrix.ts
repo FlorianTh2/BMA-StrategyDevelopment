@@ -4,6 +4,7 @@ import { Bundle } from "./bundle";
 import { Meta } from "@angular/platform-browser";
 import { BundleData } from "./bundleData";
 import { IndexStore } from "./indexStore";
+import { BundleStore } from "./bundleStore";
 
 export class ConcistencyMatrix {
   array: number[][];
@@ -76,60 +77,28 @@ export class ConcistencyMatrix {
     let variables: MetadataVariableOption[][] = this.convertVariablesDictToList(
       currentVariablesMetaData
     );
-    // let indexStore: number[] = variables.map((a) => 0);
     let indexStore: IndexStore = new IndexStore(variables);
-    let bundleStore: Bundle[] = [];
-    let minConsistencyValue = -1;
+    let bundleStore: BundleStore = new BundleStore(this._maxBundles);
     const numberBundles = this.getMaxNumberOfBundles(variables);
     let a;
     for (a = 0; a < numberBundles && a < this._maxIterations; a++) {
-      const bundle = this.createBundle(
+      const bundle: Bundle = this.createBundle(
         indexStore,
         currentVariablesData,
         variables,
         a
       );
-
-      // 1. = bundle is not consistent
-      // 2. if bundleStore is full and bundles consistencyValue is lower than current minConsistencyValue
-      //  discard bundle
-      if (
-        bundle == null ||
-        (bundleStore.length == this._maxBundles &&
-          bundle.consistence < minConsistencyValue)
-      ) {
-        indexStore.up();
-        continue;
-      }
-      if (bundleStore.length < this._maxBundles) {
-        const index = this.binarySearchDescendingInputValues(
-          bundleStore,
-          bundle.consistence
-        );
-        // parameter
-        // 1. at index
-        // 2. deleting x items first
-        // 3. element
-        bundleStore.splice(index, 0, bundle);
-      } else {
-        // can just pop since we already checked if lower than lowest
-        bundleStore.pop();
-        const index = this.binarySearchDescendingInputValues(
-          bundleStore,
-          bundle.consistence
-        );
-        bundleStore.splice(index, 0, bundle);
-      }
-      // set new minConsistence
-      minConsistencyValue = bundleStore[0].consistence;
+      bundleStore.addBundle(bundle);
       indexStore.up();
     }
     this.iterations = a;
     const rowColumnCombination = this.createAllRowColumnPairCombinations(
       this.metadataByVariable
     );
+    // console.log("test sdfasfasddfdfa");
+    // console.log(bundleStore);
     const bundleDense = this.bundleDataToDense(
-      bundleStore,
+      bundleStore.bundleStorage,
       rowColumnCombination
     );
     let bundleMatrix: BundleMatrix = {
@@ -192,36 +161,6 @@ export class ConcistencyMatrix {
     return Object.entries(currentVariablesMetaData).map(([aKey, aValue]) =>
       Object.values(aValue.options)
     );
-  }
-
-  // https://stackoverflow.com/questions/1344500/efficient-way-to-insert-a-number-into-a-sorted-array-of-numbers
-  // https://stackoverflow.com/questions/22697936/binary-search-in-javascript
-  // input e.g. array = [0,1,2,3], value=1
-  // output e.g. 1
-  binarySearchAscendingInputValues(array: Bundle[], value) {
-    let low = 0;
-    let high = array.length;
-    let mid;
-    while (low < high) {
-      mid = (low + high) >>> 1;
-      if (array[mid].consistence < value) low = mid + 1;
-      else high = mid;
-    }
-    return low;
-  }
-
-  // input e.g. array = [8, 7, 6, 5, 4, 3, 2, 1], value=7
-  // output e.g. 1
-  binarySearchDescendingInputValues(array: Bundle[], value) {
-    let low = 0;
-    let high = array.length;
-    let mid;
-    while (low < high) {
-      mid = (low + high) >>> 1;
-      if (array[mid].consistence > value) low = mid + 1;
-      else high = mid;
-    }
-    return low;
   }
 
   // input: e.g. ["1A", "2A", "3A"]

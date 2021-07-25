@@ -147,7 +147,7 @@ export class StrategyDevelopmentComponent implements OnInit, OnDestroy {
     }
     console.timeEnd("createaoa");
     // 2. aoa to sheet
-    var fileName = "strategiebündel";
+    var fileName = "strategiebuendel";
     var workSheet = XLSX.utils.aoa_to_sheet(resultArray);
     var wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, workSheet, fileName);
@@ -161,19 +161,20 @@ export class StrategyDevelopmentComponent implements OnInit, OnDestroy {
   startClusteranalysis($event: MouseEvent) {
     // switch between selectedClusterAlgorithms
     if (this.selectedClusterAlgorithm == "kmeans") {
-      const exampleDate: number[][] = [
-        [0.83685684, 2.13635938],
-        [-1.4136581, 7.40962324],
-        [1.15521298, 5.09961887],
-        [-1.01861632, 7.81491465],
-        [1.27135141, 1.89254207],
-        [3.43761754, 0.26165417],
-        [-1.80822253, 1.59701749],
-        [1.41372442, 4.38117707],
-        [-0.20493217, 8.43209665],
-        [-0.71109961, 8.66043846]
-      ];
+      // const exampleDate: number[][] = [
+      //   [0.83685684, 2.13635938],
+      //   [-1.4136581, 7.40962324],
+      //   [1.15521298, 5.09961887],
+      //   [-1.01861632, 7.81491465],
+      //   [1.27135141, 1.89254207],
+      //   [3.43761754, 0.26165417],
+      //   [-1.80822253, 1.59701749],
+      //   [1.41372442, 4.38117707],
+      //   [-0.20493217, 8.43209665],
+      //   [-0.71109961, 8.66043846]
+      // ];
       this.setClusterAnalysisRunStatus(true);
+      const clusterResultStore: Record<number, ClusterResult> = {};
       for (
         let a = this.minConsideredClusters;
         a < this.maxConsideredClusters;
@@ -182,7 +183,7 @@ export class StrategyDevelopmentComponent implements OnInit, OnDestroy {
         const kmeans = new Kmeans(a, 2, new EuclideanDistance());
         kmeans.find_clusters(this.bundleMatrix.bundles);
         // kmeans.find_clusters(exampleDate);
-        this.clusterAnalysisResults[a] = {
+        clusterResultStore[a] = {
           labels: kmeans.labels,
           centroids: kmeans.centroids,
           inertia: kmeans.inertia,
@@ -190,6 +191,7 @@ export class StrategyDevelopmentComponent implements OnInit, OnDestroy {
           numberClusters: kmeans.numClusters
         } as ClusterResult;
       }
+      this.clusterAnalysisResults = clusterResultStore;
       this.setClusterAnalysisRunStatus(false);
       this.clusterMembershipMatrix = new ClusterMembershipMatrix(
         this.bundleMatrix
@@ -197,8 +199,8 @@ export class StrategyDevelopmentComponent implements OnInit, OnDestroy {
       this.clusterMembershipMatrix.parseClusterResultToInternalDict(
         this.clusterAnalysisResults[this.selectedNumberOfClusters]
       );
-      console.log("hier0");
-      console.log(this.bundleMatrix.bundles);
+      // console.log("hier0");
+      // console.log(this.bundleMatrix.bundles);
     }
   }
 
@@ -339,7 +341,7 @@ export class StrategyDevelopmentComponent implements OnInit, OnDestroy {
       });
     });
 
-    var fileName = "ausprägungsmatrix";
+    var fileName = "auspraegungsmatrix";
     // if we use workbook and NOT the resulting array it must be:
     // .json_to_sheet or something like that
     var workSheet = XLSX.utils.aoa_to_sheet(resultAoA);

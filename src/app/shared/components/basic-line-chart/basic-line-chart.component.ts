@@ -1,10 +1,17 @@
-import { Component, Input, OnInit, ViewEncapsulation } from "@angular/core";
+import {
+  Component,
+  Input,
+  OnInit,
+  SimpleChanges,
+  ViewEncapsulation
+} from "@angular/core";
 import {
   InputMaturityModelSpiderChart,
   InputSubUserPartialModelSpiderChart
 } from "../../models/InputMaturityModelSpiderChart";
 import { ScatterPlotData } from "../../models/scatterPlotData";
 import * as d3 from "d3";
+import { ScaleBand, ScaleLinear } from "d3";
 
 @Component({
   selector: "app-basic-line-chart",
@@ -26,12 +33,72 @@ export class BasicLineChartComponent implements OnInit {
   private height: number = 400 - this.margin.top - this.margin.bottom;
   private width: number = 800 - this.margin.left - this.margin.right;
   private colorData: string = "#3D4D5D";
+  private xscale: ScaleBand<string>;
+  private yscale: ScaleLinear<number, number, never>;
 
   constructor() {}
 
   ngOnInit(): void {
     this.initChart();
     this.createdConnectedScatterPlot(this.g1);
+  }
+
+  ngOnChanges(changes: SimpleChanges) {
+    if (this.data && this.svg && changes.data.currentValue) {
+      // @ts-ignore
+      this.data = changes.data.currentValue as ScatterPlotData[];
+      console.log("currentvalue432");
+      console.log(this.data);
+      this.updateChart();
+    }
+  }
+
+  updateChart(): void {
+    const module = this;
+    const transition = d3.transition().duration(750);
+    this.g1
+      .selectAll(".pathpoints")
+      .data(this.data)
+      .transition(transition)
+      .attr("cx", function (d: ScatterPlotData) {
+        return this.xscale(d.indexName) + this.xscale.bandwidth() / 2;
+      })
+      .attr("cy", function (d: ScatterPlotData) {
+        return this.yscale(d.indexData);
+      });
+
+    // const scatterPointsOnPathLine = g1
+    //   .selectAll(".gPathpoints")
+    //   .data([-1])
+    //   .enter()
+    //   .append("g")
+    //   .attr("class", "gPathpoints")
+    //   .selectAll(".pathpoints")
+    //   .data(this.data)
+    //   .enter()
+    //   .append("circle")
+    //   .attr("class", "pathpoints")
+    //   .attr("cx", function (d: ScatterPlotData) {
+    //     return xscale(d.indexName) + xscale.bandwidth() / 2;
+    //   })
+    //   .attr("cy", function (d: ScatterPlotData) {
+    //     return yscale(d.indexData);
+    //   })
+    //   .attr("r", 5)
+    //   .attr("fill", this.colorData)
+    //   .on("mouseover", function (event, data: ScatterPlotData) {
+    //     console.log("sadfasdf");
+    //     console.log(data.indexData);
+    //     let bbox = this.getBBox();
+    //     module.tooltip
+    //       .html("<div>Inertia: " + data.indexData.toFixed(2) + "</div>")
+    //       .style("left", module.getXTooltip(this, module.tooltip))
+    //       .style("top", module.getYTooltip(this, module.tooltip))
+    //       .style("visibility", "visible");
+    //   })
+    //   .on("mouseout", () => {
+    //     module.tooltip.style("visibility", "hidden");
+    //   });
   }
 
   initChart(): void {
@@ -94,13 +161,13 @@ export class BasicLineChartComponent implements OnInit {
 
     const module = this;
 
-    const xscale = d3
+    this.xscale = d3
       .scaleBand()
       .domain(this.data.map((a) => a.indexName))
       .rangeRound([0, this.width])
       .padding(0.1);
 
-    const yscale = d3
+    this.yscale = d3
       .scaleLinear()
       .domain([
         Math.min(...this.data.map((a) => a.indexData)),
@@ -116,7 +183,7 @@ export class BasicLineChartComponent implements OnInit {
       .append("g")
       .attr("class", "gAxisBottom")
       .attr("transform", "translate(0," + this.height + ")")
-      .call(d3.axisBottom(xscale));
+      .call(d3.axisBottom(this.xscale));
 
     const axisBottomLabel = g1
       .selectAll(".gAxisBottomLabel")
@@ -126,7 +193,7 @@ export class BasicLineChartComponent implements OnInit {
       .attr("class", "gAxisBottomLabel")
       .attr("x", this.width / 2)
       .attr("y", this.height + this.margin.top + this.margin.bottom / 2)
-      .text("Anzahl der Bündel");
+      .text("Anzahl der Cluster");
 
     const axisLeft = g1
       .selectAll(".gAxisLeft")
@@ -134,7 +201,7 @@ export class BasicLineChartComponent implements OnInit {
       .enter()
       .append("g")
       .attr("class", "gAxisLeft")
-      .call(d3.axisLeft(yscale));
+      .call(d3.axisLeft(this.yscale));
 
     const axisLeftLabel = g1
       .selectAll(".gAxisLeftLabel")
@@ -165,11 +232,12 @@ export class BasicLineChartComponent implements OnInit {
           .line()
           // @ts-ignore
           .x(function (d: ScatterPlotData) {
-            return xscale(d.indexName) + xscale.bandwidth() / 2;
+            // hereeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
+            return this.xscale(d.indexName) + this.xscale.bandwidth() / 2;
           })
           // @ts-ignore
           .y(function (d: ScatterPlotData) {
-            return yscale(d.indexData);
+            return this.yscale(d.indexData);
           })
       );
 
@@ -185,10 +253,10 @@ export class BasicLineChartComponent implements OnInit {
       .append("circle")
       .attr("class", "pathpoints")
       .attr("cx", function (d: ScatterPlotData) {
-        return xscale(d.indexName) + xscale.bandwidth() / 2;
+        return this.xscale(d.indexName) + this.xscale.bandwidth() / 2;
       })
       .attr("cy", function (d: ScatterPlotData) {
-        return yscale(d.indexData);
+        return this.yscale(d.indexData);
       })
       .attr("r", 5)
       .attr("fill", this.colorData)
