@@ -1,4 +1,10 @@
-import { Component, OnDestroy, OnInit } from "@angular/core";
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  OnDestroy,
+  OnInit
+} from "@angular/core";
 import * as XLSX from "xlsx";
 import { ISheetsJsonRepresentation } from "../v-1-strategy-development/model/sheetsJsonRepresentation.interface";
 import { ConcistencyMatrix } from "./models/concistencyMatrix";
@@ -21,7 +27,8 @@ import { EuclideanDistance } from "./models/euclideanDistance";
 @Component({
   selector: "app-strategy-development",
   templateUrl: "./strategy-development.component.html",
-  styleUrls: ["./strategy-development.component.scss"]
+  styleUrls: ["./strategy-development.component.scss"],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class StrategyDevelopmentComponent implements OnInit, OnDestroy {
   workbookKonsistenzmatrix: XLSX.WorkBook;
@@ -46,7 +53,7 @@ export class StrategyDevelopmentComponent implements OnInit, OnDestroy {
   workbookClusterMembershipMatrix: WorkBook;
   bundleUsageMatrix: BundleUsageMatrix;
 
-  constructor() {}
+  constructor(private changeDetectorRef: ChangeDetectorRef) {}
 
   ngOnInit(): void {}
 
@@ -79,6 +86,7 @@ export class StrategyDevelopmentComponent implements OnInit, OnDestroy {
         );
 
         this.consistencyMatrix = new ConcistencyMatrix(resultAoA);
+        this.changeDetectorRef.markForCheck();
       };
       fileReader.readAsArrayBuffer(file);
     }
