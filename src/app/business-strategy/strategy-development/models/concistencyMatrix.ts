@@ -12,6 +12,8 @@ export class ConcistencyMatrix {
   _maxIterations: number = 500_000;
   _maxBundles: number = 4_000;
   iterations: number;
+  _consistencyBoundary: number = 1;
+  _consistencyStrategySetNewBundle: boolean = true;
 
   constructor(data: Array<Array<any>>) {
     let parseResult = this.parseAoAToConsistencyMatrix(data);
@@ -78,7 +80,10 @@ export class ConcistencyMatrix {
       currentVariablesMetaData
     );
     let indexStore: IndexStore = new IndexStore(variables);
-    let bundleStore: BundleStore = new BundleStore(this._maxBundles);
+    let bundleStore: BundleStore = new BundleStore(
+      this._maxBundles,
+      this._consistencyStrategySetNewBundle
+    );
     const numberBundles = this.getMaxNumberOfBundles(variables);
     let a;
     for (a = 0; a < numberBundles && a < this._maxIterations; a++) {
@@ -126,7 +131,12 @@ export class ConcistencyMatrix {
       this.createBundleOptionsKombination(bundleOptions);
     let isConsistent = true;
     optionCombinations.forEach((a) => {
-      if (currentVariablesData[a[1].index][a[0].index] == 1) {
+      if (
+        !(
+          currentVariablesData[a[1].index][a[0].index] >
+          this._consistencyBoundary
+        )
+      ) {
         isConsistent = false;
         return;
       }

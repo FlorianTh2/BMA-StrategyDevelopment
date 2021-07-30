@@ -74,6 +74,8 @@ export class StrategyDevelopmentComponent implements OnInit, OnDestroy {
   minConsideredClusters: number = 1;
   maxIterations: number = 500_000;
   maxStoredBundles: number = 4_000;
+  consistencyBoundary: number = 1;
+  setNewBundleLabelPosition: boolean = true;
   clusterAlgorithms: ClusterAlgorithmListView[] = [
     {
       value: "kmeans",
@@ -248,6 +250,9 @@ export class StrategyDevelopmentComponent implements OnInit, OnDestroy {
   createBundles($event: MouseEvent) {
     this.consistencyMatrix._maxIterations = this.maxIterations;
     this.consistencyMatrix._maxBundles = this.maxStoredBundles;
+    this.consistencyMatrix._consistencyBoundary = this.consistencyBoundary;
+    this.consistencyMatrix._consistencyStrategySetNewBundle =
+      this.setNewBundleLabelPosition;
     console.time("createBundleMatrix");
     this.bundleMatrix = this.consistencyMatrix.createBundleMatrix(
       this.consistencyMatrix.array,
@@ -425,6 +430,10 @@ export class StrategyDevelopmentComponent implements OnInit, OnDestroy {
 
   setMaxStoredBundles(event): void {
     this.maxStoredBundles = event.target.value;
+  }
+
+  setConsistencyBoundary(event): void {
+    this.consistencyBoundary = event.target.value;
   }
 
   uploadClusterMembershipMatrix(event: Event) {

@@ -4,11 +4,13 @@ export class BundleStore {
   bundleStorage: Bundle[];
   maxBundles: number;
   minConsistencyValue: number;
+  _consistencyStrategySetNewBundle: boolean = true;
 
-  constructor(maxBundles: number) {
+  constructor(maxBundles: number, consistencyStrategySetNewBundle: boolean) {
     this.bundleStorage = [];
     this.maxBundles = maxBundles;
     this.minConsistencyValue = -1;
+    this._consistencyStrategySetNewBundle = consistencyStrategySetNewBundle;
   }
 
   addBundle(bundle: Bundle) {
@@ -17,7 +19,12 @@ export class BundleStore {
     //  discard bundle
     if (bundle == null) return;
     if (this.bundleStorage.length == this.maxBundles) {
-      if (bundle.consistence < this.minConsistencyValue) return;
+      if (
+        bundle.consistence < this.minConsistencyValue ||
+        (!this._consistencyStrategySetNewBundle &&
+          bundle.consistence == this.minConsistencyValue)
+      )
+        return;
       // can just pop since we already checked if lower than lowest
       this.bundleStorage.pop();
     }

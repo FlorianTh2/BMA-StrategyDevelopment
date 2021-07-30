@@ -27,12 +27,6 @@
           <mat-form-field appearance="fill">
             <mat-label>Projekt wählen</mat-label>
             <mat-select formControlName="projectsView" multiple>
-<!--              <mat-select-trigger>-->
-<!--                {{saveConsistencyMatrixFormControl.value ? saveConsistencyMatrixFormControl.value[0] : ''}}-->
-<!--                <span *ngIf="saveConsistencyMatrixFormControl.value?.length > 1">-->
-<!--                (+{{saveConsistencyMatrixFormControl.value.length - 1}} {{saveConsistencyMatrixFormControl.value?.length === 2 ? 'other' : 'others'}})-->
-<!--            </span>-->
-<!--              </mat-select-trigger>-->
               <mat-option *ngFor="let project of userProjects" [value]="project">{{project.name}}</mat-option>
             </mat-select>
           </mat-form-field>
@@ -117,6 +111,12 @@
       Dies ist notwendig da die Anzahl der Bündel und der Optionskombinationen pro Bündel speicherintensiv ist und der Browser ein Limit von ca. 2GB hat.
       Beispiel: 10 Variablen je 5 Optionen = 45 Mio. Speichereinheiten. 45 Mio * 4 Byte = ca. 180 MB Rohspeicherplatz.
       Empfohlen ist ein Limit auf ca. 4.000 Bündel um eine verzögerungsfreie Betrachtung zu gewährleisten.
+      <br>
+      Bitte geben Sie dazu noch eine Konsistenzgrenze an. Die beschreibt ab welchem Konsistenzwert einer Optionskombination das Bündel als konsistent angesehen wird.
+      Beispiel: Konsistenzgrenze=1 (empfohlen). Das heißt ab einem Konsistenzwert von größer 1 wird die Optionskombination eines Bündels als konsistent betrachtet.
+      <br>
+      Bitte geben Sie zusätzlich noch eine Strategie zum Umgang mit gleichem Konsistentwert an: Sollen bei vollem Bündelspeicher und gleichem Konsistenzwert eines Bündels ("neues Bündel")
+      mit einem Bündel im Bündelspeicher mit dem minimalsten Konsistenzwert ("altes Bündel") das neue Bündel aufgenommen und das alte Bündel gelöscht werden (default) oder das alte Bündel behalten werden?
     <div style="height: 25px"></div>
     <ng-container *ngIf="consistencyMatrix">
       Für die aktuelle Konsistenzmatrix sind maximal: [{{getMaxIterations()}}] Bündel / Iterationen zu durchlaufen.
@@ -140,6 +140,26 @@
         <mat-label>Größe Bündelspeicher</mat-label>
       <input matInput type="number" value="{{maxStoredBundles}}" (input)="setMaxStoredBundles($event)"  />
       </mat-form-field>
+    </div>
+
+    <div>
+      Bitte geben Sie eine Konsistenzgrenze an:
+      <br>
+      <mat-form-field class="example-full-width" appearance="fill">
+        <mat-label>Konsistenzgrenze</mat-label>
+        <input matInput type="number" value="{{consistencyBoundary}}" (input)="setConsistencyBoundary($event)"  />
+      </mat-form-field>
+    </div>
+    <div>
+      Bitte geben Sie eine Strategie im Umgang mit Bündel mit gleichem Konsistentwert an:
+      <br>
+      <section class="example-section">
+        <label class="example-margin">Konsistenzstrategie</label>
+        <mat-radio-group [(ngModel)]="setNewBundleLabelPosition">
+          <mat-radio-button class="example-margin" [value]="true">Setze neues Bündel</mat-radio-button>
+          <mat-radio-button class="example-margin" [value]="false">Behalte altes Bündel</mat-radio-button>
+        </mat-radio-group>
+      </section>
     </div>
 
     <div style="height: 20px"></div>
