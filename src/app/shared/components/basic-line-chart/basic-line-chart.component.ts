@@ -51,6 +51,7 @@ export class BasicLineChartComponent implements OnInit {
       d3.select("#chart").selectAll("*").remove();
       this.svg = undefined;
       this.g1 = undefined;
+      this.tooltip = undefined;
       this.initChart();
       this.createdConnectedScatterPlot(this.g1);
     }
