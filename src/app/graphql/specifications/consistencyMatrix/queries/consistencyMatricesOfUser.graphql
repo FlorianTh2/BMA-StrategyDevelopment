@@ -1,0 +1,9 @@
+query ConsistencyMatricesOfUser{
+  consistencyMatricesOfUser{
+    id
+    name
+    filename
+    created
+    updated
+  }
+}

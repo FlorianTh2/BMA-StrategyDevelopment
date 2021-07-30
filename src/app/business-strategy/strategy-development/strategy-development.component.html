@@ -1,3 +1,46 @@
+<div>
+  <mat-drawer-container class="example-container" autosize hasBackdrop="false">
+    <mat-drawer #drawer class="example-sidenav" mode="push" position="end">
+
+        <h4>Speichern Sie ihr Reifegradmodell - Ergebnis</h4>
+
+        <form class="ui form" [formGroup]="saveConsistencyMatrixForm" (ngSubmit)="saveConsistencyMatrix()">
+          <h5>
+            Wählen Sie einen Namen für die Konsistenzmatrix
+          </h5>
+            <mat-form-field class="example-form-field">
+              <mat-label>Name</mat-label>
+              <input matInput type="text" formControlName="consistencyMatrixNameView">
+            </mat-form-field>
+          <br>
+          <h5>
+            Hinterlegen Sie eine Beschreibung für die Konsistenzmatrix
+          </h5>
+          <mat-form-field class="example-form-field">
+            <mat-label>Kurzbeschreibung</mat-label>
+            <input matInput type="text" formControlName="consistencyMatrixDescription">
+          </mat-form-field>
+          <br>
+          <h5>
+            Wählen Sie ein Projekt, indem die Konsistenzmatrix gespeichert werden soll.
+          </h5>
+          <mat-form-field appearance="fill">
+            <mat-label>Projekt wählen</mat-label>
+            <mat-select formControlName="projectsView" multiple>
+<!--              <mat-select-trigger>-->
+<!--                {{saveConsistencyMatrixFormControl.value ? saveConsistencyMatrixFormControl.value[0] : ''}}-->
+<!--                <span *ngIf="saveConsistencyMatrixFormControl.value?.length > 1">-->
+<!--                (+{{saveConsistencyMatrixFormControl.value.length - 1}} {{saveConsistencyMatrixFormControl.value?.length === 2 ? 'other' : 'others'}})-->
+<!--            </span>-->
+<!--              </mat-select-trigger>-->
+              <mat-option *ngFor="let project of userProjects" [value]="project">{{project.name}}</mat-option>
+            </mat-select>
+          </mat-form-field>
+          <br>
+          <button mat-raised-button class="ui button save-maturity-model-button0" type="submit">Save</button>
+        </form>
+    </mat-drawer>
+
 <div class="" style="padding: 100px">
   <div>
     <h1>
@@ -9,27 +52,48 @@
   </div>
   <div>
 
-    <h5>
-      Konsistenzmatrix hochladen
-    </h5>
-    <button mat-raised-button color="" (click)="fileInput.click()">Konsistenzmatrix hochladen</button>
-    <input hidden type="file" (change)="uploadConsistencyMatrix($event)" #fileInput id="file">
+  <div style="display: flex; justify-content: space-between">
+    <div>
+      <h5>
+        Konsistenzmatrix hochladen
+      </h5>
+      <button mat-raised-button color="" (click)="fileInput.click()">Konsistenzmatrix hochladen</button>
+      <input hidden type="file" (change)="uploadConsistencyMatrix($event)" #fileInput id="file">
 
-    <div style="height: 25px"></div>
+      <div style="height: 25px"></div>
 
-    <ng-container *ngIf="consistencyMatrix">
-      <div>
-        Ihre Konsistenzmatrix wurde erfolgreich hochgeladen. Sie hat folgende Parameter:
-        <div style="height: 25px"></div>
+      <ng-container *ngIf="consistencyMatrix">
         <div>
-          Anzahl Variablen: [{{getNumberOfVariablesConsistencyMatrix()}}]
+          <ng-container *ngIf="consistencyMatrixStored">
+            Ihre Konsistenzmatrix wurde erfolgreich aus dem Backendspeicher geladen. Sie hat folgende Parameter:
+          </ng-container>
+          <ng-container *ngIf="!consistencyMatrixStored">
+            Ihre Konsistenzmatrix wurde erfolgreich hochgeladen. Sie hat folgende Parameter:
+          </ng-container>
+
+          <div style="height: 25px"></div>
+          <div>
+            Anzahl Variablen: [{{getNumberOfVariablesConsistencyMatrix()}}]
+          </div>
+          <div style="height: 10px"></div>
+          <div>
+            Anzahl Optionen: [{{getNumberOfOptionsConsistencyMatrix()}}]
+          </div>
         </div>
-        <div style="height: 10px"></div>
-        <div>
-          Anzahl Optionen: [{{getNumberOfOptionsConsistencyMatrix()}}]
+      </ng-container>
+    </div>
+    <!-- -->
+    <div>
+      <div *ngIf="user && this.consistencyMatrix">
+        <div *ngIf="!consistencyMatrix_id">
+          <button mat-raised-button color="" class="save-maturity-model-button" (click)="saveConsistencyMatrixToggle()">Speichern Sie die hochgeladene Konsistenzmatrix</button>
         </div>
       </div>
-    </ng-container>
+      <div *ngIf="!user">
+        <button mat-raised-button color="" [disabled]="true" class="save-maturity-model-button">Einloggen zum Speichern!</button>
+      </div>
+    </div>
+  </div>
 
     <div style="height: 100px"></div>
 
@@ -212,4 +276,8 @@
 
     <div style="height: 25px"></div>
   </div>
+</div>
+
+
+</mat-drawer-container>
 </div>

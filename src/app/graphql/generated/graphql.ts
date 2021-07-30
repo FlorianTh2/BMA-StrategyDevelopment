@@ -16,6 +16,131 @@ export type Scalars = {
 
 
 
+export type ConsistencyMatrix = {
+  __typename?: 'ConsistencyMatrix';
+  id: Scalars['ID'];
+  name: Scalars['String'];
+  description?: Maybe<Scalars['String']>;
+  filename: Scalars['String'];
+  fileData: Scalars['String'];
+  projects: Array<Project>;
+  created: Scalars['String'];
+  creator: Scalars['String'];
+  updated: Scalars['String'];
+  updater: Scalars['String'];
+};
+
+export type CreateConsistencyMatrixRequest = {
+  name: Scalars['String'];
+  filename: Scalars['String'];
+  description: Scalars['String'];
+  consistencyMatrixBlobBase64String: Scalars['String'];
+  projectId: Scalars['ID'];
+};
+
+export type CreateUserEvaluationMetricRequest = {
+  valueEvaluationMetric: Scalars['Float'];
+  evaluationMetricId: Scalars['ID'];
+};
+
+export type CreateUserMaturityModelRequest = {
+  name: Scalars['String'];
+  maturityLevel?: Maybe<Scalars['Float']>;
+  projectId: Scalars['ID'];
+  userPartialModels: Array<CreateUserPartialModelRequest>;
+};
+
+export type CreateUserPartialModelRequest = {
+  maturityLevelEvaluationMetrics: Scalars['Float'];
+  partialModelId: Scalars['ID'];
+  userEvaluationMetrics?: Maybe<Array<Maybe<CreateUserEvaluationMetricRequest>>>;
+  subUserPartialModels?: Maybe<Array<Maybe<CreateUserPartialModelRequest>>>;
+  superUserPartialModel?: Maybe<CreateUserPartialModelRequest>;
+};
+
+export type EvaluationMetric = {
+  __typename?: 'EvaluationMetric';
+  id: Scalars['ID'];
+  name: Scalars['String'];
+  description?: Maybe<Scalars['String']>;
+  weight?: Maybe<Scalars['Float']>;
+  maxValue: Scalars['Int'];
+  minValue: Scalars['Int'];
+  partialModel?: Maybe<PartialModel>;
+  created: Scalars['String'];
+  creator: Scalars['String'];
+  updated: Scalars['String'];
+  updater: Scalars['String'];
+};
+
+export type MaturityModel = {
+  __typename?: 'MaturityModel';
+  id: Scalars['ID'];
+  name: Scalars['String'];
+  language: Scalars['String'];
+  version: Scalars['Int'];
+  partialModels: Array<PartialModel>;
+  created: Scalars['String'];
+  creator: Scalars['String'];
+  updated: Scalars['String'];
+  updater: Scalars['String'];
+};
+
+export type Mutation = {
+  __typename?: 'Mutation';
+  login?: Maybe<Scalars['String']>;
+  register?: Maybe<Scalars['String']>;
+  createUserMaturityModel?: Maybe<UserMaturityModel>;
+  createConsistencyMatrix?: Maybe<ConsistencyMatrix>;
+};
+
+
+export type MutationLoginArgs = {
+  userLoginRequest: UserLoginRequest;
+};
+
+
+export type MutationRegisterArgs = {
+  userRegistrationRequest: UserRegistrationRequest;
+};
+
+
+export type MutationCreateUserMaturityModelArgs = {
+  userMaturityModel: CreateUserMaturityModelRequest;
+};
+
+
+export type MutationCreateConsistencyMatrixArgs = {
+  consistencyMatrix: CreateConsistencyMatrixRequest;
+};
+
+export type PartialModel = {
+  __typename?: 'PartialModel';
+  id: Scalars['ID'];
+  name: Scalars['String'];
+  description?: Maybe<Scalars['String']>;
+  weight?: Maybe<Scalars['Float']>;
+  evaluationMetrics: Array<EvaluationMetric>;
+  subPartialModels?: Maybe<Array<PartialModel>>;
+  superPartialModel?: Maybe<PartialModel>;
+  created: Scalars['String'];
+  creator: Scalars['String'];
+  updated: Scalars['String'];
+  updater: Scalars['String'];
+};
+
+export type Project = {
+  __typename?: 'Project';
+  id: Scalars['ID'];
+  name: Scalars['String'];
+  description?: Maybe<Scalars['String']>;
+  user: User;
+  userMaturityModels: Array<UserMaturityModel>;
+  consistencyMatrices: Array<ConsistencyMatrix>;
+  created: Scalars['String'];
+  updated: Scalars['String'];
+};
+
 export type Query = {
   __typename?: 'Query';
   project?: Maybe<Project>;
@@ -26,6 +151,8 @@ export type Query = {
   users?: Maybe<Array<User>>;
   profileOfUser: User;
   checkEmailAddress: Scalars['Boolean'];
+  consistencyMatrixOfUser?: Maybe<ConsistencyMatrix>;
+  consistencyMatricesOfUser?: Maybe<Array<ConsistencyMatrix>>;
   userMaturityModel?: Maybe<UserMaturityModel>;
   userMaturityModels?: Maybe<Array<UserMaturityModel>>;
   userMaturityModelOfUser?: Maybe<UserMaturityModel>;
@@ -59,6 +186,11 @@ export type QueryUserArgs = {
 
 export type QueryCheckEmailAddressArgs = {
   emailAddress?: Maybe<Scalars['String']>;
+};
+
+
+export type QueryConsistencyMatrixOfUserArgs = {
+  id: Scalars['ID'];
 };
 
 
@@ -96,61 +228,6 @@ export type QueryMaturityModelArgs = {
   id: Scalars['ID'];
 };
 
-export type Mutation = {
-  __typename?: 'Mutation';
-  login?: Maybe<Scalars['String']>;
-  register?: Maybe<Scalars['String']>;
-  createUserMaturityModel?: Maybe<UserMaturityModel>;
-};
-
-
-export type MutationLoginArgs = {
-  userLoginRequest: UserLoginRequest;
-};
-
-
-export type MutationRegisterArgs = {
-  userRegistrationRequest: UserRegistrationRequest;
-};
-
-
-export type MutationCreateUserMaturityModelArgs = {
-  userMaturityModel: CreateUserMaturityModelRequest;
-};
-
-export type CreateUserMaturityModelRequest = {
-  name: Scalars['String'];
-  maturityLevel?: Maybe<Scalars['Float']>;
-  projectId: Scalars['ID'];
-  userPartialModels: Array<CreateUserPartialModelRequest>;
-};
-
-export type CreateUserPartialModelRequest = {
-  maturityLevelEvaluationMetrics: Scalars['Float'];
-  partialModelId: Scalars['ID'];
-  userEvaluationMetrics?: Maybe<Array<Maybe<CreateUserEvaluationMetricRequest>>>;
-  subUserPartialModels?: Maybe<Array<Maybe<CreateUserPartialModelRequest>>>;
-  superUserPartialModel?: Maybe<CreateUserPartialModelRequest>;
-};
-
-export type CreateUserEvaluationMetricRequest = {
-  valueEvaluationMetric: Scalars['Float'];
-  evaluationMetricId: Scalars['ID'];
-};
-
-export type UserLoginRequest = {
-  email: Scalars['String'];
-  password: Scalars['String'];
-};
-
-export type UserRegistrationRequest = {
-  email: Scalars['String'];
-  password: Scalars['String'];
-  firstname: Scalars['String'];
-  lastname: Scalars['String'];
-  phoneNumber?: Maybe<Scalars['String']>;
-};
-
 export type User = {
   __typename?: 'User';
   id: Scalars['ID'];
@@ -162,15 +239,21 @@ export type User = {
   projects?: Maybe<Array<Project>>;
 };
 
-export type Project = {
-  __typename?: 'Project';
+export type UserEvaluationMetric = {
+  __typename?: 'UserEvaluationMetric';
   id: Scalars['ID'];
-  name: Scalars['String'];
-  description?: Maybe<Scalars['String']>;
-  user: User;
-  userMaturityModels: Array<UserMaturityModel>;
+  valueEvaluationMetric: Scalars['Float'];
+  userPartialModel: UserPartialModel;
+  evaluationMetric: EvaluationMetric;
   created: Scalars['String'];
+  creator: Scalars['String'];
   updated: Scalars['String'];
+  updater: Scalars['String'];
+};
+
+export type UserLoginRequest = {
+  email: Scalars['String'];
+  password: Scalars['String'];
 };
 
 export type UserMaturityModel = {
@@ -201,60 +284,50 @@ export type UserPartialModel = {
   updater: Scalars['String'];
 };
 
-export type UserEvaluationMetric = {
-  __typename?: 'UserEvaluationMetric';
-  id: Scalars['ID'];
-  valueEvaluationMetric: Scalars['Float'];
-  userPartialModel: UserPartialModel;
-  evaluationMetric: EvaluationMetric;
-  created: Scalars['String'];
-  creator: Scalars['String'];
-  updated: Scalars['String'];
-  updater: Scalars['String'];
+export type UserRegistrationRequest = {
+  email: Scalars['String'];
+  password: Scalars['String'];
+  firstname: Scalars['String'];
+  lastname: Scalars['String'];
+  phoneNumber?: Maybe<Scalars['String']>;
 };
 
-export type PartialModel = {
-  __typename?: 'PartialModel';
-  id: Scalars['ID'];
-  name: Scalars['String'];
-  description?: Maybe<Scalars['String']>;
-  weight?: Maybe<Scalars['Float']>;
-  evaluationMetrics: Array<EvaluationMetric>;
-  subPartialModels?: Maybe<Array<PartialModel>>;
-  superPartialModel?: Maybe<PartialModel>;
-  created: Scalars['String'];
-  creator: Scalars['String'];
-  updated: Scalars['String'];
-  updater: Scalars['String'];
-};
+export type CreateConsistencyMatrixMutationVariables = Exact<{
+  consistencyMatrix: CreateConsistencyMatrixRequest;
+}>;
 
-export type EvaluationMetric = {
-  __typename?: 'EvaluationMetric';
-  id: Scalars['ID'];
-  name: Scalars['String'];
-  description?: Maybe<Scalars['String']>;
-  weight?: Maybe<Scalars['Float']>;
-  maxValue: Scalars['Int'];
-  minValue: Scalars['Int'];
-  partialModel?: Maybe<PartialModel>;
-  created: Scalars['String'];
-  creator: Scalars['String'];
-  updated: Scalars['String'];
-  updater: Scalars['String'];
-};
 
-export type MaturityModel = {
-  __typename?: 'MaturityModel';
-  id: Scalars['ID'];
-  name: Scalars['String'];
-  language: Scalars['String'];
-  version: Scalars['Int'];
-  partialModels: Array<PartialModel>;
-  created: Scalars['String'];
-  creator: Scalars['String'];
-  updated: Scalars['String'];
-  updater: Scalars['String'];
-};
+export type CreateConsistencyMatrixMutation = (
+  { __typename?: 'Mutation' }
+  & { createConsistencyMatrix?: Maybe<(
+    { __typename?: 'ConsistencyMatrix' }
+    & Pick<ConsistencyMatrix, 'id' | 'name'>
+  )> }
+);
+
+export type ConsistencyMatricesOfUserQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type ConsistencyMatricesOfUserQuery = (
+  { __typename?: 'Query' }
+  & { consistencyMatricesOfUser?: Maybe<Array<(
+    { __typename?: 'ConsistencyMatrix' }
+    & Pick<ConsistencyMatrix, 'id' | 'name' | 'filename' | 'created' | 'updated'>
+  )>> }
+);
+
+export type ConsistencyMatrixOfUserQueryVariables = Exact<{
+  consistencyMatrixId: Scalars['ID'];
+}>;
+
+
+export type ConsistencyMatrixOfUserQuery = (
+  { __typename?: 'Query' }
+  & { consistencyMatrixOfUser?: Maybe<(
+    { __typename?: 'ConsistencyMatrix' }
+    & Pick<ConsistencyMatrix, 'id' | 'name' | 'filename' | 'fileData' | 'created' | 'updated'>
+  )> }
+);
 
 export type MaturityModelQueryVariables = Exact<{
   maturityModelId: Scalars['ID'];
@@ -321,6 +394,26 @@ export type ProjectOfUserQuery = (
   )> }
 );
 
+export type ProjectsNestedResourcesQueryVariables = Exact<{
+  projectId: Scalars['ID'];
+}>;
+
+
+export type ProjectsNestedResourcesQuery = (
+  { __typename?: 'Query' }
+  & { projectOfUser?: Maybe<(
+    { __typename?: 'Project' }
+    & Pick<Project, 'id'>
+    & { consistencyMatrices: Array<(
+      { __typename?: 'ConsistencyMatrix' }
+      & Pick<ConsistencyMatrix, 'id' | 'name' | 'updated' | 'created'>
+    )>, userMaturityModels: Array<(
+      { __typename?: 'UserMaturityModel' }
+      & Pick<UserMaturityModel, 'id' | 'name' | 'updated' | 'created'>
+    )> }
+  )> }
+);
+
 export type ProjectsOfUserQueryVariables = Exact<{ [key: string]: never; }>;
 
 
@@ -330,23 +423,6 @@ export type ProjectsOfUserQuery = (
     { __typename?: 'Project' }
     & Pick<Project, 'id' | 'name' | 'description' | 'created' | 'updated'>
   )>> }
-);
-
-export type ProjectsUserMaturityModelsOfUserQueryVariables = Exact<{
-  projectId: Scalars['ID'];
-}>;
-
-
-export type ProjectsUserMaturityModelsOfUserQuery = (
-  { __typename?: 'Query' }
-  & { projectOfUser?: Maybe<(
-    { __typename?: 'Project' }
-    & Pick<Project, 'id'>
-    & { userMaturityModels: Array<(
-      { __typename?: 'UserMaturityModel' }
-      & Pick<UserMaturityModel, 'id' | 'name' | 'updated' | 'created'>
-    )> }
-  )> }
 );
 
 export type LoginMutationVariables = Exact<{
@@ -442,6 +518,70 @@ export type UserMaturityModelsOfUserQuery = (
   )>> }
 );
 
+export const CreateConsistencyMatrixDocument = gql`
+    mutation CreateConsistencyMatrix($consistencyMatrix: CreateConsistencyMatrixRequest!) {
+  createConsistencyMatrix(consistencyMatrix: $consistencyMatrix) {
+    id
+    name
+  }
+}
+    `;
+
+  @Injectable({
+    providedIn: 'root'
+  })
+  export class CreateConsistencyMatrixGQL extends Apollo.Mutation<CreateConsistencyMatrixMutation, CreateConsistencyMatrixMutationVariables> {
+    document = CreateConsistencyMatrixDocument;
+    
+    constructor(apollo: Apollo.Apollo) {
+      super(apollo);
+    }
+  }
+export const ConsistencyMatricesOfUserDocument = gql`
+    query ConsistencyMatricesOfUser {
+  consistencyMatricesOfUser {
+    id
+    name
+    filename
+    created
+    updated
+  }
+}
+    `;
+
+  @Injectable({
+    providedIn: 'root'
+  })
+  export class ConsistencyMatricesOfUserGQL extends Apollo.Query<ConsistencyMatricesOfUserQuery, ConsistencyMatricesOfUserQueryVariables> {
+    document = ConsistencyMatricesOfUserDocument;
+    
+    constructor(apollo: Apollo.Apollo) {
+      super(apollo);
+    }
+  }
+export const ConsistencyMatrixOfUserDocument = gql`
+    query ConsistencyMatrixOfUser($consistencyMatrixId: ID!) {
+  consistencyMatrixOfUser(id: $consistencyMatrixId) {
+    id
+    name
+    filename
+    fileData
+    created
+    updated
+  }
+}
+    `;
+
+  @Injectable({
+    providedIn: 'root'
+  })
+  export class ConsistencyMatrixOfUserGQL extends Apollo.Query<ConsistencyMatrixOfUserQuery, ConsistencyMatrixOfUserQueryVariables> {
+    document = ConsistencyMatrixOfUserDocument;
+    
+    constructor(apollo: Apollo.Apollo) {
+      super(apollo);
+    }
+  }
 export const MaturityModelDocument = gql`
     query MaturityModel($maturityModelId: ID!) {
   maturityModel(id: $maturityModelId) {
@@ -549,6 +689,36 @@ export const ProjectOfUserDocument = gql`
       super(apollo);
     }
   }
+export const ProjectsNestedResourcesDocument = gql`
+    query ProjectsNestedResources($projectId: ID!) {
+  projectOfUser(id: $projectId) {
+    id
+    consistencyMatrices {
+      id
+      name
+      updated
+      created
+    }
+    userMaturityModels {
+      id
+      name
+      updated
+      created
+    }
+  }
+}
+    `;
+
+  @Injectable({
+    providedIn: 'root'
+  })
+  export class ProjectsNestedResourcesGQL extends Apollo.Query<ProjectsNestedResourcesQuery, ProjectsNestedResourcesQueryVariables> {
+    document = ProjectsNestedResourcesDocument;
+    
+    constructor(apollo: Apollo.Apollo) {
+      super(apollo);
+    }
+  }
 export const ProjectsOfUserDocument = gql`
     query ProjectsOfUser {
   projectsOfUser {
@@ -566,30 +736,6 @@ export const ProjectsOfUserDocument = gql`
   })
   export class ProjectsOfUserGQL extends Apollo.Query<ProjectsOfUserQuery, ProjectsOfUserQueryVariables> {
     document = ProjectsOfUserDocument;
-    
-    constructor(apollo: Apollo.Apollo) {
-      super(apollo);
-    }
-  }
-export const ProjectsUserMaturityModelsOfUserDocument = gql`
-    query ProjectsUserMaturityModelsOfUser($projectId: ID!) {
-  projectOfUser(id: $projectId) {
-    id
-    userMaturityModels {
-      id
-      name
-      updated
-      created
-    }
-  }
-}
-    `;
-
-  @Injectable({
-    providedIn: 'root'
-  })
-  export class ProjectsUserMaturityModelsOfUserGQL extends Apollo.Query<ProjectsUserMaturityModelsOfUserQuery, ProjectsUserMaturityModelsOfUserQueryVariables> {
-    document = ProjectsUserMaturityModelsOfUserDocument;
     
     constructor(apollo: Apollo.Apollo) {
       super(apollo);

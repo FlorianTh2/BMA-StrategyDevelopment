@@ -30,6 +30,13 @@ const routes: Routes = [
           import(`./../maturity-model/maturity-model.module`).then(
             (m) => m.MaturityModelModule
           )
+      },
+      {
+        path: ":project_id/projectelements/consistencyMatrix",
+        loadChildren: () =>
+          import(`./../business-strategy/business-strategy.module`).then(
+            (m) => m.BusinessStrategyModule
+          )
       }
 
       // {

@@ -1,0 +1,10 @@
+query ConsistencyMatrixOfUser($consistencyMatrixId: ID!){
+  consistencyMatrixOfUser(id: $consistencyMatrixId) {
+    id
+    name
+    filename
+    fileData
+    created
+    updated
+  }
+}

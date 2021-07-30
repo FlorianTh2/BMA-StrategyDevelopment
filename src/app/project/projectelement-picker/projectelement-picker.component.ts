@@ -1,12 +1,10 @@
 import { Component, OnInit } from "@angular/core";
 import { Observable } from "rxjs";
 import {
+  ConsistencyMatrix,
   Project,
-  ProjectsOfUserGQL,
-  ProjectsUserMaturityModelsOfUserGQL,
-  UserMaturityModel,
-  UserMaturityModelOfUserGQL,
-  UserMaturityModelsOfUserGQL
+  ProjectsNestedResourcesGQL,
+  UserMaturityModel
 } from "../../graphql/generated/graphql";
 import { map } from "rxjs/operators";
 import { ActivatedRoute } from "@angular/router";
@@ -19,10 +17,11 @@ import { ActivatedRoute } from "@angular/router";
 export class ProjectelementPickerComponent implements OnInit {
   projectId: string;
   userMaturityModels$: Observable<UserMaturityModel[]>;
+  consistencyMatrices$: Observable<ConsistencyMatrix[]>;
 
   constructor(
     private route: ActivatedRoute,
-    private projectsUserMaturityModels: ProjectsUserMaturityModelsOfUserGQL
+    private projectsNestedResourcesGQL: ProjectsNestedResourcesGQL
   ) {}
 
   ngOnInit(): void {
@@ -30,7 +29,27 @@ export class ProjectelementPickerComponent implements OnInit {
       this.projectId = paramMap.get("project_id");
     });
 
-    this.userMaturityModels$ = this.projectsUserMaturityModels
+    this.consistencyMatrices$ = this.projectsNestedResourcesGQL
+      .watch({
+        projectId: this.projectId
+      })
+      .valueChanges.pipe(
+        map(
+          (result) =>
+            result.data.projectOfUser.consistencyMatrices as ConsistencyMatrix[]
+        )
+      );
+
+    this.projectsNestedResourcesGQL
+      .watch({
+        projectId: this.projectId
+      })
+      .valueChanges.pipe()
+      .subscribe((res) => {
+        console.log("response: ", res.data);
+      });
+
+    this.userMaturityModels$ = this.projectsNestedResourcesGQL
       .watch({
         projectId: this.projectId
       })

@@ -2,6 +2,21 @@
   <h3>Project Workspace</h3>
   <ul>
     <li>
+      <h4>Your ConsistencyMatrices</h4>
+      <div class="selector-container">
+        <ng-container *ngIf="consistencyMatrices$ | async as consistencyMatrices, else loading">
+          <div *ngFor="let consistencyMatrix of consistencyMatrices" class="selector-item">
+            <app-projectelement-picker-card [projectId]="projectId" [consistencyMatrix]="consistencyMatrix"></app-projectelement-picker-card>
+          </div>
+        </ng-container>
+      </div>
+    </li>
+  </ul>
+
+  <div style="padding-top: 20px">
+
+  <ul>
+    <li>
       <h4>Your Maturity Models</h4>
       <div class="selector-container">
         <ng-container *ngIf="userMaturityModels$ | async as userMaturityModels, else loading">

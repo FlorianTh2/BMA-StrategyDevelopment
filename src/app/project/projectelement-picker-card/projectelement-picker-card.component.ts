@@ -1,6 +1,9 @@
 import { ActivatedRoute } from "@angular/router";
 import { Component, Input, OnInit } from "@angular/core";
-import { UserMaturityModel } from "../../graphql/generated/graphql";
+import {
+  ConsistencyMatrix,
+  UserMaturityModel
+} from "../../graphql/generated/graphql";
 
 @Component({
   selector: "app-projectelement-picker-card",
@@ -13,6 +16,10 @@ export class ProjectelementPickerCardComponent implements OnInit {
 
   @Input()
   userMaturityModel: UserMaturityModel;
+
+  @Input()
+  consistencyMatrix: ConsistencyMatrix;
+
   constructor() {}
 
   ngOnInit(): void {}

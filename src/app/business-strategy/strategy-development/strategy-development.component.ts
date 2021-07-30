@@ -3,12 +3,13 @@ import {
   ChangeDetectorRef,
   Component,
   OnDestroy,
-  OnInit
+  OnInit,
+  ViewChild
 } from "@angular/core";
 import * as XLSX from "xlsx";
 import { ISheetsJsonRepresentation } from "../v-1-strategy-development/model/sheetsJsonRepresentation.interface";
 import { ConcistencyMatrix } from "./models/concistencyMatrix";
-import { Subject } from "rxjs";
+import { Observable, Subject } from "rxjs";
 import { IBundleMatrix } from "../v-1-strategy-development/model/bundleMatrix.interface";
 import { BundleMatrix } from "./models/bundleMatrix";
 import { Kmeans } from "./models/kmeans";
@@ -20,10 +21,28 @@ import { ClusterMembershipMatrix } from "./models/clusterMembershipMatrix";
 import { WorkBook } from "xlsx";
 import { BundleUsageMatrix } from "./models/bundleUsageMatrix";
 import { EuclideanDistance } from "./models/euclideanDistance";
+import { map } from "rxjs/operators";
+import {
+  ConsistencyMatrix,
+  ConsistencyMatrixOfUserGQL,
+  CreateConsistencyMatrixGQL,
+  CreateUserMaturityModelGQL,
+  Project,
+  ProjectsOfUserGQL,
+  User,
+  UserMaturityModel,
+  UserMaturityModelOfUserGQL
+} from "../../graphql/generated/graphql";
+import { ActivatedRoute, Router } from "@angular/router";
+import { AuthorizationService } from "../../core/services/authorization.service";
+import { MatSidenav } from "@angular/material/sidenav";
+import {
+  FormBuilder,
+  FormControl,
+  FormGroup,
+  Validators
+} from "@angular/forms";
 
-// zumachen
-// - wenn man custom hochlädt wird trotzdem angezeigt, dass 500.000 iterationen gemacht wurden
-// -
 @Component({
   selector: "app-strategy-development",
   templateUrl: "./strategy-development.component.html",
@@ -31,7 +50,20 @@ import { EuclideanDistance } from "./models/euclideanDistance";
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class StrategyDevelopmentComponent implements OnInit, OnDestroy {
+  consistencyMatrix_id: string;
+  consistencyMatrixStored$: Observable<ConsistencyMatrix>;
+  consistencyMatrixStored: ConsistencyMatrix;
+
+  user: User = null;
+
+  @ViewChild("drawer") sidenav: MatSidenav;
+  showFiller = false;
+  saveConsistencyMatrixFormControl = new FormControl();
+
+  userProjects: Project[];
+
   workbookKonsistenzmatrix: XLSX.WorkBook;
+  consistencyMatrixBlob: Blob;
   consistencyMatrix: ConcistencyMatrix;
   bundleMatrix: BundleMatrix;
   destroy$: Subject<boolean> = new Subject<boolean>();
@@ -52,10 +84,124 @@ export class StrategyDevelopmentComponent implements OnInit, OnDestroy {
   clusterMembershipMatrix: ClusterMembershipMatrix;
   workbookClusterMembershipMatrix: WorkBook;
   bundleUsageMatrix: BundleUsageMatrix;
+  saveConsistencyMatrixForm: FormGroup;
+  filename: string;
 
-  constructor(private changeDetectorRef: ChangeDetectorRef) {}
+  constructor(
+    private route: ActivatedRoute,
+    private consistencyMatrixOfUserGQL: ConsistencyMatrixOfUserGQL,
+    private authorizationService: AuthorizationService,
+    private projectsOfUserGQL: ProjectsOfUserGQL,
+    private changeDetectorRef: ChangeDetectorRef,
+    private fb: FormBuilder,
+    private createConsistencyMatrixGQL: CreateConsistencyMatrixGQL,
+    private router: Router
+  ) {}
 
-  ngOnInit(): void {}
+  ngOnInit(): void {
+    this.consistencyMatrix_id = this.route.snapshot.paramMap.get(
+      "consistencyMatrix_id"
+    );
+
+    this.authorizationService.userObservable.subscribe((a) => {
+      this.user = a;
+    });
+
+    if (this.user) {
+      this.projectsOfUserGQL
+        .watch()
+        .valueChanges.pipe(
+          map((result) => result.data.projectsOfUser as Project[])
+        )
+        .subscribe(
+          (res) => {
+            this.userProjects = res;
+          },
+          (err) => {}
+        );
+    }
+
+    if (this.consistencyMatrix_id) {
+      this.loadConsistencyMatrixFromBackend();
+    }
+
+    this.createForm();
+  }
+
+  private createForm() {
+    this.saveConsistencyMatrixForm = this.fb.group({
+      consistencyMatrixNameView: new FormControl("", [Validators.required]),
+      consistencyMatrixDescription: new FormControl("", [Validators.required]),
+      projectsView: new FormControl("", [Validators.required])
+    });
+  }
+
+  loadConsistencyMatrixFromBackend() {
+    this.consistencyMatrixStored$ = this.consistencyMatrixOfUserGQL
+      .watch({ consistencyMatrixId: this.consistencyMatrix_id })
+      .valueChanges.pipe(
+        map(
+          (result) => result.data.consistencyMatrixOfUser as ConsistencyMatrix
+        )
+      );
+
+    this.consistencyMatrixStored$.subscribe(
+      (res) => {
+        this.consistencyMatrixStored = res;
+
+        const blob = this.b64toBlob(this.consistencyMatrixStored.fileData);
+        this.consistencyMatrixBlob = blob;
+        let fileReader = new FileReader();
+        fileReader.onloadend = (e) => {
+          var fileReaderResult = e.target.result as ArrayBufferLike;
+          // new array to handle xls AND xlsx AND csv
+          var fileReaderResultCasted = new Uint8Array(fileReaderResult);
+          this.workbookKonsistenzmatrix = XLSX.read(fileReaderResultCasted, {
+            type: "array"
+          });
+
+          // only first sheet for now
+          var resultAoA: Array<Array<any>> = XLSX.utils.sheet_to_json(
+            this.workbookKonsistenzmatrix.Sheets[
+              this.workbookKonsistenzmatrix.SheetNames[0]
+            ],
+            {
+              header: 1
+            }
+          );
+
+          this.consistencyMatrix = new ConcistencyMatrix(resultAoA);
+          this.changeDetectorRef.markForCheck();
+        };
+        fileReader.readAsArrayBuffer(blob);
+      },
+      (error) => {}
+    );
+  }
+
+  saveConsistencyMatrixToggle() {
+    this.sidenav.toggle();
+  }
+
+  b64toBlob(b64Data, contentType = "", sliceSize = 512): Blob {
+    const byteCharacters = atob(b64Data);
+    const byteArrays = [];
+
+    for (let offset = 0; offset < byteCharacters.length; offset += sliceSize) {
+      const slice = byteCharacters.slice(offset, offset + sliceSize);
+
+      const byteNumbers = new Array(slice.length);
+      for (let i = 0; i < slice.length; i++) {
+        byteNumbers[i] = slice.charCodeAt(i);
+      }
+
+      const byteArray = new Uint8Array(byteNumbers);
+      byteArrays.push(byteArray);
+    }
+
+    const blob = new Blob(byteArrays, { type: contentType });
+    return blob;
+  }
 
   uploadConsistencyMatrix(event: Event) {
     const element = event.currentTarget as HTMLInputElement;
@@ -65,6 +211,8 @@ export class StrategyDevelopmentComponent implements OnInit, OnDestroy {
         throw new Error("Cannot use multiple files");
       }
       let file: File = fileList.item(0);
+      this.filename = file.name;
+      this.consistencyMatrixBlob = file;
       // https://stackoverflow.com/questions/28782074/excel-to-json-javascript-code
       let fileReader = new FileReader();
       fileReader.onloadend = (e) => {
@@ -387,5 +535,58 @@ export class StrategyDevelopmentComponent implements OnInit, OnDestroy {
         worksheet[ref].z = fmt;
       }
     }
+  }
+
+  // this.saveConsistencyMatrixForm = this.fb.group({
+  //   consistencyMatrixNameView: new FormControl("", [Validators.required]),
+  //   consistencyMatrixDescription: new FormControl("", [Validators.required]),
+  //   projectsView: new FormControl("", [Validators.required])
+  // });
+
+  saveConsistencyMatrix() {
+    console.log("filename: ", this.filename);
+    const selectedProjects: Project[] =
+      this.saveConsistencyMatrixForm.get("projectsView").value;
+    const selectedProjectId: string = selectedProjects[0].id;
+    console.log("projectid: ", selectedProjectId);
+
+    const selectedConsistencyMatrixName = this.saveConsistencyMatrixForm.get(
+      "consistencyMatrixNameView"
+    ).value;
+    const selectedConsistencyMatrixDescription =
+      this.saveConsistencyMatrixForm.get("consistencyMatrixDescription").value;
+
+    let createdUserMaturityModelId: string;
+    var reader = new FileReader();
+    reader.readAsDataURL(this.consistencyMatrixBlob);
+    reader.onloadend = (e) => {
+      // https://stackoverflow.com/questions/18650168/convert-blob-to-base64
+      const base64dataWithDonwloadTags: string = reader.result as string;
+      const base64data: string = base64dataWithDonwloadTags.substr(
+        base64dataWithDonwloadTags.indexOf(",") + 1
+      );
+      // console.log("here again: ", selectedProjectId);
+      this.createConsistencyMatrixGQL
+        .mutate({
+          consistencyMatrix: {
+            name: selectedConsistencyMatrixName,
+            filename: this.filename,
+            description: selectedConsistencyMatrixDescription,
+            consistencyMatrixBlobBase64String: base64data,
+            projectId: selectedProjectId
+          }
+        })
+        .pipe()
+        .subscribe((a) => {
+          console.log("here again: ", selectedProjectId);
+          const createdConsistencyMatrixId = a.data.createConsistencyMatrix.id;
+          this.router.navigate([
+            "/project/" +
+              selectedProjectId +
+              "/projectelements/consistencyMatrix/" +
+              createdConsistencyMatrixId
+          ]);
+        });
+    };
   }
 }

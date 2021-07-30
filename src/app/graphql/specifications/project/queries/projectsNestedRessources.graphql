@@ -1,0 +1,17 @@
+query ProjectsNestedResources($projectId: ID!){
+  projectOfUser(id: $projectId){
+    id
+    consistencyMatrices{
+      id
+      name
+      updated
+      created
+    }
+    userMaturityModels{
+      id
+      name
+      updated
+      created
+    }
+  }
+}

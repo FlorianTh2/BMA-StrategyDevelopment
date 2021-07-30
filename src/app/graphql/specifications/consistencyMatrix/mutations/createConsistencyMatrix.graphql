@@ -1,0 +1,7 @@
+mutation CreateConsistencyMatrix($consistencyMatrix: CreateConsistencyMatrixRequest!){
+  createConsistencyMatrix(consistencyMatrix: $consistencyMatrix)
+  {
+    id
+    name
+  }
+}

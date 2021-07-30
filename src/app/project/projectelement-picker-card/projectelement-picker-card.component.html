@@ -1,34 +1,74 @@
-<div>
-  <mat-card routerLink="/project/{{projectId}}/projectelements/maturitymodel/{{userMaturityModel.id}}" class="example-card">
-    <mat-card-header>
-      <mat-card-title style="min-width: 250px">{{userMaturityModel.name.length < 20 ? userMaturityModel.name : userMaturityModel.name.slice(0,20) + "..."}}</mat-card-title>
-    </mat-card-header>
-    <mat-card-content>
-      <mat-grid-list cols="2" rowHeight="3:1">
-        <mat-grid-tile class="">
-          <div class="align-left">
-            Updated:
-          </div>
-        </mat-grid-tile>
-        <mat-grid-tile class="">
-          <div class="align-left">
-            {{userMaturityModel.updated | customDate}}
-          </div>
-        </mat-grid-tile>
-        <mat-grid-tile class="">
-          <div class="align-left">
-            Created:
-          </div>
-        </mat-grid-tile>
-        <mat-grid-tile class="">
-          <div class="align-left">
-            {{userMaturityModel.created | customDate}}
-          </div>
-        </mat-grid-tile>
-      </mat-grid-list>
-    </mat-card-content>
-    <mat-card-actions>
-      <button mat-button>Open</button>
-    </mat-card-actions>
-  </mat-card>
-</div>
+
+<ng-container *ngIf="consistencyMatrix">
+  <div>
+    <mat-card routerLink="/project/{{projectId}}/projectelements/consistencyMatrix/{{consistencyMatrix.id}}" class="example-card">
+      <mat-card-header>
+        <mat-card-title style="min-width: 250px">{{consistencyMatrix.name.length < 20 ? consistencyMatrix.name : consistencyMatrix.name.slice(0,20) + "..."}}</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <mat-grid-list cols="2" rowHeight="3:1">
+          <mat-grid-tile class="">
+            <div class="align-left">
+              Updated:
+            </div>
+          </mat-grid-tile>
+          <mat-grid-tile class="">
+            <div class="align-left">
+              {{consistencyMatrix.updated | customDate}}
+            </div>
+          </mat-grid-tile>
+          <mat-grid-tile class="">
+            <div class="align-left">
+              Created:
+            </div>
+          </mat-grid-tile>
+          <mat-grid-tile class="">
+            <div class="align-left">
+              {{consistencyMatrix.created | customDate}}
+            </div>
+          </mat-grid-tile>
+        </mat-grid-list>
+      </mat-card-content>
+      <mat-card-actions>
+        <button mat-button>Open</button>
+      </mat-card-actions>
+    </mat-card>
+  </div>
+</ng-container>
+
+<ng-container *ngIf="userMaturityModel">
+  <div>
+    <mat-card routerLink="/project/{{projectId}}/projectelements/maturitymodel/{{userMaturityModel.id}}" class="example-card">
+      <mat-card-header>
+        <mat-card-title style="min-width: 250px">{{userMaturityModel.name.length < 20 ? userMaturityModel.name : userMaturityModel.name.slice(0,20) + "..."}}</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <mat-grid-list cols="2" rowHeight="3:1">
+          <mat-grid-tile class="">
+            <div class="align-left">
+              Updated:
+            </div>
+          </mat-grid-tile>
+          <mat-grid-tile class="">
+            <div class="align-left">
+              {{userMaturityModel.updated | customDate}}
+            </div>
+          </mat-grid-tile>
+          <mat-grid-tile class="">
+            <div class="align-left">
+              Created:
+            </div>
+          </mat-grid-tile>
+          <mat-grid-tile class="">
+            <div class="align-left">
+              {{userMaturityModel.created | customDate}}
+            </div>
+          </mat-grid-tile>
+        </mat-grid-list>
+      </mat-card-content>
+      <mat-card-actions>
+        <button mat-button>Open</button>
+      </mat-card-actions>
+    </mat-card>
+  </div>
+</ng-container>
