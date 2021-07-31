@@ -338,7 +338,8 @@ export class StrategyDevelopmentComponent implements OnInit, OnDestroy {
       const clusterResultStore: Record<number, ClusterResult> = {};
       for (
         let a = this.minConsideredClusters;
-        a < this.maxConsideredClusters;
+        // <= instead of < since we want to include the maxConsideredClusters-number too
+        a <= this.maxConsideredClusters;
         a++
       ) {
         const kmeans = new Kmeans(a, 2, new EuclideanDistance());
@@ -352,6 +353,8 @@ export class StrategyDevelopmentComponent implements OnInit, OnDestroy {
           numberClusters: kmeans.numClusters
         } as ClusterResult;
       }
+      console.log("clusterresult");
+      console.log(clusterResultStore);
       this.clusterAnalysisResults = clusterResultStore;
       this.setClusterAnalysisRunStatus(false);
       this.clusterMembershipMatrix = new ClusterMembershipMatrix(
