@@ -89,11 +89,11 @@ export class StrategyDevelopmentComponent implements OnInit, OnDestroy {
   bundleUsageMatrix: BundleUsageMatrix;
 
   mdsData: ScatterPlotMdsData[] = [
-    { x: 0, y: 0 },
-    { x: 1, y: 1 },
-    { x: 2, y: 2 },
-    { x: 3, y: 3 },
-    { x: 4, y: 4 }
+    { clusterName: "cluster 0", x: 0, y: 0 },
+    { clusterName: "cluster 1", x: 1, y: 1 },
+    { clusterName: "cluster 2", x: 2, y: 2 },
+    { clusterName: "cluster 3", x: 3, y: 3 },
+    { clusterName: "cluster 4", x: 4, y: 4 }
   ];
 
   saveConsistencyMatrixForm: FormGroup;
@@ -612,11 +612,11 @@ export class StrategyDevelopmentComponent implements OnInit, OnDestroy {
 
   calculateMds($event: MouseEvent) {
     this.mdsData = [
-      { x: 0, y: 0 },
-      { x: 1, y: 1 },
-      { x: 2, y: 2 },
-      { x: 3, y: 3 },
-      { x: 4, y: 4 }
+      { clusterName: "cluster 0", x: 0, y: 0 },
+      { clusterName: "cluster 1", x: 1, y: 1 },
+      { clusterName: "cluster 2", x: 2, y: 2 },
+      { clusterName: "cluster 3", x: 3, y: 3 },
+      { clusterName: "cluster 4", x: 4, y: 4 }
     ];
   }
 }

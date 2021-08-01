@@ -30,6 +30,8 @@ export class ScatterPlotMdsComponent implements OnInit {
   private colorData: string = "#3D4D5D";
   private xscale: ScaleLinear<number, number, never>;
   private yscale: ScaleLinear<number, number, never>;
+  private sequentialColorScale: ScaleLinear<number, number, never>;
+
   constructor() {}
 
   ngOnInit(): void {
@@ -52,7 +54,7 @@ export class ScatterPlotMdsComponent implements OnInit {
   }
 
   initChart(): void {
-    this.margin = { top: 10, right: 60, bottom: 75, left: 60 };
+    this.margin = { top: 10, right: 80, bottom: 75, left: 60 };
     this.height = 400 - this.margin.top - this.margin.bottom;
     this.width = 800 - this.margin.left - this.margin.right;
 
@@ -89,6 +91,12 @@ export class ScatterPlotMdsComponent implements OnInit {
       .style("border-width", "1px")
       .style("border-radius", "5px")
       .style("padding", "10px");
+
+    this.sequentialColorScale = d3
+      .scaleLinear()
+      .domain([0, this.data.length - 1])
+      // @ts-ignore
+      .range(["grey", "blue"]);
   }
 
   // https://bl.ocks.org/d3noob/a22c42db65eb00d4e369
@@ -184,6 +192,7 @@ export class ScatterPlotMdsComponent implements OnInit {
       .style("text-anchor", "middle")
       .text("y");
 
+    // https://stackoverflow.com/questions/40766379/d3-adding-grid-to-simple-line-chart
     const horizontalGrid = axisLeft
       .selectAll(".tick")
       .append("line")
@@ -226,7 +235,9 @@ export class ScatterPlotMdsComponent implements OnInit {
         return module.yscale(d.y);
       })
       .attr("r", 10)
-      .attr("fill", this.colorData)
+      .attr("fill", (a, aIndex) => {
+        return this.sequentialColorScale(aIndex);
+      })
       .on("mouseover", function (event, data: ScatterPlotMdsData) {
         console.log("sadfasdf");
         console.log(data.y);
@@ -253,38 +264,46 @@ export class ScatterPlotMdsComponent implements OnInit {
     const gLegend = this.svg
       .selectAll(".g-legend")
       // random value to be able to enter()
-      .data([1])
+      .data([-1])
       .enter()
       .append("g")
       .attr("class", "g-legend")
       .attr("height", 100)
       .attr("width", 300);
 
+    // for each data element (1 data element = 1 cluster) print 1 rect (coloured) + 1 Text
     // create legend color squares
     gLegend
       .selectAll(".legend-rect")
-      .data(["Anzahl der Cluster"])
+      .data(this.data)
       .enter()
       .append("rect")
       .attr("class", "legend-rect")
-      .attr("x", this.width + this.margin.left + this.margin.right - 175)
-      .attr("y", 0)
+      .attr("x", this.width + this.margin.left + this.margin.right - 70)
+      .attr("y", (a: ScatterPlotMdsData, aIndex) => {
+        return 15 + aIndex * 20;
+      })
       .attr("width", 10)
       .attr("height", 10)
-      .attr("fill", this.colorData);
+      .attr("fill", (a, aIndex) => {
+        return this.sequentialColorScale(aIndex);
+      });
 
     // create legend-text
     gLegend
       .selectAll(".legend-text")
-      .data(["Anzahl der Cluster"])
+      .data(this.data)
       .enter()
       .append("text")
       .attr("class", "legend-text")
-      .attr("x", this.width + this.margin.left + this.margin.right - 150)
-      .attr("y", (a, b) => b * 20 + 10)
-      .attr("cursor", "pointer")
+      .attr("x", this.width + this.margin.left + this.margin.right - 50)
+      .attr("y", (a: ScatterPlotMdsData, aIndex) => {
+        return 25 + aIndex * 20;
+      })
       .attr("font-size", "11px")
-      .text((a) => a);
+      .text((a: ScatterPlotMdsData) => {
+        return a.clusterName;
+      });
   }
 
   // keep in mind where the tooltip div spawns: only with right x+y at the buttom-left-corner of edge
