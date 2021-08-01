@@ -225,14 +225,22 @@ export class ScatterPlotMdsComponent implements OnInit {
       .attr("cy", function (d: ScatterPlotMdsData) {
         return module.yscale(d.y);
       })
-      .attr("r", 5)
+      .attr("r", 10)
       .attr("fill", this.colorData)
       .on("mouseover", function (event, data: ScatterPlotMdsData) {
         console.log("sadfasdf");
         console.log(data.y);
         let bbox = this.getBBox();
         module.tooltip
-          .html("<div>Inertia: " + data.y.toFixed(2) + "</div>")
+          .html(
+            "<div>Cluster-x: " +
+              data.x.toFixed(2) +
+              "</div>" +
+              '<div style="height: 2px"></div>' +
+              "<div>Cluster-y: " +
+              data.y.toFixed(2) +
+              "</div>"
+          )
           .style("left", module.getXTooltip(this, module.tooltip))
           .style("top", module.getYTooltip(this, module.tooltip))
           .style("visibility", "visible");
@@ -295,6 +303,7 @@ export class ScatterPlotMdsComponent implements OnInit {
       window.pageYOffset +
       currentObject.getBoundingClientRect().y -
       tooltipSelection.node().getBoundingClientRect().height +
+      currentObject.getBoundingClientRect().height +
       "px"
     );
   }
