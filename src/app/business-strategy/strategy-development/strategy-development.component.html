@@ -296,6 +296,21 @@
 
     <div style="height: 25px"></div>
   </div>
+
+  <div style="height: 25px"></div>
+
+  <button mat-raised-button color="" (click)="calculateMds($event)">Berechne Multidimensionale Skalierung zur Visualisierung</button>
+
+  <div style="height: 25px"></div>
+
+<!--  <ng-container *ngIf="mdsData && mdsData.length > 0">-->
+    <div>
+      <app-scatter-plot-mds [data]="mdsData"></app-scatter-plot-mds>
+    </div>
+    <div>
+      Die Multidimensionale Skalierung wurde erfolgreich berechnet. Die Visualisierung der berechneten Koordinaten wird folgend dargestellt.
+    </div>
+<!--  </ng-container>-->
 </div>
 
 

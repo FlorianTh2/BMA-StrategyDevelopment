@@ -42,6 +42,7 @@ import {
   FormGroup,
   Validators
 } from "@angular/forms";
+import { ScatterPlotMdsData } from "../../shared/models/scatterPlotMdsData";
 
 @Component({
   selector: "app-strategy-development",
@@ -86,6 +87,15 @@ export class StrategyDevelopmentComponent implements OnInit, OnDestroy {
   clusterMembershipMatrix: ClusterMembershipMatrix;
   workbookClusterMembershipMatrix: WorkBook;
   bundleUsageMatrix: BundleUsageMatrix;
+
+  mdsData: ScatterPlotMdsData[] = [
+    { x: 0, y: 0 },
+    { x: 1, y: 1 },
+    { x: 2, y: 2 },
+    { x: 3, y: 3 },
+    { x: 4, y: 4 }
+  ];
+
   saveConsistencyMatrixForm: FormGroup;
   filename: string;
 
@@ -353,8 +363,6 @@ export class StrategyDevelopmentComponent implements OnInit, OnDestroy {
           numberClusters: kmeans.numClusters
         } as ClusterResult;
       }
-      console.log("clusterresult");
-      console.log(clusterResultStore);
       this.clusterAnalysisResults = clusterResultStore;
       this.setClusterAnalysisRunStatus(false);
       this.clusterMembershipMatrix = new ClusterMembershipMatrix(
@@ -600,5 +608,15 @@ export class StrategyDevelopmentComponent implements OnInit, OnDestroy {
           ]);
         });
     };
+  }
+
+  calculateMds($event: MouseEvent) {
+    this.mdsData = [
+      { x: 0, y: 0 },
+      { x: 1, y: 1 },
+      { x: 2, y: 2 },
+      { x: 3, y: 3 },
+      { x: 4, y: 4 }
+    ];
   }
 }

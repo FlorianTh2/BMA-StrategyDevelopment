@@ -5,24 +5,19 @@ import {
   SimpleChanges,
   ViewEncapsulation
 } from "@angular/core";
-import {
-  InputMaturityModelSpiderChart,
-  InputSubUserPartialModelSpiderChart
-} from "../../models/InputMaturityModelSpiderChart";
-import { ScatterPlotData } from "../../models/scatterPlotData";
-import * as d3 from "d3";
 import { ScaleBand, ScaleLinear } from "d3";
+import { ScatterPlotMdsData } from "../../models/scatterPlotMdsData";
+import * as d3 from "d3";
 
 @Component({
-  selector: "app-basic-line-chart",
-  templateUrl: "./basic-line-chart.component.html",
-  styleUrls: ["./basic-line-chart.component.scss"],
-  encapsulation: ViewEncapsulation.None
+  selector: "app-scatter-plot-mds",
+  templateUrl: "./scatter-plot-mds.component.html",
+  styleUrls: ["./scatter-plot-mds.component.scss"]
 })
-export class BasicLineChartComponent implements OnInit {
+export class ScatterPlotMdsComponent implements OnInit {
   @Input()
   // [[x,y], ...]
-  data: ScatterPlotData[];
+  data: ScatterPlotMdsData[];
 
   hostElement: any;
   private svg: any;
@@ -33,22 +28,21 @@ export class BasicLineChartComponent implements OnInit {
   private height: number;
   private width: number;
   private colorData: string = "#3D4D5D";
-  private xscale: ScaleBand<string>;
+  private xscale: ScaleLinear<number, number, never>;
   private yscale: ScaleLinear<number, number, never>;
-
   constructor() {}
 
   ngOnInit(): void {
+    console.log("mds plot: ", this.data);
     this.initChart();
     this.createdConnectedScatterPlot(this.g1);
   }
 
   ngOnChanges(changes: SimpleChanges) {
     if (this.data && this.svg && changes.data.currentValue) {
-      this.data = changes.data.currentValue as ScatterPlotData[];
-      const oldData = changes.data.previousValue as ScatterPlotData[];
-      // this.updateChart(oldData);
-      d3.select("#chart").selectAll("*").remove();
+      this.data = changes.data.currentValue as ScatterPlotMdsData[];
+      const oldData = changes.data.previousValue as ScatterPlotMdsData[];
+      d3.select("#chart2").selectAll("*").remove();
       this.svg = undefined;
       this.g1 = undefined;
       this.tooltip = undefined;
@@ -62,20 +56,20 @@ export class BasicLineChartComponent implements OnInit {
     this.height = 400 - this.margin.top - this.margin.bottom;
     this.width = 800 - this.margin.left - this.margin.right;
 
-    const maxValue = Math.max(...this.data.map((a) => a.indexData));
+    const maxYValue = Math.max(...this.data.map((a) => a.y));
     // give 5px per digit more to properly display leftaxislabel
     this.margin.left =
       this.margin.left +
-      [...maxValue.toString()].reduce((aAcc, a) => aAcc + 5, 0);
+      [...maxYValue.toString()].reduce((aAcc, a) => aAcc + 5, 0);
+
     this.svg = d3
-      .select("#chart")
+      .select("#chart2")
       .append("svg")
       .attr("class", "svg-class")
       .attr("width", this.width + this.margin.left + +this.margin.right)
       .attr("height", this.height + this.margin.top + this.margin.bottom);
 
     this.g1 = this.svg
-      // dont work on svg, instead work on one group of svg
       .append("g")
       .attr(
         "transform",
@@ -84,7 +78,7 @@ export class BasicLineChartComponent implements OnInit {
 
     // init/prepare tooltip for following definition of edge-point-hover
     this.tooltip = d3
-      .select("#chart")
+      .select("#chart2")
       .append("div")
       .attr("class", "tooltip-class")
       .style("position", "absolute")
@@ -124,19 +118,22 @@ export class BasicLineChartComponent implements OnInit {
     const module = this;
 
     this.xscale = d3
-      .scaleBand()
-      .domain(this.data.map((a) => a.indexName))
-      .rangeRound([0, this.width])
-      .padding(0.1);
+      .scaleLinear()
+      .domain([
+        Math.min(...this.data.map((a) => a.x)),
+        Math.max(...this.data.map((a) => a.x)) * 1.1
+      ])
+      .range([0, this.width])
+      .nice();
 
     this.yscale = d3
       .scaleLinear()
       .domain([
-        Math.min(...this.data.map((a) => a.indexData)),
-        Math.max(...this.data.map((a) => a.indexData))
+        Math.min(...this.data.map((a) => a.y)),
+        Math.max(...this.data.map((a) => a.y)) * 1.1
       ])
-      .nice()
-      .range([this.height, 0]);
+      .range([this.height, 0])
+      .nice();
 
     const axisBottom = g1
       .selectAll(".gAxisBottom")
@@ -145,7 +142,12 @@ export class BasicLineChartComponent implements OnInit {
       .append("g")
       .attr("class", "gAxisBottom")
       .attr("transform", "translate(0," + this.height + ")")
-      .call(d3.axisBottom(this.xscale));
+      .call(
+        d3.axisBottom(this.xscale)
+        // .tickSizeInner(-this.height)
+        // .tickSizeOuter(0)
+        // .tickPadding(10)
+      );
 
     const axisBottomLabel = g1
       .selectAll(".gAxisBottomLabel")
@@ -155,7 +157,7 @@ export class BasicLineChartComponent implements OnInit {
       .attr("class", "gAxisBottomLabel")
       .attr("x", this.width / 2)
       .attr("y", this.height + this.margin.top + this.margin.bottom / 2)
-      .text("Anzahl der Cluster");
+      .text("x");
 
     const axisLeft = g1
       .selectAll(".gAxisLeft")
@@ -163,7 +165,12 @@ export class BasicLineChartComponent implements OnInit {
       .enter()
       .append("g")
       .attr("class", "gAxisLeft")
-      .call(d3.axisLeft(this.yscale));
+      .call(
+        d3.axisLeft(this.yscale)
+        // .tickSizeInner(-this.width)
+        // .tickSizeOuter(0)
+        // .tickPadding(10)
+      );
 
     const axisLeftLabel = g1
       .selectAll(".gAxisLeftLabel")
@@ -175,31 +182,31 @@ export class BasicLineChartComponent implements OnInit {
       .attr("y", -this.margin.left / 2)
       .attr("transform", "rotate(-90)")
       .style("text-anchor", "middle")
-      .text("Aggregierter Abstand");
+      .text("y");
 
-    const pathLineWithLineObjects = g1
-      .selectAll(".pathline")
-      .data([this.data])
-      .enter()
-      .append("path")
-      .attr("class", "pathline")
-      .attr("fill", "none")
-      .attr("stroke", this.colorData)
-      .attr("stroke-width", 1.5)
-      .attr("class", "line")
-      .attr(
-        "d",
-        d3
-          .line()
-          // @ts-ignore
-          .x(function (d: ScatterPlotData) {
-            return module.xscale(d.indexName) + module.xscale.bandwidth() / 2;
-          })
-          // @ts-ignore
-          .y(function (d: ScatterPlotData) {
-            return module.yscale(d.indexData);
-          })
-      );
+    const horizontalGrid = axisLeft
+      .selectAll(".tick")
+      .append("line")
+      .attr("class", "gridline")
+      .style("stroke", "black")
+      .style("shape-rendering", "crispEdges")
+      .style("stroke-opacity", 0.2)
+      .attr("x1", 0)
+      .attr("y1", 0)
+      .attr("x2", this.width)
+      .attr("y2", 0);
+
+    const verticalGrid = axisBottom
+      .selectAll(".tick")
+      .append("line")
+      .attr("class", "gridline")
+      .style("stroke", "black")
+      .style("shape-rendering", "crispEdges")
+      .style("stroke-opacity", 0.2)
+      .attr("x1", 0)
+      .attr("y1", -this.height)
+      .attr("x2", 0)
+      .attr("y2", 0);
 
     const scatterPointsOnPathLine = g1
       .selectAll(".gPathpoints")
@@ -212,20 +219,20 @@ export class BasicLineChartComponent implements OnInit {
       .enter()
       .append("circle")
       .attr("class", "pathpoints")
-      .attr("cx", function (d: ScatterPlotData) {
-        return module.xscale(d.indexName) + module.xscale.bandwidth() / 2;
+      .attr("cx", function (d: ScatterPlotMdsData) {
+        return module.xscale(d.x);
       })
-      .attr("cy", function (d: ScatterPlotData) {
-        return module.yscale(d.indexData);
+      .attr("cy", function (d: ScatterPlotMdsData) {
+        return module.yscale(d.y);
       })
       .attr("r", 5)
       .attr("fill", this.colorData)
-      .on("mouseover", function (event, data: ScatterPlotData) {
+      .on("mouseover", function (event, data: ScatterPlotMdsData) {
         console.log("sadfasdf");
-        console.log(data.indexData);
+        console.log(data.y);
         let bbox = this.getBBox();
         module.tooltip
-          .html("<div>Inertia: " + data.indexData.toFixed(2) + "</div>")
+          .html("<div>Inertia: " + data.y.toFixed(2) + "</div>")
           .style("left", module.getXTooltip(this, module.tooltip))
           .style("top", module.getYTooltip(this, module.tooltip))
           .style("visibility", "visible");

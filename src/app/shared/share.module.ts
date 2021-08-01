@@ -5,13 +5,15 @@ import { MaterialModule } from "../material/material.module";
 import { CustomDatePipe } from "./pipes/custom-date.pipe";
 import { SpiderchartComponent } from "./components/spiderchart/spiderchart.component";
 import { BasicLineChartComponent } from "./components/basic-line-chart/basic-line-chart.component";
+import { ScatterPlotMdsComponent } from "./components/scatter-plot-mds/scatter-plot-mds.component";
 
 @NgModule({
   declarations: [
     SafeHtmlPipe,
     CustomDatePipe,
     SpiderchartComponent,
-    BasicLineChartComponent
+    BasicLineChartComponent,
+    ScatterPlotMdsComponent
   ],
   imports: [CommonModule, MaterialModule],
   exports: [
@@ -19,7 +21,8 @@ import { BasicLineChartComponent } from "./components/basic-line-chart/basic-lin
     MaterialModule,
     CustomDatePipe,
     SpiderchartComponent,
-    BasicLineChartComponent
+    BasicLineChartComponent,
+    ScatterPlotMdsComponent
   ]
 })
 export class SharedModule {}
