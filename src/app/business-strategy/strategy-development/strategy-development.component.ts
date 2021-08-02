@@ -43,6 +43,7 @@ import {
   Validators
 } from "@angular/forms";
 import { ScatterPlotMdsData } from "../../shared/models/scatterPlotMdsData";
+import { MultidimensionalScaling } from "./models/mds";
 
 @Component({
   selector: "app-strategy-development",
@@ -611,12 +612,30 @@ export class StrategyDevelopmentComponent implements OnInit, OnDestroy {
   }
 
   calculateMds($event: MouseEvent) {
-    this.mdsData = [
-      { clusterName: "cluster 0", x: 0, y: 0 },
-      { clusterName: "cluster 1", x: 1, y: 1 },
-      { clusterName: "cluster 2", x: 2, y: 2 },
-      { clusterName: "cluster 3", x: 3, y: 3 },
-      { clusterName: "cluster 4", x: 4, y: 4 }
-    ];
+    console.log("this.bundleUsageMatrix", this.bundleUsageMatrix);
+    // one "point" / cluster / clusterUsage == 1 row
+    const data = this.bundleUsageMatrix.clusterGroups.map((a) => {
+      return Object.values(a.options);
+    });
+    const multiDimensionalScaling = new MultidimensionalScaling();
+    const distanceMatrix: number[][] =
+      multiDimensionalScaling.calc_distanceMatrix(data, data, false);
+    const mdsResult: number[][] =
+      multiDimensionalScaling.calc_mds(distanceMatrix);
+    console.log(mdsResult);
+    this.mdsData = mdsResult.map((a) => {
+      return {
+        x: a[0],
+        y: a[1],
+        clusterName: "i dont know"
+      } as ScatterPlotMdsData;
+    });
+    // this.mdsData = [
+    //   { clusterName: "cluster 0", x: 0, y: 0 },
+    //   { clusterName: "cluster 1", x: 1, y: 1 },
+    //   { clusterName: "cluster 2", x: 2, y: 2 },
+    //   { clusterName: "cluster 3", x: 3, y: 3 },
+    //   { clusterName: "cluster 4", x: 4, y: 4 }
+    // ];
   }
 }

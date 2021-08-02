@@ -1,3 +1,4 @@
+// @ts-ignore
 const lMath = require("mathjs");
 
 const config = {
@@ -36,27 +37,77 @@ export class MultidimensionalScaling {
     console.log("Created mds instance");
   }
 
-  calc_mds() {
+  elementwise_multiplication_with_factor(matrix: number[][], factor: number) {
+    return matrix.map((a) => a.map((b) => b * factor));
+  }
+
+  change_negativ_element_to_zero(matrix: number[][]) {
+    return matrix.map((a) =>
+      a.map((b) => {
+        return b < 0 ? 0 : b;
+      })
+    );
+  }
+
+  // example:
+  //  data = [[100, 0, 100, 0, 50, 50],[100, 0, 0, 100, 100, 0],[0, 100, 100, 0, 100, 0]]
+  //  var result = calc_distancematrix(data,data,false)
+  calc_distanceMatrix(
+    matrix0: number[][],
+    matrix1: number[][],
+    squared: boolean
+  ): number[][] {
+    const M = matrix0.length;
+    const N = matrix1.length;
+
+    const a_dots_operation0 = math.square(matrix0);
+    const a_dots_operation1 = math.apply(a_dots_operation0, 1, math.sum);
+    const a_dots_operation2 = math.reshape(a_dots_operation1, [M, 1]);
+    // pay attention: here: dot, in python *, but * in python yields other results than dot
+    // this is especially true in b_dots_operationX
+    // here, at this operation python * is same as dot
+    const a_dots_operation3 = math.multiply(a_dots_operation2, math.ones(1, N));
+    const A_dots = a_dots_operation3;
+
+    const b_dots_operation0 = math.square(matrix1);
+    const b_dots_operation1 = math.apply(a_dots_operation0, 1, math.sum);
+    // pay attention: this reshape operation is not included in original script
+    // reason: python * is not the same as dot, so to get this dot same result as with * in python we have to include this reshape
+    // pay attention2: N and M are in the right order according to the script (actually since reshape is not included [N,1]) was chosen (instead of [M,1]) to the best of knowledge and belief
+    // python
+    //  from (data_true*data_true).sum(axis=1)*np.ones(shape=(M,1))
+    //  to (data_true*data_true).sum(axis=1).reshape((N,1)).dot(np.ones(shape=(1,M))).T
+    const b_dots_operation2 = math.reshape(b_dots_operation1, [N, 1]);
+    const b_dots_operation3 = math.transpose(
+      math.multiply(b_dots_operation2, math.ones(1, M))
+    );
+    const B_dots = b_dots_operation3;
+
+    const D_squared_add = math.add(A_dots, B_dots);
+    const D_squared_dot = math.multiply(matrix0, math.transpose(matrix1));
+    const D_squared_subtraction = this.elementwise_multiplication_with_factor(
+      D_squared_dot,
+      -2
+    );
+    const D_squared = math.add(D_squared_add._data, D_squared_subtraction);
+
+    if (squared == false) {
+      const min_zero_matrix = this.change_negativ_element_to_zero(D_squared);
+      return math.sqrt(min_zero_matrix);
+    }
+    return D_squared;
+  }
+
+  calc_mds(matrix: number[][]): number[][] {
     console.log("\n\n" + "STEP 0");
     console.time("step_0");
 
     const dimensions = 2;
-    const data = [
-      [8, 2],
-      [2, 4]
-    ];
-
-    // const data =  [[0,548,289,576,586], [548,0,493,195,392], [289,493,0,427,776], [576,195,427,0,577], [586, 392, 776,577,0]];
-
-    // const data = [];
-    // var counter = 1000;
-    // for(let a = 0; a < counter; a++){
-    //     var dataToPush = []
-    //     for(let b = 0; b < counter; b++){
-    //         dataToPush.push(5);
-    //     }
-    //     data.push(dataToPush);
-    // }
+    // const data = [
+    //   [8, 2],
+    //   [2, 4]
+    // ];
+    const data = matrix;
 
     let data_true = math.matrix(data);
     console.timeEnd("step_0");
@@ -130,6 +181,6 @@ export class MultidimensionalScaling {
     // console.log(E.size())
     // math.multiply(Delta, E)
 
-    return returnX;
+    return returnX._data;
   }
 }
