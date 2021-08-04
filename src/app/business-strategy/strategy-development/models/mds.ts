@@ -119,17 +119,18 @@ export class MultidimensionalScaling {
 
     console.log("\n\n" + "STEP 2");
     console.time("step_2");
-    let means_each_row = math.mean(data_true, 1);
-    let means_each_column = math.mean(data_true, 0);
+
+    let means_each_row = math.mean(A, 1);
+    let means_each_column = math.mean(A, 0);
     let total_mean = math.mean(means_each_row);
     let B = math.matrix(A);
     for (let a = 0; a < B.size()[0]; a++) {
       for (let b = 0; b < B.size()[1]; b++) {
         let valueToSet =
-          B.get([a, b]) +
-          total_mean -
+          B.get([a, b]) -
           means_each_row.get([a]) -
-          means_each_column.get([b]);
+          means_each_column.get([b]) +
+          total_mean;
         B.subset(math.index(a, b), valueToSet);
       }
     }
@@ -153,6 +154,7 @@ export class MultidimensionalScaling {
         eigenvector: eigenVectors._data[a]
       });
     }
+    // sort descending
     mix.sort(function (a, b) {
       return b.eigenvalue - a.eigenvalue;
     });
@@ -166,7 +168,10 @@ export class MultidimensionalScaling {
 
     // now: [5,2], before [2,5] -> input got interpreted as rows (zeilenvektoren)
     // now: columns -> spaltenvektoren
+
+    console.log("before transpose: ", first_n_eigenvectors);
     const Delta = math.transpose(math.matrix(first_n_eigenvectors));
+    console.log("after transpose: ", Delta);
     const returnX = Delta;
     console.timeEnd("step_4");
 

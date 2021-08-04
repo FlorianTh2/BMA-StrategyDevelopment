@@ -620,9 +620,10 @@ export class StrategyDevelopmentComponent implements OnInit, OnDestroy {
     const multiDimensionalScaling = new MultidimensionalScaling();
     const distanceMatrix: number[][] =
       multiDimensionalScaling.calc_distanceMatrix(data, data, false);
+    console.log("distance matrix: ", distanceMatrix);
     const mdsResult: number[][] =
       multiDimensionalScaling.calc_mds(distanceMatrix);
-    console.log(mdsResult);
+    console.log("mds result: ", mdsResult);
     this.mdsData = mdsResult.map((a) => {
       return {
         x: a[0],
