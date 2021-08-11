@@ -612,27 +612,17 @@ export class StrategyDevelopmentComponent implements OnInit, OnDestroy {
   }
 
   calculateMds($event: MouseEvent) {
-    console.log("this.bundleUsageMatrix", this.bundleUsageMatrix);
-    // one "point" / cluster / clusterUsage == 1 row
-    const data = this.bundleUsageMatrix.clusterGroups.map((a) => {
-      return Object.values(a.options);
-    });
-    const multiDimensionalScaling = new MultidimensionalScaling();
-    const distanceMatrix: number[][] =
-      multiDimensionalScaling.calc_distanceMatrix(data, data, false);
-    const mdsResult: number[][] =
-      multiDimensionalScaling.calc_mds(distanceMatrix);
-    console.log("mds result: ", mdsResult);
-    this.mdsData = mdsResult.map((a) => {
-      return {
-        x: a[0],
-        y: a[1],
-        clusterName: "i dont know"
-      } as ScatterPlotMdsData;
-    });
-
+    // console.log("this.bundleUsageMatrix", this.bundleUsageMatrix);
+    // // one "point" / cluster / clusterUsage == 1 row
+    // const data = this.bundleUsageMatrix.clusterGroups.map((a) => {
+    //   return Object.values(a.options);
+    // });
     // const multiDimensionalScaling = new MultidimensionalScaling();
-    // const mdsResult: number[][] = multiDimensionalScaling.calc_mds([]);
+    // const distanceMatrix: number[][] =
+    //   multiDimensionalScaling.calc_distanceMatrix(data, data, false);
+    // const mdsResult: number[][] =
+    //   multiDimensionalScaling.calc_mds(distanceMatrix);
+    // console.log("mds result: ", mdsResult);
     // this.mdsData = mdsResult.map((a) => {
     //   return {
     //     x: a[0],
@@ -640,5 +630,15 @@ export class StrategyDevelopmentComponent implements OnInit, OnDestroy {
     //     clusterName: "i dont know"
     //   } as ScatterPlotMdsData;
     // });
+
+    const multiDimensionalScaling = new MultidimensionalScaling();
+    const mdsResult: number[][] = multiDimensionalScaling.calc_mds([]);
+    this.mdsData = mdsResult.map((a) => {
+      return {
+        x: a[0],
+        y: a[1],
+        clusterName: "i dont know"
+      } as ScatterPlotMdsData;
+    });
   }
 }

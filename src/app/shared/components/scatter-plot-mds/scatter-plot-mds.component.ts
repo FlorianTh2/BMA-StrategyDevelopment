@@ -279,11 +279,12 @@ export class ScatterPlotMdsComponent implements OnInit {
       })
       .on("mouseover", function (event, data: ScatterPlotMdsData) {
         console.log("sadfasdf");
-        console.log(data.y);
-        let bbox = this.getBBox();
         module.tooltip
           .html(
-            "<div>Cluster-x: " +
+            "<div>Cluster-Name: " +
+              data.clusterName +
+              "</div>" +
+              "<div>Cluster-x: " +
               data.x.toFixed(2) +
               "</div>" +
               '<div style="height: 2px"></div>' +
@@ -291,8 +292,8 @@ export class ScatterPlotMdsComponent implements OnInit {
               data.y.toFixed(2) +
               "</div>"
           )
-          .style("left", module.getXTooltip(this, module.tooltip))
-          .style("top", module.getYTooltip(this, module.tooltip))
+          .style("left", module.getXTooltip(this, module.tooltip) + "px")
+          .style("top", module.getYTooltip(this, module.tooltip) + 20 + "px")
           .style("visibility", "visible");
       })
       .on("mouseout", () => {
@@ -346,23 +347,21 @@ export class ScatterPlotMdsComponent implements OnInit {
   }
 
   // keep in mind where the tooltip div spawns: only with right x+y at the buttom-left-corner of edge
-  getXTooltip(currentObject, tooltipSelection): string {
+  getXTooltip(currentObject, tooltipSelection): number {
     return (
       window.pageXOffset +
       currentObject.getBoundingClientRect().x -
       tooltipSelection.node().getBoundingClientRect().width / 2 +
-      currentObject.getBoundingClientRect().width / 2 +
-      "px"
+      currentObject.getBoundingClientRect().width / 2
     );
   }
 
-  getYTooltip(currentObject, tooltipSelection): string {
+  getYTooltip(currentObject, tooltipSelection): number {
     return (
       window.pageYOffset +
       currentObject.getBoundingClientRect().y -
       tooltipSelection.node().getBoundingClientRect().height +
-      currentObject.getBoundingClientRect().height +
-      "px"
+      currentObject.getBoundingClientRect().height
     );
   }
 }
