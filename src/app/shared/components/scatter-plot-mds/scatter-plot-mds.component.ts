@@ -149,7 +149,8 @@ export class ScatterPlotMdsComponent implements OnInit {
       .enter()
       .append("g")
       .attr("class", "gAxisBottom")
-      .attr("transform", "translate(0," + this.height + ")")
+      // .attr("transform", "translate(0," + this.height + ")")
+      .attr("transform", "translate(0," + this.yscale(0) + ")")
       .call(
         d3.axisBottom(this.xscale)
         // .tickSizeInner(-this.height)
@@ -164,7 +165,9 @@ export class ScatterPlotMdsComponent implements OnInit {
       .append("text")
       .attr("class", "gAxisBottomLabel")
       .attr("x", this.width / 2)
-      .attr("y", this.height + this.margin.top + this.margin.bottom / 2)
+      // pay attention: /2 is only applied to this.margin.bottom ()
+      // .attr("y", this.height + this.margin.top + (this.margin.bottom / 2))
+      .attr("y", (this.height + this.margin.top + this.margin.bottom / 2) / 2)
       .text("x");
 
     const axisLeft = g1
@@ -173,6 +176,7 @@ export class ScatterPlotMdsComponent implements OnInit {
       .enter()
       .append("g")
       .attr("class", "gAxisLeft")
+      .attr("transform", "translate(" + this.xscale(0) + ",0)")
       .call(
         d3.axisLeft(this.yscale)
         // .tickSizeInner(-this.width)
@@ -188,11 +192,20 @@ export class ScatterPlotMdsComponent implements OnInit {
       .attr("class", "gAxisLeftLabel")
       .attr("x", -this.height / 2)
       .attr("y", -this.margin.left / 2)
-      .attr("transform", "rotate(-90)")
-      .style("text-anchor", "middle")
+      // dx, dy is not affected of rotate, so to bring label to middle (instead of after rotating outer left)
+      .attr("dx", "50px")
+      .attr("dy", this.width / 2 + "px")
+      .attr("transform", "rotate(-90)") // translateX(100px)
+      .style("text-anchor", "end")
       .text("y");
 
+    const xMin = this.xscale.domain()[0];
+    const xMax = this.xscale.domain()[this.xscale.domain().length - 1];
+
     // https://stackoverflow.com/questions/40766379/d3-adding-grid-to-simple-line-chart
+    // in grid these lines
+    // -----
+    // -----
     const horizontalGrid = axisLeft
       .selectAll(".tick")
       .append("line")
@@ -200,11 +213,29 @@ export class ScatterPlotMdsComponent implements OnInit {
       .style("stroke", "black")
       .style("shape-rendering", "crispEdges")
       .style("stroke-opacity", 0.2)
-      .attr("x1", 0)
+      .attr(
+        "x1",
+        -(Math.abs(xMin) / (Math.abs(xMin) + Math.abs(xMax))) * this.width
+      )
       .attr("y1", 0)
-      .attr("x2", this.width)
+      .attr(
+        "x2",
+        // procedure: get min and max value of xscale, get the percentage from 1. x<0 (negativ) to x=0 2. from 0 to x>0
+        // then transfer this given relationship to this.width (separate this.width into 2 parts: 1. from x<0 to 0 and 0 to x>0)
+        // why?
+        //  the grid will be printed FROM the y-axis (yes y-axis (aka x=0) -> at each tick at y-axis there will be printed a pseudo parallel
+        //  line to the x-axis so that we get this lines ---), but we cannot just take this.width/2 since we cannot assume that
+        //  x=0 (aka y-axis lies at the center of the svg (aka this.width/2))
+        (Math.abs(xMax) / (Math.abs(xMin) + Math.abs(xMax))) * this.width
+      )
       .attr("y2", 0);
 
+    const yMin = this.yscale.domain()[0];
+    const yMax = this.yscale.domain()[this.yscale.domain().length - 1];
+
+    // in grid these lines
+    // ||||
+    // ||||
     const verticalGrid = axisBottom
       .selectAll(".tick")
       .append("line")
@@ -213,9 +244,15 @@ export class ScatterPlotMdsComponent implements OnInit {
       .style("shape-rendering", "crispEdges")
       .style("stroke-opacity", 0.2)
       .attr("x1", 0)
-      .attr("y1", -this.height)
+      .attr(
+        "y1",
+        (Math.abs(yMin) / (Math.abs(yMin) + Math.abs(yMax))) * this.height
+      )
       .attr("x2", 0)
-      .attr("y2", 0);
+      .attr(
+        "y2",
+        -(Math.abs(yMax) / (Math.abs(yMin) + Math.abs(yMax))) * this.height
+      );
 
     const scatterPointsOnPathLine = g1
       .selectAll(".gPathpoints")

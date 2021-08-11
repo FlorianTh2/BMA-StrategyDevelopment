@@ -620,7 +620,6 @@ export class StrategyDevelopmentComponent implements OnInit, OnDestroy {
     const multiDimensionalScaling = new MultidimensionalScaling();
     const distanceMatrix: number[][] =
       multiDimensionalScaling.calc_distanceMatrix(data, data, false);
-    console.log("distance matrix: ", distanceMatrix);
     const mdsResult: number[][] =
       multiDimensionalScaling.calc_mds(distanceMatrix);
     console.log("mds result: ", mdsResult);
@@ -631,5 +630,15 @@ export class StrategyDevelopmentComponent implements OnInit, OnDestroy {
         clusterName: "i dont know"
       } as ScatterPlotMdsData;
     });
+
+    // const multiDimensionalScaling = new MultidimensionalScaling();
+    // const mdsResult: number[][] = multiDimensionalScaling.calc_mds([]);
+    // this.mdsData = mdsResult.map((a) => {
+    //   return {
+    //     x: a[0],
+    //     y: a[1],
+    //     clusterName: "i dont know"
+    //   } as ScatterPlotMdsData;
+    // });
   }
 }
