@@ -49,6 +49,8 @@ export class MultidimensionalScaling {
     );
   }
 
+  // examploe: https://www.dabblingbadger.com/blog/2020/2/27/implementing-euclidean-distance-matrix-calculations-from-scratch-in-python
+  // another example: https://blog.paperspace.com/dimension-reduction-with-multi-dimension-scaling/
   // example:
   //  data = [[100, 0, 100, 0, 50, 50],[100, 0, 0, 100, 100, 0],[0, 100, 100, 0, 100, 0]]
   //  var result = calc_distancematrix(data,data,false)
@@ -98,39 +100,69 @@ export class MultidimensionalScaling {
     return D_squared;
   }
 
-  calc_mds(matrix: number[][]): number[][] {
+  // CLASSICAL MDS
+  //
+  // this is the implementation for the CLASSICAL MDS (NOT THE METRIC OR NON-METRIC MDS)
+  //
+  // theorie important sources
+  //  https://ncss-wpengine.netdna-ssl.com/wp-content/themes/ncss/pdf/Procedures/NCSS/Multidimensional_Scaling.pdf
+  //  algorithm in pseudo text code form
+  //  https://medium.datadriveninvestor.com/the-multidimensional-scaling-mds-algorithm-for-dimensionality-reduction-9211f7fa5345
+  //  http://statweb.stanford.edu/~jtaylo/courses/stats202/mds.html
+  //  https://de.wikipedia.org/wiki/Multidimensionale_Skalierung
+  //  https://www.programmersought.com/article/72564905909/
+  //  http://www.nervouscomputer.com/hfs/cmdscale-in-python/
+  //  https://www.benfrederickson.com/multidimensional-scaling/
+  //  https://mathepedia.de/Eigenwerte.html
+  //  https://mathepedia.de/Charakteristisches_Polynom.html
+  //  https://de.wikipedia.org/wiki/Multidimensionale_Skalierung
+  //  https://www.statistik-nachhilfe.de/ratgeber/statistik/induktive-statistik/statistische-modellbildung-und-weitere-methoden/multidimensionale-skalierung
+  //  http://www.benfrederickson.com/multidimensional-scaling/
+  //  https://en.wikipedia.org/wiki/List_of_numerical_analysis_topics#Eigenvalue_algorithms
+  //  https://de.wikipedia.org/wiki/Regel_von_Sarrus
+  //  https://de.wikipedia.org/wiki/Determinante#Laplacescher_Entwicklungssatz
+  //  https://matrixcalc.org/de/vectors.html
+  //
+  // explicit algorithm / implementation sources
+  //  (pay attention: the english site and NOT the german one (it does not cover the classical mds))
+  //  in python: the whole function with comments and the matrices at the end
+  //  https://en.wikipedia.org/wiki/Multidimensional_scaling
+  //  https://github.com/GeostatsGuy/PythonNumericalDemos/blob/master/SubsurfaceDataAnalytics_Multidimensional_Scaling.ipynb
+  //  https://www.stat.pitt.edu/sungkyu/course/2221Fall13/lec8_mds_combined.pdf
+  calc_mds(distances: number[][]): number[][] {
+    // const distances = [
+    //   [0, 548, 289, 576, 586],
+    //   [548, 0, 493, 195, 392],
+    //   [289, 493, 0, 427, 776],
+    //   [576, 195, 427, 0, 577],
+    //   [586, 392, 776, 577, 0]
+    // ];
+
     console.log("\n\n" + "STEP 0");
     console.time("step_0");
-
     const dimensions = 2;
-    // const data = [
-    //   [8, 2],
-    //   [2, 4]
-    // ];
-    const data = matrix;
-
-    let data_true = math.matrix(data);
+    const data_true = math.matrix(distances);
     console.timeEnd("step_0");
 
     console.log("\n\n" + "STEP 1");
     console.time("step_1");
-    let A = math.multiply(-0.5, math.square(data_true));
+    const A = math.multiply(-0.5, math.square(data_true));
     console.timeEnd("step_1");
 
     console.log("\n\n" + "STEP 2");
     console.time("step_2");
+    const means_each_row = math.mean(A, 1);
+    const means_each_column = math.mean(A, 0);
+    const total_mean = math.mean(means_each_row);
 
-    let means_each_row = math.mean(A, 1);
-    let means_each_column = math.mean(A, 0);
-    let total_mean = math.mean(means_each_row);
     let B = math.matrix(A);
     for (let a = 0; a < B.size()[0]; a++) {
       for (let b = 0; b < B.size()[1]; b++) {
-        let valueToSet =
-          B.get([a, b]) -
+        const valueToSet =
+          B.get([a, b]) +
+          total_mean -
           means_each_row.get([a]) -
-          means_each_column.get([b]) +
-          total_mean;
+          means_each_column.get([b]);
         B.subset(math.index(a, b), valueToSet);
       }
     }
@@ -138,54 +170,51 @@ export class MultidimensionalScaling {
 
     console.log("\n\n" + "STEP 3");
     console.time("step_3");
+    // console.log("B ", B)
     const eigen = math.eigs(B);
+
     // both are math.js related objects (densematrix)
-    const eigenValues = eigen.values;
-    const eigenVectors = eigen.vectors;
+    const eigenValuesRaw = eigen.values;
+    // absolute since maybe negative
+    const eigenValuesAbs = math.abs(eigenValuesRaw);
+    // transpose since the sorting that is later applied
+    // normally: input [[1,2,3],[4,5,6]] -> e.g. [[4,5,6], [1,2,3]]
+    // but actually we want: [[1,2,3],[4,5,6]] -> e.g. [[2,3,1], [6,5,4]]
+    // so we want the sorting on axis=1 and not axis=0
+    // after sorting -> we transpose back
+    const eigenVectors = math.transpose(eigen.vectors);
+
+    // get eigenvectors of biggest eigenvalues
+    const mix = [];
+    for (let a = 0; a < eigenValuesAbs.size()[0]; a++) {
+      mix.push({
+        eigenvalue: eigenValuesAbs.get([a]),
+        eigenvector: eigenVectors._data[a]
+      });
+    }
+    mix.sort(function (a, b) {
+      return b.eigenvalue - a.eigenvalue;
+    });
+
+    const eigenValuesSorted = [];
+    let eigenVectorsSorted = [];
+    mix.forEach((a) => {
+      eigenValuesSorted.push(a["eigenvalue"]);
+      eigenVectorsSorted.push(a["eigenvector"]);
+    });
+    // after sorting: transpose back
+    eigenVectorsSorted = math.transpose(eigenVectorsSorted);
     console.timeEnd("step_3");
 
     console.log("\n\n" + "STEP 4");
     console.time("step_4");
-    // get eigenvectors of biggest eigenvalues
-    const mix = [];
-    for (let a = 0; a < eigenValues.size()[0]; a++) {
-      mix.push({
-        eigenvalue: eigenValues.get([a]),
-        eigenvector: eigenVectors._data[a]
-      });
-    }
-    // sort descending
-    mix.sort(function (a, b) {
-      return b.eigenvalue - a.eigenvalue;
-    });
-    const first_n = mix.slice(0, dimensions);
-    const first_n_eigenvalues = [];
-    const first_n_eigenvectors = [];
-    for (let a = 0; a < dimensions; a++) {
-      first_n_eigenvalues.push(first_n[a].eigenvalue);
-      first_n_eigenvectors.push(first_n[a].eigenvector);
-    }
-
-    // now: [5,2], before [2,5] -> input got interpreted as rows (zeilenvektoren)
-    // now: columns -> spaltenvektoren
-
-    console.log("before transpose: ", first_n_eigenvectors);
-    const Delta = math.transpose(math.matrix(first_n_eigenvectors));
-    console.log("after transpose: ", Delta);
-    const returnX = Delta;
+    const eigenValuesSqrt = math.sqrt(eigenValuesSorted);
+    const eigenValuesDiag = math.diag(eigenValuesSqrt);
+    const multiplyResult = math.multiply(eigenVectorsSorted, eigenValuesDiag);
+    // result is more or less equal to the python result mirrored on y-axis
+    //resultTrimedToDesiredDimensions
+    const resultMatrix = multiplyResult.map((a) => a.splice(0, dimensions));
     console.timeEnd("step_4");
-
-    // console.log(X.size());
-    // console.log(X)
-
-    // according to https://de.wikipedia.org/wiki/Multidimensionale_Skalierung
-    // we dont need to matrix-multiply Delta with E to get X like shown here
-    // https://www.statistik-nachhilfe.de/ratgeber/statistik/induktive-statistik/statistische-modellbildung-und-weitere-methoden/multidimensionale-skalierung
-    //
-    // var E = math.matrix(math.diag(first_n_eigenvalues));
-    // console.log(E.size())
-    // math.multiply(Delta, E)
-
-    return returnX._data;
+    return resultMatrix;
   }
 }
