@@ -66,7 +66,7 @@ export class BasicLineChartComponent implements OnInit {
     // give 5px per digit more to properly display leftaxislabel
     this.margin.left =
       this.margin.left +
-      [...maxValue.toString()].reduce((aAcc, a) => aAcc + 5, 0);
+      [...maxValue.toString()].reduce((aAcc, a) => aAcc + 7.5, 0);
     this.svg = d3
       .select("#chart")
       .append("svg")

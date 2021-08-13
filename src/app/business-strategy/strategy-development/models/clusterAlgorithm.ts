@@ -1,4 +1,4 @@
-import { Distance } from "./distance.interface";
+import { Distance } from "./distances/distance.interface";
 
 export abstract class ClusterAlgorithm {
   // labels of each point (for each point: the index of its centroid-point)

@@ -1,7 +1,7 @@
 import * as seedrandom from "seedrandom";
 import { ClusterAlgorithm } from "./clusterAlgorithm";
-import { Distance } from "./distance.interface";
-import { EuclideanDistance } from "./euclideanDistance";
+import { Distance } from "./distances/distance.interface";
+import { EuclideanDistance } from "./distances/euclideanDistance";
 
 export class Kmeans extends ClusterAlgorithm {
   // sum of euclidean distances of each data-point to its centroid-point

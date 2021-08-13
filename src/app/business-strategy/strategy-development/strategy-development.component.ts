@@ -20,7 +20,7 @@ import { ClusterAlgorithmListView } from "./models/clusterAlgorithmListView";
 import { ClusterMembershipMatrix } from "./models/clusterMembershipMatrix";
 import { WorkBook } from "xlsx";
 import { BundleUsageMatrix } from "./models/bundleUsageMatrix";
-import { EuclideanDistance } from "./models/euclideanDistance";
+import { EuclideanDistance } from "./models/distances/euclideanDistance";
 import { map } from "rxjs/operators";
 import {
   ConsistencyMatrix,
@@ -44,6 +44,10 @@ import {
 } from "@angular/forms";
 import { ScatterPlotMdsData } from "../../shared/models/scatterPlotMdsData";
 import { MultidimensionalScaling } from "./models/mds";
+import { DistanceAlgorithmListView } from "./models/distances/distanceAlgorithmListView";
+import { SquaredEuclideanDistance } from "./models/distances/squaredEuclideanDistance";
+import { ManhattenDistance } from "./models/distances/manhattenDistance";
+import { Distance } from "./models/distances/distance.interface";
 
 @Component({
   selector: "app-strategy-development",
@@ -99,6 +103,21 @@ export class StrategyDevelopmentComponent implements OnInit, OnDestroy {
 
   saveConsistencyMatrixForm: FormGroup;
   filename: string;
+  distanceMeasurements: DistanceAlgorithmListView[] = [
+    {
+      value: new EuclideanDistance(),
+      viewValue: "Euklidische Distanz"
+    },
+    {
+      value: new SquaredEuclideanDistance(),
+      viewValue: "Quadratische Euklidische Distanz"
+    },
+    {
+      value: new ManhattenDistance(),
+      viewValue: "Manhatten Distanz"
+    }
+  ];
+  selectedDistanceAlgorithm: Distance = this.distanceMeasurements[0].value;
 
   constructor(
     private route: ActivatedRoute,
@@ -353,7 +372,7 @@ export class StrategyDevelopmentComponent implements OnInit, OnDestroy {
         a <= this.maxConsideredClusters;
         a++
       ) {
-        const kmeans = new Kmeans(a, 2, new EuclideanDistance());
+        const kmeans = new Kmeans(a, 2, this.selectedDistanceAlgorithm);
         kmeans.find_clusters(this.bundleMatrix.bundles);
         // kmeans.find_clusters(exampleDate);
         clusterResultStore[a] = {
@@ -494,6 +513,7 @@ export class StrategyDevelopmentComponent implements OnInit, OnDestroy {
 
   createBundleUsageMatrix(event: MouseEvent) {
     console.log("click create bundleUsageMatrix");
+    console.log(this.clusterMembershipMatrix);
     this.bundleUsageMatrix = new BundleUsageMatrix(
       this.consistencyMatrix,
       this.bundleMatrix,
@@ -612,33 +632,44 @@ export class StrategyDevelopmentComponent implements OnInit, OnDestroy {
   }
 
   calculateMds($event: MouseEvent) {
-    // console.log("this.bundleUsageMatrix", this.bundleUsageMatrix);
-    // // one "point" / cluster / clusterUsage == 1 row
-    // const data = this.bundleUsageMatrix.clusterGroups.map((a) => {
-    //   return Object.values(a.options);
-    // });
-    // const multiDimensionalScaling = new MultidimensionalScaling();
-    // const distanceMatrix: number[][] =
-    //   multiDimensionalScaling.calc_distanceMatrix(data, data, false);
-    // const mdsResult: number[][] =
-    //   multiDimensionalScaling.calc_mds(distanceMatrix);
-    // console.log("mds result: ", mdsResult);
-    // this.mdsData = mdsResult.map((a) => {
-    //   return {
-    //     x: a[0],
-    //     y: a[1],
-    //     clusterName: "i dont know"
-    //   } as ScatterPlotMdsData;
-    // });
-
+    console.log("this.bundleUsageMatrix", this.bundleUsageMatrix);
+    // one "point" / cluster / clusterUsage == 1 row
+    const data = this.bundleUsageMatrix.clusterGroups.map((a) => {
+      return Object.values(a.options);
+    });
+    const labels = this.bundleUsageMatrix.clusterGroups.map((a) => {
+      return a.name;
+    });
     const multiDimensionalScaling = new MultidimensionalScaling();
-    const mdsResult: number[][] = multiDimensionalScaling.calc_mds([]);
-    this.mdsData = mdsResult.map((a) => {
+    const distanceMatrix: number[][] =
+      multiDimensionalScaling.calc_distanceMatrix(data, data, false);
+    const mdsResult: number[][] =
+      multiDimensionalScaling.calc_mds(distanceMatrix);
+    console.log("mds result: ", mdsResult);
+    this.mdsData = mdsResult.map((a, aIndex) => {
       return {
         x: a[0],
         y: a[1],
-        clusterName: "i dont know"
+        clusterName: "cluster " + labels[aIndex]
       } as ScatterPlotMdsData;
     });
+
+    // const labels = ["Berlin", "Frankfurt", "Hamburg", "Köln", "München"];
+    // const distances = [
+    //   [0, 548, 289, 576, 586],
+    //   [548, 0, 493, 195, 392],
+    //   [289, 493, 0, 427, 776],
+    //   [576, 195, 427, 0, 577],
+    //   [586, 392, 776, 577, 0]
+    // ];
+    // const multiDimensionalScaling = new MultidimensionalScaling();
+    // const mdsResult: number[][] = multiDimensionalScaling.calc_mds(distances);
+    // this.mdsData = mdsResult.map((a, aIndex) => {
+    //   return {
+    //     x: a[0],
+    //     y: a[1],
+    //     clusterName: labels[aIndex]
+    //   } as ScatterPlotMdsData;
+    // });
   }
 }

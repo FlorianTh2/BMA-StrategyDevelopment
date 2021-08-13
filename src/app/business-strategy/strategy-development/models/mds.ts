@@ -130,14 +130,6 @@ export class MultidimensionalScaling {
   //  https://github.com/GeostatsGuy/PythonNumericalDemos/blob/master/SubsurfaceDataAnalytics_Multidimensional_Scaling.ipynb
   //  https://www.stat.pitt.edu/sungkyu/course/2221Fall13/lec8_mds_combined.pdf
   calc_mds(distances: number[][]): number[][] {
-    distances = [
-      [0, 548, 289, 576, 586],
-      [548, 0, 493, 195, 392],
-      [289, 493, 0, 427, 776],
-      [576, 195, 427, 0, 577],
-      [586, 392, 776, 577, 0]
-    ];
-
     console.log("\n\n" + "STEP 0");
     console.time("step_0");
     const dimensions = 2;

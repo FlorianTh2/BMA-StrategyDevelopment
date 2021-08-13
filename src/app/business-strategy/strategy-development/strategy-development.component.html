@@ -206,6 +206,18 @@
       </mat-form-field>
     </div>
     <div>
+      Bitte geben Sie zum Clusteralgorithmus das zu verwendende Distanzmaß an.
+      <br>
+      <mat-form-field appearance="fill">
+        <mat-label>Clusterverfahren</mat-label>
+        <mat-select [(ngModel)]="selectedDistanceAlgorithm">
+          <mat-option *ngFor="let distanceAlgorithm of distanceMeasurements" [value]="distanceAlgorithm.value">
+            {{distanceAlgorithm.viewValue}}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+    </div>
+    <div>
       Für die Clusteranalyse geben Sie bitte die zu betrachtete minimale Clusteranzahl und maximale Clusteranzahl an.
       <br>
       Empfohlen ist eine Clusteranalyse im Bereich 1-10.
