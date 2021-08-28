@@ -19,7 +19,7 @@ export class Kmeans extends ClusterAlgorithm {
     super(numClusters, tolerance, distanceAlgorithm);
   }
 
-  euclidean_inertia(
+  get_inertia(
     vectors_of_all_centroids: number[][],
     data: number[][],
     labels: number[]
@@ -72,13 +72,7 @@ export class Kmeans extends ClusterAlgorithm {
     if (data.length < this.numClusters) {
       throw "you can not request more cluster than data-points you have.";
     }
-    // in script: randomIndices === i
-    const randomIndices = [];
-    for (let a = 0; a < this.numClusters; a++) {
-      randomIndices.push(
-        Math.floor(this.getRandomArbitrary(0, data.length - 1, a))
-      );
-    }
+    const randomIndices = this.generateRandomIndices(0, data.length);
     this.centroids = randomIndices.map((a) => data[a]);
     this.iterations = 0;
     this.labels = [];
@@ -101,12 +95,31 @@ export class Kmeans extends ClusterAlgorithm {
         }
       }
       this.iterations += 1;
-      this.inertia = this.euclidean_inertia(this.centroids, data, this.labels);
+      this.inertia = this.get_inertia(this.centroids, data, this.labels);
       if (this.arraysEqual(this.centroids, new_centroids)) {
         return this.labels;
       }
       this.centroids = new_centroids;
     }
+  }
+
+  generateRandomIndices(min: number, max: number): number[] {
+    const randomIndices = [];
+    let indexDatapointWhichCentroidWillUse = -1;
+    let bias = 0;
+    for (let a = 0; a < this.numClusters; a++) {
+      do {
+        indexDatapointWhichCentroidWillUse = Math.floor(
+          // bias needed since the random generator generates same results for same third parameter
+          // (here a) -> so if randomIndices includes generated index, the loop will generate same results (in an endless loop),
+          // since a does not change
+          this.getRandomArbitrary(0, max, a + bias)
+        );
+        bias = bias + 1;
+      } while (randomIndices.includes(indexDatapointWhichCentroidWillUse));
+      randomIndices.push(indexDatapointWhichCentroidWillUse);
+    }
+    return randomIndices;
   }
 
   // https://www.npmjs.com/package/seedrandom

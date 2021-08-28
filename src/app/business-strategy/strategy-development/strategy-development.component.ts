@@ -350,6 +350,11 @@ export class StrategyDevelopmentComponent implements OnInit, OnDestroy {
   }
 
   startClusteranalysis($event: MouseEvent) {
+    // console.log(
+    //   "startClusteranalysis: ",
+    //   this.bundleMatrix.bundleMatrixRowColumnCombinations
+    // );
+    // console.log("startClusteranalysis: ", this.bundleMatrix.bundles);
     // switch between selectedClusterAlgorithms
     if (this.selectedClusterAlgorithm == "kmeans") {
       // const exampleDate: number[][] = [
