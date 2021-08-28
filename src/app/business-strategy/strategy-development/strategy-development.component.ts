@@ -48,6 +48,7 @@ import { DistanceAlgorithmListView } from "./models/distances/distanceAlgorithmL
 import { SquaredEuclideanDistance } from "./models/distances/squaredEuclideanDistance";
 import { ManhattenDistance } from "./models/distances/manhattenDistance";
 import { Distance } from "./models/distances/distance.interface";
+import { ChebyshevDistance } from "./models/distances/chebyshev_distance";
 
 @Component({
   selector: "app-strategy-development",
@@ -115,6 +116,10 @@ export class StrategyDevelopmentComponent implements OnInit, OnDestroy {
     {
       value: new ManhattenDistance(),
       viewValue: "Manhatten Distanz"
+    },
+    {
+      value: new ChebyshevDistance(),
+      viewValue: "Chebyshev Distanz"
     }
   ];
   selectedDistanceAlgorithm: Distance = this.distanceMeasurements[0].value;

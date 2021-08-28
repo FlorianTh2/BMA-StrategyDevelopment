@@ -5,7 +5,7 @@ export class EuclideanDistance implements Distance {
     let total = 0;
     let diff = 0;
     for (let a = 0; a < vector0.length; a++) {
-      diff = vector0[a] - vector1[a];
+      diff = vector1[a] - vector0[a];
       total += diff * diff;
     }
     return Math.sqrt(total);
