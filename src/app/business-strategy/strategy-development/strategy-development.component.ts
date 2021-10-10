@@ -271,6 +271,7 @@ export class StrategyDevelopmentComponent implements OnInit, OnDestroy {
         );
 
         this.consistencyMatrix = new ConcistencyMatrix(resultAoA);
+        console.log(this.consistencyMatrix);
         this.changeDetectorRef.markForCheck();
       };
       fileReader.readAsArrayBuffer(file);
