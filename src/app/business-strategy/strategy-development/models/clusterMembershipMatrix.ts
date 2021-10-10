@@ -11,35 +11,29 @@ export class ClusterMembershipMatrix {
   bundleMetaData: BundleData[];
   bundleMatrixRowColumnCombinations: string[][];
 
-  constructor(bundleMatrix: BundleMatrix) {
+  constructor(
+    bundleMatrix: BundleMatrix,
+    clusterMemberShipDictPara: Record<string, string[]> = undefined,
+    clusterResult: ClusterResult = undefined
+  ) {
     this.bundleMatrixRowColumnCombinations =
       bundleMatrix.bundleMatrixRowColumnCombinations;
     this.bundles = bundleMatrix.bundles;
     this.bundleMetaData = bundleMatrix.bundleMetaData;
-  }
 
-  // result: clusterName/clusterNumber -> bundleName(-s)
-  parseFromAoAToInternalDict(inputArray: Array<Array<any>>): void {
-    console.log("hi");
-    console.log(inputArray);
-    let resultDict: Record<string, string[]> = {};
-    // cut header row
-    inputArray = inputArray.slice(1);
-    inputArray.forEach((a) => {
-      const clusterName = a[1].toString().trim();
-      const bundleName = a[0].trim();
-      resultDict[clusterName] =
-        resultDict[clusterName] == undefined
-          ? [bundleName]
-          : [...resultDict[clusterName], bundleName];
-    });
-    console.log(resultDict);
-    this.clusterMemberShipDict = resultDict;
+    if (clusterMemberShipDictPara === undefined) {
+      this.clusterMemberShipDict =
+        this.parseClusterResultToInternalDict(clusterResult);
+    } else {
+      this.clusterMemberShipDict = clusterMemberShipDictPara;
+    }
   }
 
   // result: clusterName/clusterNumber -> bundleName(-s)
   // takes bundleName from this.bundleMetaData
-  parseClusterResultToInternalDict(clusterResult: ClusterResult) {
+  parseClusterResultToInternalDict(
+    clusterResult: ClusterResult
+  ): Record<string, string[]> {
     console.log(clusterResult);
     let resultDict: Record<string, string[]> = {};
     clusterResult.labels.forEach((a, aIndex) => {
@@ -48,6 +42,6 @@ export class ClusterMembershipMatrix {
           ? [this.bundleMetaData[aIndex].name]
           : [...resultDict[a], this.bundleMetaData[aIndex].name];
     });
-    this.clusterMemberShipDict = resultDict;
+    return resultDict;
   }
 }

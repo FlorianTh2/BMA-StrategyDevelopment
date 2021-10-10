@@ -49,6 +49,8 @@ import { SquaredEuclideanDistance } from "./models/distances/squaredEuclideanDis
 import { ManhattenDistance } from "./models/distances/manhattenDistance";
 import { Distance } from "./models/distances/distance.interface";
 import { ChebyshevDistance } from "./models/distances/chebyshev_distance";
+import { Helper } from "./models/helper";
+import { IOParser } from "./models/ioParser";
 
 @Component({
   selector: "app-strategy-development",
@@ -186,7 +188,7 @@ export class StrategyDevelopmentComponent implements OnInit, OnDestroy {
       (res) => {
         this.consistencyMatrixStored = res;
 
-        const blob = this.b64toBlob(this.consistencyMatrixStored.fileData);
+        const blob = IOParser.b64toBlob(this.consistencyMatrixStored.fileData);
         this.consistencyMatrixBlob = blob;
         let fileReader = new FileReader();
         fileReader.onloadend = (e) => {
@@ -207,7 +209,8 @@ export class StrategyDevelopmentComponent implements OnInit, OnDestroy {
             }
           );
 
-          this.consistencyMatrix = new ConcistencyMatrix(resultAoA);
+          this.consistencyMatrix =
+            IOParser.parseAoAToConsistencyMatrix(resultAoA);
           this.changeDetectorRef.markForCheck();
         };
         fileReader.readAsArrayBuffer(blob);
@@ -220,26 +223,6 @@ export class StrategyDevelopmentComponent implements OnInit, OnDestroy {
     this.sidenav.toggle();
   }
 
-  b64toBlob(b64Data, contentType = "", sliceSize = 512): Blob {
-    const byteCharacters = atob(b64Data);
-    const byteArrays = [];
-
-    for (let offset = 0; offset < byteCharacters.length; offset += sliceSize) {
-      const slice = byteCharacters.slice(offset, offset + sliceSize);
-
-      const byteNumbers = new Array(slice.length);
-      for (let i = 0; i < slice.length; i++) {
-        byteNumbers[i] = slice.charCodeAt(i);
-      }
-
-      const byteArray = new Uint8Array(byteNumbers);
-      byteArrays.push(byteArray);
-    }
-
-    const blob = new Blob(byteArrays, { type: contentType });
-    return blob;
-  }
-
   uploadConsistencyMatrix(event: Event) {
     const element = event.currentTarget as HTMLInputElement;
     let fileList: FileList | null = element.files;
@@ -247,35 +230,12 @@ export class StrategyDevelopmentComponent implements OnInit, OnDestroy {
       if (fileList.length !== 1) {
         throw new Error("Cannot use multiple files");
       }
-      let file: File = fileList.item(0);
-      this.filename = file.name;
-      this.consistencyMatrixBlob = file;
-      // https://stackoverflow.com/questions/28782074/excel-to-json-javascript-code
-      let fileReader = new FileReader();
-      fileReader.onloadend = (e) => {
-        var fileReaderResult = e.target.result as ArrayBufferLike;
-        // new array to handle xls AND xlsx AND csv
-        var fileReaderResultCasted = new Uint8Array(fileReaderResult);
-        this.workbookKonsistenzmatrix = XLSX.read(fileReaderResultCasted, {
-          type: "array"
-        });
-
-        // only first sheet for now
-        var resultAoA: Array<Array<any>> = XLSX.utils.sheet_to_json(
-          this.workbookKonsistenzmatrix.Sheets[
-            this.workbookKonsistenzmatrix.SheetNames[0]
-          ],
-          {
-            header: 1
-          }
-        );
-
-        this.consistencyMatrix = new ConcistencyMatrix(resultAoA);
-        console.log(this.consistencyMatrix);
-        this.changeDetectorRef.markForCheck();
-      };
-      fileReader.readAsArrayBuffer(file);
+      IOParser.readUploadedConsistencyMatrix(this, fileList.item(0));
     }
+  }
+
+  markForChangeCheck() {
+    this.changeDetectorRef.markForCheck();
   }
 
   ngOnDestroy(): void {
@@ -284,71 +244,20 @@ export class StrategyDevelopmentComponent implements OnInit, OnDestroy {
   }
 
   createBundles($event: MouseEvent) {
-    this.consistencyMatrix._maxIterations = this.maxIterations;
-    this.consistencyMatrix._maxBundles = this.maxStoredBundles;
-    this.consistencyMatrix._consistencyBoundary = this.consistencyBoundary;
-    this.consistencyMatrix._consistencyStrategySetNewBundle =
-      this.setNewBundleLabelPosition;
     console.time("createBundleMatrix");
-    this.bundleMatrix = this.consistencyMatrix.createBundleMatrix(
-      this.consistencyMatrix.array,
-      this.consistencyMatrix.metadataByVariable
+    this.bundleMatrix = new BundleMatrix(
+      this.consistencyMatrix,
+      this.maxIterations,
+      this.maxStoredBundles,
+      this.consistencyBoundary,
+      this.setNewBundleLabelPosition
     );
     console.timeEnd("createBundleMatrix");
     console.log(this.bundleMatrix.bundles.length);
   }
 
   downloadBundles($event: MouseEvent) {
-    console.time("createaoa");
-    // 1. bundleMatrix to aoa
-    let resultArray: Array<Array<any>> = [];
-    // first row
-    resultArray.push(
-      ["Options-Kombinationen"].concat(
-        this.bundleMatrix.bundleMetaData.map((a) => {
-          return a.bundleSzenarioCombinationString;
-        })
-      )
-    );
-    // second row
-    resultArray.push(
-      ["Paare"].concat(
-        this.bundleMatrix.bundleMetaData.map((a) => {
-          return a.name;
-        })
-      )
-    );
-
-    // third row
-    resultArray.push(
-      ["Konsistenzwert"].concat(
-        this.bundleMatrix.bundleMetaData.map((a) => {
-          return a.consistence.toString();
-        })
-      )
-    );
-
-    for (
-      let a = 0;
-      a < this.bundleMatrix.bundleMatrixRowColumnCombinations.length;
-      a++
-    ) {
-      const row = [];
-      row.push(
-        this.bundleMatrix.bundleMatrixRowColumnCombinations[a].join("/")
-      );
-      this.bundleMatrix.bundles.forEach((b) => {
-        row.push(b[a]);
-      });
-      resultArray.push(row);
-    }
-    console.timeEnd("createaoa");
-    // 2. aoa to sheet
-    var fileName = "strategiebuendel";
-    var workSheet = XLSX.utils.aoa_to_sheet(resultArray);
-    var wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, workSheet, fileName);
-    XLSX.writeFile(wb, fileName + ".xlsx");
+    IOParser.downloadBundlesFromBundleMatrix(this.bundleMatrix);
   }
 
   setClusterAnalysisRunStatus(running: boolean) {
@@ -397,13 +306,10 @@ export class StrategyDevelopmentComponent implements OnInit, OnDestroy {
       this.clusterAnalysisResults = clusterResultStore;
       this.setClusterAnalysisRunStatus(false);
       this.clusterMembershipMatrix = new ClusterMembershipMatrix(
-        this.bundleMatrix
-      );
-      this.clusterMembershipMatrix.parseClusterResultToInternalDict(
+        this.bundleMatrix,
+        undefined,
         this.clusterAnalysisResults[this.selectedNumberOfClusters]
       );
-      // console.log("hier0");
-      // console.log(this.bundleMatrix.bundles);
     }
   }
 
@@ -459,8 +365,8 @@ export class StrategyDevelopmentComponent implements OnInit, OnDestroy {
   }
 
   getMaxIterations(): number {
-    return this.consistencyMatrix.getMaxNumberOfBundles(
-      this.consistencyMatrix.convertVariablesDictToList(
+    return Helper.getMaxNumberOfBundles(
+      Helper.convertVariablesDictToList(
         this.consistencyMatrix.metadataByVariable
       )
     );
@@ -485,36 +391,7 @@ export class StrategyDevelopmentComponent implements OnInit, OnDestroy {
       if (fileList.length !== 1) {
         throw new Error("Cannot use multiple files");
       }
-      let file: File = fileList.item(0);
-      // https://stackoverflow.com/questions/28782074/excel-to-json-javascript-code
-      let fileReader = new FileReader();
-      fileReader.onloadend = (e) => {
-        var fileReaderResult = e.target.result as ArrayBufferLike;
-        // new array to handle xls AND xlsx AND csv
-        var fileReaderResultCasted = new Uint8Array(fileReaderResult);
-        this.workbookClusterMembershipMatrix = XLSX.read(
-          fileReaderResultCasted,
-          {
-            type: "array"
-          }
-        );
-
-        // only first sheet for now
-        var resultAoA: Array<Array<any>> = XLSX.utils.sheet_to_json(
-          this.workbookClusterMembershipMatrix.Sheets[
-            this.workbookClusterMembershipMatrix.SheetNames[0]
-          ],
-          {
-            header: 1
-          }
-        );
-
-        this.clusterMembershipMatrix = new ClusterMembershipMatrix(
-          this.bundleMatrix
-        );
-        this.clusterMembershipMatrix.parseFromAoAToInternalDict(resultAoA);
-      };
-      fileReader.readAsArrayBuffer(file);
+      IOParser.readUploadedClusterMembershipMatrix(this, fileList.item(0));
     }
   }
 
@@ -533,60 +410,7 @@ export class StrategyDevelopmentComponent implements OnInit, OnDestroy {
   }
 
   downloadBundleUsageMatrix(event: MouseEvent) {
-    console.log("Ausprägungsmatrix herunterladen");
-    let resultAoA: Array<Array<string>> = [];
-    resultAoA.push(
-      ["Variable", "Option"].concat(
-        this.bundleUsageMatrix.clusterGroups.map((a) => "Cluster " + a.name)
-      )
-    );
-    this.bundleUsageMatrix.metadataBundleUsageVariables.forEach((a) => {
-      a.options.forEach((b) => {
-        let valueList = this.bundleUsageMatrix.clusterGroups.map((c) => {
-          return c.options[b.id].toFixed(2);
-        });
-        resultAoA.push([a.id, b.id, ...valueList]);
-      });
-    });
-
-    var fileName = "auspraegungsmatrix";
-    // if we use workbook and NOT the resulting array it must be:
-    // .json_to_sheet or something like that
-    var workSheet = XLSX.utils.aoa_to_sheet(resultAoA);
-    // format to output numbers instead of string-type
-    this.formatWorksheetToNumbers(workSheet, 2, resultAoA);
-
-    var wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, workSheet, fileName);
-    XLSX.writeFile(wb, fileName + ".xlsx");
-  }
-
-  private formatWorksheetToNumbers(
-    worksheet,
-    startColumn: number,
-    matrix: string[][]
-  ) {
-    const format = "0.00";
-    let endColumn = startColumn + matrix[0].length;
-    let arrayWithColumns = Array.from(
-      { length: endColumn - startColumn },
-      (v, k) => k + startColumn
-    );
-    for (let col of arrayWithColumns) {
-      this.formatColumn(worksheet, col, format);
-    }
-  }
-
-  private formatColumn(worksheet, col, fmt) {
-    const range = XLSX.utils.decode_range(worksheet["!ref"]);
-    // note: range.s.r + 1 skips the header row
-    for (let row = range.s.r + 1; row <= range.e.r; ++row) {
-      const ref = XLSX.utils.encode_cell({ r: row, c: col });
-      if (worksheet[ref]) {
-        worksheet[ref].t = "n";
-        worksheet[ref].z = fmt;
-      }
-    }
+    IOParser.downloadBundleUsageMatrix(this.bundleUsageMatrix);
   }
 
   // this.saveConsistencyMatrixForm = this.fb.group({
@@ -648,15 +472,17 @@ export class StrategyDevelopmentComponent implements OnInit, OnDestroy {
     const data = this.bundleUsageMatrix.clusterGroups.map((a) => {
       return Object.values(a.options);
     });
+    console.log("dataa: ", data);
     const labels = this.bundleUsageMatrix.clusterGroups.map((a) => {
       return a.name;
     });
     const multiDimensionalScaling = new MultidimensionalScaling();
     const distanceMatrix: number[][] =
       multiDimensionalScaling.calc_distanceMatrix(data, data, false);
+    // console.log("distance matrixx: ", distanceMatrix);
     const mdsResult: number[][] =
       multiDimensionalScaling.calc_mds(distanceMatrix);
-    console.log("mds result: ", mdsResult);
+    // console.log("mds result: ", mdsResult);
     this.mdsData = mdsResult.map((a, aIndex) => {
       return {
         x: a[0],
