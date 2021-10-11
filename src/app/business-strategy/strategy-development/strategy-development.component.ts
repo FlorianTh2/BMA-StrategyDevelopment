@@ -332,14 +332,14 @@ export class StrategyDevelopmentComponent implements OnInit, OnDestroy {
     if (event.target.value > this.maxConsideredClusters) {
       this.selectedNumberOfClusters = this.maxConsideredClusters;
     } else if (event.target.value < this.minConsideredClusters) {
-      console.log("hi");
       this.selectedNumberOfClusters = this.minConsideredClusters;
     } else {
       this.selectedNumberOfClusters = parseInt(event.target.value);
     }
-    this.clusterMembershipMatrix.parseClusterResultToInternalDict(
-      this.clusterAnalysisResults[this.selectedNumberOfClusters]
-    );
+    this.clusterMembershipMatrix.clusterMemberShipDict =
+      this.clusterMembershipMatrix.parseClusterResultToInternalDict(
+        this.clusterAnalysisResults[this.selectedNumberOfClusters]
+      );
 
     // if we select 2 clusters that does not mean that
     // the clustermembershipmatrix has 2 entries
