@@ -31,6 +31,7 @@ export class BundleUsageMatrix {
       bundleMatrix,
       clusterMembershipMatrix
     );
+    console.log("check bum: ", this);
   }
 
   generateBundleUsageMatrix(
@@ -57,7 +58,7 @@ export class BundleUsageMatrix {
       } as MetadataBundleUsageVariable;
     });
 
-    // consider only those bundles from bundleMatrix whos name appear in clusterMemberShipMatrix
+    // consider only those bundles from bundleMatrix whose name appear in clusterMemberShipMatrix
 
     const bundles: number[][] = [];
     const bundleMetaData: BundleData[] = [];
@@ -82,8 +83,6 @@ export class BundleUsageMatrix {
       bundleMatrixRowColumnCombinations:
         bundleMatrix.bundleMatrixRowColumnCombinations
     } as BundleMatrix;
-    //
-    // console.log("selectedBundleMatrix: ", bundleMatrix);
 
     let clusterGroups = Object.entries(
       clusterMemberShipMatrix.clusterMemberShipDict
@@ -109,54 +108,12 @@ export class BundleUsageMatrix {
       });
       clusterGroup.options = { ...variablesOptions };
 
-      // build dict: variablenname -> optionsName -> counterOfItsAppearences
-      // group under variablename is needed since later we want to aggregate
-      // all optionCounts UNDER 1 VARIABLE
-      let internalCounterDict: Record<string, Record<string, number>> = {};
-      let pairNamesOfBundleDivided: string[][] =
-        clusterGroup.bundleMatrixRowColumnCombinations;
+      let keysWhichAreNotZero = this.getNotZeroKeys(clusterGroup);
 
-      let keysWhichAreNotZero = clusterGroup.bundles
-        .map((b) => {
-          const indexResults = b.bundleData
-            .map((c, cIndex) => {
-              if (c != 0) {
-                return cIndex;
-              }
-            })
-            .filter((c) => c != undefined);
-          const keysWhichAreNotZeroForThisBundle = indexResults
-            .map((c) => {
-              const keyNames =
-                clusterGroup.bundleMatrixRowColumnCombinations[c];
-              return keyNames;
-            })
-            .reduce((c, d) => c.concat(d), []);
-          return keysWhichAreNotZeroForThisBundle;
-        })
-        .reduce((b, c) => b.concat(c), []);
-
-      // find options corresponding variable name and count up (+1) in internal dict
-      // here only one module is considered
-      // name shortening
-      keysWhichAreNotZero.forEach((a) => {
-        Object.entries(consistencyMatrix.metadataByVariable).forEach(
-          ([keyVariable, valueVariable]) => {
-            if (valueVariable.options[a] != undefined) {
-              if (internalCounterDict[keyVariable] == undefined) {
-                internalCounterDict[keyVariable] = {
-                  [a]: 1
-                };
-              } else if (internalCounterDict[keyVariable][a] == undefined) {
-                internalCounterDict[keyVariable][a] = 1;
-              } else {
-                internalCounterDict[keyVariable][a] =
-                  internalCounterDict[keyVariable][a] + 1;
-              }
-            }
-          }
-        );
-      });
+      let internalCounterDict = this.countUpEachOption(
+        keysWhichAreNotZero,
+        consistencyMatrix
+      );
 
       Object.entries(internalCounterDict).forEach(
         ([
@@ -177,5 +134,59 @@ export class BundleUsageMatrix {
       return clusterGroup;
     });
     this.clusterGroups = clusterGroups;
+  }
+
+  getNotZeroKeys(clusterGroup: ClusterGroup): string[] {
+    return clusterGroup.bundles
+      .map((b) => {
+        const indexResults = b.bundleData
+          .map((c, cIndex) => {
+            if (c != 0) {
+              return cIndex;
+            }
+          })
+          .filter((c) => c != undefined);
+        const keysWhichAreNotZeroForThisBundle = indexResults
+          .map((c) => {
+            const keyNames = clusterGroup.bundleMatrixRowColumnCombinations[c];
+            return keyNames;
+          })
+          .reduce((c, d) => c.concat(d), []);
+        return keysWhichAreNotZeroForThisBundle;
+      })
+      .reduce((b, c) => b.concat(c), []);
+  }
+
+  countUpEachOption(
+    keysWhichAreNotZero: string[],
+    consistencyMatrix: ConcistencyMatrix
+  ): Record<string, Record<string, number>> {
+    // build dict: variablenname -> optionsName -> counterOfItsAppearences
+    // group under variablename is needed since later we want to aggregate
+    // all optionCounts UNDER 1 VARIABLE
+    let internalCounterDict: Record<string, Record<string, number>> = {};
+
+    // find options corresponding variable name and count up (+1) in internal dict
+    // here only one module is considered
+    // name shortening
+    keysWhichAreNotZero.forEach((a) => {
+      Object.entries(consistencyMatrix.metadataByVariable).forEach(
+        ([keyVariable, valueVariable]) => {
+          if (valueVariable.options[a] != undefined) {
+            if (internalCounterDict[keyVariable] == undefined) {
+              internalCounterDict[keyVariable] = {
+                [a]: 1
+              };
+            } else if (internalCounterDict[keyVariable][a] == undefined) {
+              internalCounterDict[keyVariable][a] = 1;
+            } else {
+              internalCounterDict[keyVariable][a] =
+                internalCounterDict[keyVariable][a] + 1;
+            }
+          }
+        }
+      );
+    });
+    return internalCounterDict;
   }
 }

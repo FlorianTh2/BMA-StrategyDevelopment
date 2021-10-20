@@ -303,6 +303,7 @@ export class StrategyDevelopmentComponent implements OnInit, OnDestroy {
           numberClusters: kmeans.numClusters
         } as ClusterResult;
       }
+      console.log("check: ", clusterResultStore);
       this.clusterAnalysisResults = clusterResultStore;
       this.setClusterAnalysisRunStatus(false);
       this.clusterMembershipMatrix = new ClusterMembershipMatrix(

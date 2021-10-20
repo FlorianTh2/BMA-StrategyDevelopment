@@ -2,16 +2,16 @@ import { MetadataVariableOption } from "./metadataVariable";
 
 export class IndexStore {
   dataStore: number[];
-  variables: MetadataVariableOption[][];
+  optionsByVariable: MetadataVariableOption[][];
 
   constructor(variables: MetadataVariableOption[][]) {
-    this.variables = variables;
+    this.optionsByVariable = variables;
     this.dataStore = variables.map((a) => 0);
   }
 
   getVariablesOptionsBasedOnCurrentIndexStore() {
     return this.dataStore.map((a, aIndex) => {
-      return this.variables[aIndex][a];
+      return this.optionsByVariable[aIndex][a];
     });
   }
 
@@ -21,7 +21,7 @@ export class IndexStore {
     while (true) {
       if (
         this.dataStore[indexStoreAddingIndex] <
-        this.variables[indexStoreAddingIndex].length - 1
+        this.optionsByVariable[indexStoreAddingIndex].length - 1
       ) {
         this.dataStore[indexStoreAddingIndex] += 1;
         return;

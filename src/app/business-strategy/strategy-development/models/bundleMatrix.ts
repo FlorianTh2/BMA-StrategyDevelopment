@@ -43,6 +43,7 @@ export class BundleMatrix {
     this.bundleMetaData = tmpCoreBundleMatrix.bundleMetaData;
     this.bundleMatrixRowColumnCombinations =
       tmpCoreBundleMatrix.bundleMatrixRowColumnCombinations;
+    console.log("check: ", this);
   }
 
   set maxBundles(value: number) {
@@ -61,20 +62,21 @@ export class BundleMatrix {
     bundleMatrixRowColumnCombinations: string[][];
   } {
     console.log("createBundleMatrix");
-    let variables: MetadataVariableOption[][] =
+    let optionsByVariable: MetadataVariableOption[][] =
       Helper.convertVariablesDictToList(currentVariablesMetaData);
-    let indexStore: IndexStore = new IndexStore(variables);
+    console.log("check: ", optionsByVariable);
+    let indexStore: IndexStore = new IndexStore(optionsByVariable);
     let bundleStore: BundleStore = new BundleStore(
       this._maxBundles,
       this._consistencyStrategySetNewBundle
     );
-    const numberBundles = Helper.getMaxNumberOfBundles(variables);
+    const numberBundles = Helper.getMaxNumberOfBundles(optionsByVariable);
     let a;
     for (a = 0; a < numberBundles && a < this._maxIterations; a++) {
       const bundle: Bundle = this.createBundle(
         indexStore,
         currentVariablesData,
-        variables,
+        optionsByVariable,
         a
       );
       bundleStore.addBundle(bundle);
@@ -103,7 +105,7 @@ export class BundleMatrix {
     currentVariablesData: number[][],
     variables: MetadataVariableOption[][],
     runIndex: number
-  ) {
+  ): Bundle {
     // get option-metadataobjects based on indexStore
     // in matrix: column-key
     // const bundleOptions = this.indexStoreReturnVariables(indexStore, variables);
@@ -145,7 +147,9 @@ export class BundleMatrix {
 
   // input: e.g. ["1A", "2A", "3A"]
   // output e.g. [["1A", "2A"], ["1A", "3A"], ["2A", "3A"]]
-  createBundleOptionsKombination(options: MetadataVariableOption[]) {
+  createBundleOptionsKombination(
+    options: MetadataVariableOption[]
+  ): MetadataVariableOption[][] {
     let combinationsArray: MetadataVariableOption[][] = [];
     for (let a = 0; a < options.length; a++) {
       for (let b = a + 1; b < options.length; b++) {

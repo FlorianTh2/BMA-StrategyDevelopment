@@ -27,6 +27,7 @@ export class ClusterMembershipMatrix {
     } else {
       this.clusterMemberShipDict = clusterMemberShipDictPara;
     }
+    console.log("check: ", this);
   }
 
   // result: clusterName/clusterNumber -> bundleName(-s)

@@ -7,6 +7,7 @@ export class ConcistencyMatrix {
   constructor(rawData: number[][], metadataByVariableParameter) {
     this.array = rawData;
     this.metadataByVariable = metadataByVariableParameter;
+    console.log("check: ", this);
   }
 
   getNumberOfVariables(): number {
