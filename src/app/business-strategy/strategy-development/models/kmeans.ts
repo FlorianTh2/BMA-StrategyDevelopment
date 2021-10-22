@@ -44,23 +44,23 @@ export class Kmeans extends ClusterAlgorithm {
         aggregateVector[b] += vectors[a][b];
       }
     }
-    const result = aggregateVector.map(
-      (a) => ((1.0 * a) / vectorElements) * 0.1
-    );
+    const result = aggregateVector.map((a) => (1.0 * a) / vectorElements);
     return result;
   }
 
   pairwise_euclidean_distances_argmin(data: number[][], centroids: number[][]) {
     const resultIndices = [];
     for (let a = 0; a < data.length; a++) {
-      let currentMinDistance = this.distanceAlgorithm
-        .calcDistance(data[a], centroids[0])
-        .toFixed(this.tolerance);
+      let currentMinDistance = this.distanceAlgorithm.calcDistance(
+        data[a],
+        centroids[0]
+      );
       let currentMinDistanceIndex = 0;
       for (let b = 0; b < centroids.length; b++) {
-        const distance = this.distanceAlgorithm
-          .calcDistance(data[a], centroids[b])
-          .toFixed(this.tolerance);
+        const distance = this.distanceAlgorithm.calcDistance(
+          data[a],
+          centroids[b]
+        );
         if (distance < currentMinDistance) {
           currentMinDistance = distance;
           currentMinDistanceIndex = b;
@@ -75,9 +75,9 @@ export class Kmeans extends ClusterAlgorithm {
     if (data.length < this.numClusters) {
       throw "you can not request more cluster than data-points you have.";
     }
-    console.log(this);
     const randomIndices = this.generateRandomIndices(0, data.length);
     this.centroids = randomIndices.map((a) => data[a]);
+
     this.iterations = 0;
     this.labels = [];
     while (true) {
@@ -103,14 +103,11 @@ export class Kmeans extends ClusterAlgorithm {
           new_centroids.push(a_center);
         }
       }
-      this.iterations += 1;
       this.inertia = this.get_inertia(this.centroids, data, this.labels);
+      this.iterations += 1;
       if (this.arraysEqual(this.centroids, new_centroids)) {
         return this.labels;
       }
-      // console.log("current: ", this.centroids);
-      // console.log("new: ", new_centroids);
-      // if (this.iterations > 100) return this.labels;
       this.centroids = new_centroids;
     }
   }
@@ -144,16 +141,7 @@ export class Kmeans extends ClusterAlgorithm {
   }
 
   arraysEqual(arr0: number[][], arr1: number[][]): boolean {
-    // console.log(
-    //   "length:",
-    //   arr0.length,
-    //   " ",
-    //   arr0[0].length,
-    //   " ",
-    //   arr0[1]?.length,
-    //   " ",
-    //   arr0[2]?.length
-    // );
+    console.log("check");
     for (let a = 0; a < arr0.length; ++a) {
       for (let b = 0; b < arr0[a].length; ++b) {
         if (
