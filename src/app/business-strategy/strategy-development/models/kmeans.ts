@@ -44,7 +44,10 @@ export class Kmeans extends ClusterAlgorithm {
         aggregateVector[b] += vectors[a][b];
       }
     }
-    return aggregateVector.map((a) => (1.0 * a) / vectorElements);
+    const result = aggregateVector.map(
+      (a) => ((1.0 * a) / vectorElements) * 0.1
+    );
+    return result;
   }
 
   pairwise_euclidean_distances_argmin(data: number[][], centroids: number[][]) {
@@ -72,6 +75,7 @@ export class Kmeans extends ClusterAlgorithm {
     if (data.length < this.numClusters) {
       throw "you can not request more cluster than data-points you have.";
     }
+    console.log(this);
     const randomIndices = this.generateRandomIndices(0, data.length);
     this.centroids = randomIndices.map((a) => data[a]);
     this.iterations = 0;
@@ -83,7 +87,12 @@ export class Kmeans extends ClusterAlgorithm {
       );
       let new_centroids: number[][] = [];
       for (let a = 0; a < this.numClusters; a++) {
-        const a_center_datapoints_indices = this.labels.filter((b) => b === a);
+        const a_center_datapoints_indices = [];
+        this.labels.forEach((b, bIndex) => {
+          if (b === a) {
+            a_center_datapoints_indices.push(bIndex);
+          }
+        });
         if (a_center_datapoints_indices.length == 0) {
           new_centroids.push(this.centroids[a]);
         } else {
@@ -99,6 +108,9 @@ export class Kmeans extends ClusterAlgorithm {
       if (this.arraysEqual(this.centroids, new_centroids)) {
         return this.labels;
       }
+      // console.log("current: ", this.centroids);
+      // console.log("new: ", new_centroids);
+      // if (this.iterations > 100) return this.labels;
       this.centroids = new_centroids;
     }
   }
@@ -132,13 +144,24 @@ export class Kmeans extends ClusterAlgorithm {
   }
 
   arraysEqual(arr0: number[][], arr1: number[][]): boolean {
+    // console.log(
+    //   "length:",
+    //   arr0.length,
+    //   " ",
+    //   arr0[0].length,
+    //   " ",
+    //   arr0[1]?.length,
+    //   " ",
+    //   arr0[2]?.length
+    // );
     for (let a = 0; a < arr0.length; ++a) {
       for (let b = 0; b < arr0[a].length; ++b) {
         if (
           arr0[a][b].toFixed(this.tolerance) !==
           arr1[a][b].toFixed(this.tolerance)
-        )
+        ) {
           return false;
+        }
       }
     }
     return true;
