@@ -171,7 +171,7 @@ export class MultidimensionalScaling {
     const eigenValuesAbs = math.abs(eigenValuesRaw);
     // transpose since the sorting that is later applied
     // normally: input [[1,2,3],[4,5,6]] -> e.g. [[4,5,6], [1,2,3]]
-    // but actually we want: [[1,2,3],[4,5,6]] -> e.g. [[2,3,1], [6,5,4]]
+    // but actually we want: [[1,2,3],[4,5,6]] -> e.g. [[3,2,1], [6,5,4]]
     // so we want the sorting on axis=1 and not axis=0
     // after sorting -> we transpose back
     const eigenVectors = math.transpose(eigen.vectors);
