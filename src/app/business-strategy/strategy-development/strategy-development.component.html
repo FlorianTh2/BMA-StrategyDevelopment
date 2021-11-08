@@ -36,23 +36,31 @@
     </mat-drawer>
 
     <div class="" style="padding: 100px">
-
-
-
-
-
-
-
-
-
-  <div>
+  <div style="text-align: center">
+    <div style="padding: 20px; padding-bottom: 50px">
     <h1>
-      Geschäftsstrategie - Self Service
+      Geschäftsmodellentwicklung - Management Self Service
     </h1>
     <h3>
-      Erstellen Sie ihre individuelle Geschäftsstrategie
+      Erstellen Sie Ihr individuelles Geschäftsmodell in wenigen Schritten
     </h3>
+    </div>
   </div>
+
+
+
+
+
+
+
+      <mat-horizontal-stepper #stepper>
+        <mat-step label="Fill out your name">
+
+
+
+
+
+
 
 
 
@@ -98,6 +106,19 @@
       </div>
     </div>
   </div>
+
+
+
+
+
+
+  <div style="padding-top: 50px">
+    <button mat-raised-button matStepperNext color="primary">Next</button>
+  </div>
+  </mat-step>
+  <mat-step label="Fill out your address">
+
+
 
 
 
@@ -199,6 +220,40 @@
     Der Download erfolgt im Excel-Format. 180.000 Speichereinheiten entspricht einer Downloadgröße von ca. 200 MB. 200 MB benötigen ca. 20 Sekunden zum Schreiben der Datei.
     <div style="height: 25px"></div>
     <button mat-raised-button color="" (click)="downloadBundles($event)">Download konsistente Strategiebündel</button>
+
+
+
+
+
+
+    <div>
+      <button mat-raised-button matStepperNext color="primary">Next</button>
+    </div>
+  </mat-step>
+  <mat-step label="Done">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     <div style="height: 100px"></div>
 
@@ -305,7 +360,26 @@
       </div>
     </ng-container>
 
-    <div style="height: 25px"></div>
+
+
+
+
+    <div>
+      <button mat-raised-button matStepperNext color="primary">Next</button>
+    </div>
+  </mat-step>
+        <mat-step label="Done">
+
+
+
+
+
+
+
+
+
+
+      <div style="height: 25px"></div>
 
     <button mat-raised-button color="" (click)="createBundleUsageMatrix($event)">Erstelle Ausprägungsmatrix</button>
 
@@ -336,7 +410,23 @@
     <div>
       Die Multidimensionale Skalierung wurde erfolgreich berechnet. Die Visualisierung der berechneten Koordinaten wird dargestellt.
     </div>
-</div>
+
+
+
+
+
+
+      <div>
+        <button mat-raised-button matStepperPrevious color="primary">Back</button>
+        <button mat-button color="primary" (click)="stepper.reset()">Reset</button>
+      </div>
+    </mat-step>
+  </mat-horizontal-stepper>
+
+
+
+
+    </div>
 <!--  </ng-container>-->
 
 
