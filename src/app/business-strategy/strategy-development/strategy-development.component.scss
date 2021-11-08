@@ -36,3 +36,14 @@
 .example-form-field {
   width: 200px;
 }
+
+ul {
+  padding-left: 15px;
+}
+
+li span {
+  // position: relative;
+  left: -10px;
+}
+
+ul li { padding: 10px 0px; }

@@ -510,4 +510,8 @@ export class StrategyDevelopmentComponent implements OnInit, OnDestroy {
     //   } as ScatterPlotMdsData;
     // });
   }
+
+  downloadExampleConsistencyMatrix($event: MouseEvent) {
+    
+  }
 }
