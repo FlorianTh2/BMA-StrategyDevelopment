@@ -6,6 +6,8 @@ import { StrategyDevelopmentComponent } from "./strategy-development/strategy-de
 import { SharedModule } from "../shared/share.module";
 import { FormsModule, ReactiveFormsModule } from "@angular/forms";
 import { V1StrategyDevelopmentComponent } from "./v-1-strategy-development/strategy-development.component";
+import { MatStepperModule } from "@angular/material/stepper";
+import { TestStepperComponent } from "../test-stepper/test-stepper.component";
 
 @NgModule({
   declarations: [StrategyDevelopmentComponent, V1StrategyDevelopmentComponent],

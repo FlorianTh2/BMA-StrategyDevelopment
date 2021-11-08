@@ -3,6 +3,7 @@ import { RouterModule, Routes } from "@angular/router";
 import { AboutComponent } from "./static-sites/about/about.component";
 import { PrivacyComponent } from "./static-sites/privacy/privacy.component";
 import { ImpressumComponent } from "./static-sites/impressum/impressum.component";
+import { TestStepperComponent } from "./test-stepper/test-stepper.component";
 
 const routes: Routes = [
   {
@@ -45,7 +46,11 @@ const routes: Routes = [
     component: ImpressumComponent
   },
   // default
-  { path: "", redirectTo: "/home", pathMatch: "full" }
+  { path: "", redirectTo: "/home", pathMatch: "full" },
+  {
+    path: "test",
+    component: TestStepperComponent
+  }
   //
   // to make it possible to be on route localhost:4200/: (otherwise this route will always load to /home)
   // (maybe there will be errors (like it is possible to /home/project1 to make /project1?? this should not be possible)

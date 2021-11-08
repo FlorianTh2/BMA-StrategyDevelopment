@@ -10,9 +10,14 @@ import { ROOT_REDUCERS, metaReducers } from "./store/reducers/root.reducer";
 import { StoreRouterConnectingModule } from "@ngrx/router-store";
 import { BusinessStrategyComponent } from "./business-strategy/business-strategy.component";
 import { BusinessStrategyModule } from "./business-strategy/business-strategy.module";
+import { TestStepperComponent } from "./test-stepper/test-stepper.component";
+import { MatStepperModule } from "@angular/material/stepper";
+import { SharedModule } from "./shared/share.module";
+import { FormsModule, ReactiveFormsModule } from "@angular/forms";
+import { CommonModule } from "@angular/common";
 
 @NgModule({
-  declarations: [AppComponent, BusinessStrategyComponent],
+  declarations: [AppComponent, BusinessStrategyComponent, TestStepperComponent],
   imports: [
     BrowserModule,
     BrowserAnimationsModule,
@@ -35,7 +40,11 @@ import { BusinessStrategyModule } from "./business-strategy/business-strategy.mo
     }),
 
     CoreModule,
-    BusinessStrategyModule
+    BusinessStrategyModule,
+    SharedModule,
+    ReactiveFormsModule,
+    FormsModule,
+    CommonModule
   ],
   providers: [],
   bootstrap: [AppComponent]

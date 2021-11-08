@@ -4,6 +4,7 @@ import { BusinessStrategyComponent } from "./business-strategy.component";
 import { PrivacyComponent } from "../static-sites/privacy/privacy.component";
 import { V1StrategyDevelopmentComponent } from "./v-1-strategy-development/strategy-development.component";
 import { MaturityModelComponent } from "../maturity-model/maturity-model.component";
+import { TestStepperComponent } from "../test-stepper/test-stepper.component";
 
 const routes: Routes = [
   {
