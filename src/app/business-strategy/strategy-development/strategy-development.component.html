@@ -1,16 +1,17 @@
-<mat-drawer-container class="example-container" autosize hasBackdrop="false">
-  <mat-drawer #drawer class="example-sidenav" mode="push" position="end">
+<div>
+  <mat-drawer-container class="example-container" autosize hasBackdrop="false">
+    <mat-drawer #drawer class="example-sidenav" mode="push" position="end">
 
-      <h4>Speichern Sie ihr Reifegradmodell - Ergebnis</h4>
+      <h4>Speichern Sie Ihre Konsistenzmatrix - Ergebnis</h4>
 
       <form class="ui form" [formGroup]="saveConsistencyMatrixForm" (ngSubmit)="saveConsistencyMatrix()">
         <h5>
           Wählen Sie einen Namen für die Konsistenzmatrix
         </h5>
-          <mat-form-field class="example-form-field">
-            <mat-label>Name</mat-label>
-            <input matInput type="text" formControlName="consistencyMatrixNameView">
-          </mat-form-field>
+        <mat-form-field class="example-form-field">
+          <mat-label>Name</mat-label>
+          <input matInput type="text" formControlName="consistencyMatrixNameView">
+        </mat-form-field>
         <br>
         <h5>
           Hinterlegen Sie eine Beschreibung für die Konsistenzmatrix
@@ -32,21 +33,23 @@
         <br>
         <button mat-raised-button class="ui button save-maturity-model-button0" type="submit">Save</button>
       </form>
-  </mat-drawer>
-  <div class="" style="padding: 100px">
-    <div style="text-align: center">
-      <div style="padding: 20px; padding-bottom: 50px">
-      <h1>
-        Geschäftsmodellentwicklung - Management Self Service
-      </h1>
-      <h3>
-        Erstellen Sie Ihr individuelles Geschäftsmodell in wenigen Schritten
-      </h3>
-      </div>
-    </div>
+    </mat-drawer>
 
-    <mat-horizontal-stepper style="" #stepper>
-      <mat-step label="Konsistenzmatrix">
+
+
+    <div class="" style="padding: 100px;">
+      <div style="text-align: center">
+        <div style="padding: 20px; padding-bottom: 50px">
+          <h1>
+            Geschäftsmodellentwicklung - Management Self Service
+          </h1>
+          <h3>
+            Erstellen Sie Ihr individuelles Geschäftsmodell in wenigen Schritten
+          </h3>
+        </div>
+      </div>
+      <mat-horizontal-stepper style="" #stepper>
+        <mat-step label="Konsistenzmatrix">
           <div style="padding: 50px">
             <div style="text-align: center">
               <h2 style="font-weight: normal">Festhalten einer Konsistenzmatrix</h2>
@@ -60,326 +63,336 @@
             </ul>
 
 
+            <div style="display: flex; justify-content: space-between">
+              <div>
+                <button mat-raised-button color="" (click)="fileInput.click()">Konsistenzmatrix hochladen</button>
+                <input hidden type="file" (change)="uploadConsistencyMatrix($event)" #fileInput id="file">
+
+                <div style="height: 25px"></div>
+
+                <ng-container *ngIf="consistencyMatrix">
+                  <div>
+                    <ng-container *ngIf="consistencyMatrixStored">
+                      Ihre Konsistenzmatrix wurde erfolgreich aus dem Backendspeicher geladen. Sie hat folgende Parameter:
+                    </ng-container>
+                    <ng-container *ngIf="!consistencyMatrixStored">
+                      Ihre Konsistenzmatrix wurde erfolgreich hochgeladen. Sie hat folgende Parameter:
+                    </ng-container>
+
+                    <div style="height: 25px"></div>
+                    <div>
+                      Anzahl Variablen: [{{getNumberOfVariablesConsistencyMatrix()}}]
+                    </div>
+                    <div style="height: 10px"></div>
+                    <div>
+                      Anzahl Optionen: [{{getNumberOfOptionsConsistencyMatrix()}}]
+                    </div>
+                  </div>
+                </ng-container>
+              </div>
+
+              <div>
+                <div *ngIf="user && this.consistencyMatrix">
+                  <div *ngIf="!consistencyMatrix_id">
+                    <button mat-raised-button color="" class="save-maturity-model-button" (click)="saveConsistencyMatrixToggle()">Speichern Sie die hochgeladene Konsistenzmatrix</button>
+                  </div>
+                </div>
+                <div *ngIf="!user">
+                  <button mat-raised-button color="" [disabled]="true" class="save-maturity-model-button">Einloggen zum Speichern!</button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div style="padding-top: 50px">
+            <button mat-raised-button matStepperNext color="primary">Zum nächsten Schritt</button>
+          </div>
+        </mat-step>
+
+        <mat-step label="Strategiebündelerstellung">
+          <!--      <div>-->
+          <!--      Bitte geben Sie ebenfalls ein Limit für die Anzahl der zu speichernden (konsistentesten) Bündel an.-->
+          <!--      Dies ist notwendig da die Anzahl der Bündel und der Optionskombinationen pro Bündel speicherintensiv ist und der Browser ein Limit von ca. 2GB hat.-->
+          <!--      Beispiel: 10 Variablen je 5 Optionen = 45 Mio. Speichereinheiten. 45 Mio * 4 Byte = ca. 180 MB Rohspeicherplatz.-->
+          <!--      Empfohlen ist ein Limit auf ca. 4.000 Bündel um eine verzögerungsfreie Betrachtung zu gewährleisten.-->
+          <!--      <br>-->
+          <!--      Bitte geben Sie dazu noch eine Konsistenzgrenze an. Die beschreibt ab welchem Konsistenzwert einer Optionskombination das Bündel als konsistent angesehen wird.-->
+          <!--      Beispiel: Konsistenzgrenze=1 (empfohlen). Das heißt ab einem Konsistenzwert von größer 1 wird die Optionskombination eines Bündels als konsistent betrachtet.-->
+          <!--      <br>-->
+          <!--      Bitte geben Sie zusätzlich noch eine Strategie zum Umgang mit gleichem Konsistentwert an: Sollen bei vollem Bündelspeicher und gleichem Konsistenzwert eines Bündels ("neues Bündel")-->
+          <!--      mit einem Bündel im Bündelspeicher mit dem minimalsten Konsistenzwert ("altes Bündel") das neue Bündel aufgenommen und das alte Bündel gelöscht werden (default) oder das alte Bündel behalten werden?-->
+          <div style="padding: 50px">
+            <div style="text-align: center">
+              <h2 style="font-weight: normal">Generierung der Strategiebündel</h2>
+            </div>
+            <ul>
+              <li>Gehen Sie die folgenden notwendigen Fakten durch</li>
+              <ul>
+                <li>Die Bündelerstellung erstellt für jede mögliche Optionskombination ein mögliches Bündel</li>
+                <li>Mit Variablen (v) und Optionen (o) sind Schritte notwendig: o^v * (v/2) * (v-1)</li>
+                <li>Schritte wachsen exponentiell mit Anzahl der Variablen und polynomiell mit Anzahl der Optionen</li>
+                <li>10 Mrd. Schritte = 10min</li>
+                <li>Laufzeit- und Speicher-Limitierungen großer Konsistenzmatrizen optional folgend möglich</li>
+              </ul>
+              <li>Spezifizieren Sie einige Parameter:</li>
+            </ul>
+
+            <div>
+              <ul>
+                <ul>
+                <li>Limit der Iterationen (1 Iteration = 1 mögliches Bündel) - Empfehlung: 500000</li>
+                <ul *ngIf="consistencyMatrix">
+                  <li>Für die aktuelle Konsistenzmatrix sind maximal: [{{getMaxIterations()}}] Bündel / Iterationen zu durchlaufen.</li>
+                  <li>Die Gleiche Anzahl an Bündeln ist maximal speicherbar.</li>
+                </ul>
+                </ul>
+              </ul>
+              <mat-form-field class="example-full-width" appearance="fill">
+                <mat-label>Maximale Iterationen</mat-label>
+                <input matInput type="number" value="{{maxIterations}}" (input)="setMaxIterations($event)"  />
+              </mat-form-field>
+            </div>
+
+            <div style="height: 20px"></div>
+            <div>
+              <ul>
+                <ul>
+                  <li>Limit für die Anzahl der zu speichernden (konsistentesten) Bündel - Empfehlung: 4000</li>
+                </ul>
+              </ul>
+              <mat-form-field class="example-full-width" appearance="fill">
+                <mat-label>Größe Bündelspeicher</mat-label>
+                <input matInput type="number" value="{{maxStoredBundles}}" (input)="setMaxStoredBundles($event)"  />
+              </mat-form-field>
+            </div>
+
+            <div>
+              <ul>
+                <ul>
+                  <li>Angabe einer Konsistenzgrenze - Empfehlung: 1</li>
+                </ul>
+              </ul>
+              <mat-form-field class="example-full-width" appearance="fill">
+                <mat-label>Konsistenzgrenze</mat-label>
+                <input matInput type="number" value="{{consistencyBoundary}}" (input)="setConsistencyBoundary($event)"  />
+              </mat-form-field>
+            </div>
+
+            <div>
+              <ul>
+                <ul>
+                  <li>Angabe einer Konsistenzstrategie - Empfehlung: Setze neues Bündel</li>
+                </ul>
+              </ul>
+              <section class="example-section">
+                <label class="example-margin">Konsistenzstrategie</label>
+                <mat-radio-group [(ngModel)]="setNewBundleLabelPosition">
+                  <mat-radio-button class="example-margin" [value]="true">Setze neues Bündel</mat-radio-button>
+                  <mat-radio-button class="example-margin" [value]="false">Behalte altes Bündel</mat-radio-button>
+                </mat-radio-group>
+              </section>
+            </div>
+
+            <div style="height: 20px"></div>
+            <ul>
+              <li>Starten Sie die Bündelgeneration</li>
+            </ul>
 
 
-  <div style="display: flex; justify-content: space-between">
-    <div>
-      <button mat-raised-button color="" (click)="fileInput.click()">Konsistenzmatrix hochladen</button>
-      <input hidden type="file" (change)="uploadConsistencyMatrix($event)" #fileInput id="file">
+            <button mat-raised-button color="" (click)="createBundles($event)">Erstelle konsistente Strategiebündel</button>
 
-      <div style="height: 25px"></div>
+            <div style="height: 50px"></div>
 
-      <ng-container *ngIf="consistencyMatrix">
-        <div>
-          <ng-container *ngIf="consistencyMatrixStored">
-            Ihre Konsistenzmatrix wurde erfolgreich aus dem Backendspeicher geladen. Sie hat folgende Parameter:
+            <ng-container *ngIf="bundleMatrix">
+              <div>
+                Innerhalb von [{{bundleMatrix.iterations}}] Iterationen wurden [{{bundleMatrix.bundles.length}}] Bündel erstellt.
+              </div>
+            </ng-container>
+
+            <div style="height: 50px"></div>
+
+            <ul>
+              <li>Laden Sie die generierten Bündel bei Bedarf herunter</li>
+              <ul>
+                <li>Laufzeitbedarf und Speicherbedarf hängt von der Anzahl der gespeicherten Bündel und der Optionskombinationen pro Bündel ab</li>
+                <li>Beispiel: 4000 Bündel von einer Konsistenzmatrix mit 10 Variablen, je 5 Optionen: 200MB - 20 Sekunden</li>
+              </ul>
+            </ul>
+
+<!--            asdkjkhjasdkfkasdfkjasdfsdksdfkasdkbfjbjkffbhjkffsdkabjkdsfkjbfdjkbnsdjsfdajbdsabnjkdsfabkjdfsabjkfasdbjkasdbkjasdfbkjdsfabdjkfssdfbjkfdsbjkasdfbsdfdsbdbdsdjkfbjkdasbjkasdfbjkdsfabjkfsdbdsdfdsbjkfdfsbjk-->
+<!--            asfhashfhjkafshjfdshjkfdsahjkdfshjkfdfashjkdfashjkdsfahjkldfashjkldfsahjkdfsahjkldfashjkdfsahjkdfashjkdfashjklfdsahjklfdsahjkdsahjkdfsahjkfdshjkdjkfdshjkfdsdkfkhj-->
+
+            <div style="height: 25px"></div>
+            <button mat-raised-button color="" (click)="downloadBundles($event)">Download konsistente Strategiebündel</button>
+
+
+          </div>
+          <div style="padding-top: 50px">
+            <button mat-raised-button matStepperNext color="primary">Zum nächsten Schritt</button>
+          </div>
+        </mat-step>
+
+        <mat-step label="Clusteranalyse">
+          <div style="text-align: center">
+            <h2 style="font-weight: normal">Durchführen einer Clusteranalyse</h2>
+          </div>
+
+          <ul>
+            <li>Spezifizieren Sie einige Parameter:</li>
+          </ul>
+
+          <div>
+            <ul>
+              <ul>
+                <li>Bitte geben Sie das Clusterverfahren an, mit dem die Clusteranalyse erfolgen soll.</li>
+              </ul>
+            </ul>
+            <mat-form-field appearance="fill">
+              <mat-label>Clusterverfahren</mat-label>
+              <mat-select [(ngModel)]="selectedClusterAlgorithm">
+                <mat-option *ngFor="let clusterAlgorithm of clusterAlgorithms" [value]="clusterAlgorithm.value">
+                  {{clusterAlgorithm.viewValue}}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+
+          <div>
+            <ul>
+              <ul>
+                <li>Bitte geben Sie zum Clusteralgorithmus das zu verwendende Distanzmaß an.</li>
+              </ul>
+            </ul>
+            <mat-form-field appearance="fill">
+              <mat-label>Clusterverfahren</mat-label>
+              <mat-select [(ngModel)]="selectedDistanceAlgorithm">
+                <mat-option *ngFor="let distanceAlgorithm of distanceMeasurements" [value]="distanceAlgorithm.value">
+                  {{distanceAlgorithm.viewValue}}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+
+
+
+
+          <div>
+            <ul>
+              <ul>
+                <li>Für die Clusteranalyse geben Sie bitte die zu betrachtete minimale Clusteranzahl und maximale Clusteranzahl an.</li>
+                <li>Empfohlen ist eine Clusteranalyse im Bereich 1-10.</li>
+                <li>Minimale Grenze: [1]</li>
+              </ul>
+            </ul>
+            <mat-form-field class="example-full-width" appearance="fill">
+              <mat-label>Minimale Clusterzahl</mat-label>
+              <input matInput type="number" value="{{minConsideredClusters}}" (input)="setMinConsideredClusters($event)"  />
+            </mat-form-field>
+            <ul>
+              <ul>
+                <li>Maximale Grenze: [{{this.bundleMatrix?.bundles?.length}}]</li>
+              </ul>
+            </ul>
+            <mat-form-field class="example-full-width" appearance="fill">
+              <mat-label>Maximale Clusterzahl</mat-label>
+              <input matInput type="number" value="{{maxConsideredClusters}}" (input)="setMaxConsideredClusters($event)"  />
+            </mat-form-field>
+            <div style="height: 20px"></div>
+          </div>
+
+
+          <button mat-raised-button color="" (click)="startClusteranalysis($event)">Starte Clusteranalyse (Ellenbogen-Methode)</button>
+
+          <div style="height: 50px"></div>
+
+          <ng-container *ngIf="!dictIsEmpty(clusterAnalysisResults)">
+            <div>
+              <app-basic-line-chart [data]="getScatterPlotInput(clusterAnalysisResults)"></app-basic-line-chart>
+            </div>
+
+            <div style="height: 50px"></div>
+
+            <ul>
+              <li>Bitte entnehmen Sie der Ellenbogenkurve eine angemessene Clusteranzahl und geben Sie diese für folgende Berechnungen an.</li>
+              <ul>
+                <li>Die Anzahl muss zwischen [{{minConsideredClusters}}] und [{{getMaxClusterNumber()}}] liegen.</li>
+              </ul>
+            </ul>
+            <div style="height: 10px"></div>
+            <mat-form-field class="example-full-width" appearance="fill">
+              <mat-label>Anzahl der Cluster</mat-label>
+              <input matInput type="number" min="{{minConsideredClusters}}" max="{{maxConsideredClusters}}" (keypress)="setSelectedNumberOfClusters($event)" value="{{selectedNumberOfClusters}}" (input)="setSelectedNumberOfClusters($event)"  />
+            </mat-form-field>
+            <div style="height: 25px"></div>
+            Aktuell wurde intern die Clusteranalyse für [{{selectedNumberOfClusters}}] Cluster registriert. Somit wird mit den Ergebnissen dieser Analyse nachfolgend weiter gearbeitet.
           </ng-container>
-          <ng-container *ngIf="!consistencyMatrixStored">
-            Ihre Konsistenzmatrix wurde erfolgreich hochgeladen. Sie hat folgende Parameter:
-          </ng-container>
+
+          <div style="height: 100px"></div>
+
+          <ul>
+            <li>Alternativ können Sie die Clusteranalyse in einem externen Werkzeug erstellen und die Ergebnisse hier hochladen.</li>
+          </ul>
 
           <div style="height: 25px"></div>
-          <div>
-            Anzahl Variablen: [{{getNumberOfVariablesConsistencyMatrix()}}]
+          <button mat-raised-button color="" (click)="clusterMembershipMatrixInput.click()">ClusterMembership-Matrix hochladen</button>
+          <input hidden type="file" (change)="uploadClusterMembershipMatrix($event)" #clusterMembershipMatrixInput id="uploadClusterMembershipMatrix">
+
+          <div style="height: 25px"></div>
+
+          <ng-container *ngIf="clusterMembershipMatrix">
+            <div>
+              Ihre ClusterMembershipMatrix wurde erfolgreich hochgeladen.
+            </div>
+          </ng-container>
+          <div style="padding-top: 50px">
+            <button mat-raised-button matStepperNext color="primary">Zum nächsten Schritt</button>
           </div>
-          <div style="height: 10px"></div>
-          <div>
-            Anzahl Optionen: [{{getNumberOfOptionsConsistencyMatrix()}}]
-          </div>
-        </div>
-      </ng-container>
-    </div>
+        </mat-step>
 
-    <div>
-      <div *ngIf="user && this.consistencyMatrix">
-        <div *ngIf="!consistencyMatrix_id">
-          <button mat-raised-button color="" class="save-maturity-model-button" (click)="saveConsistencyMatrixToggle()">Speichern Sie die hochgeladene Konsistenzmatrix</button>
-        </div>
-      </div>
-      <div *ngIf="!user">
-        <button mat-raised-button color="" [disabled]="true" class="save-maturity-model-button">Einloggen zum Speichern!</button>
-      </div>
-    </div>
-  </div>
-          </div>
-  <div style="padding-top: 50px">
-    <button mat-raised-button matStepperNext color="primary">Zum nächsten Schritt</button>
-  </div>
-  </mat-step>
-      <mat-step label="Strategiebündelerstellung">
-    <!--      <div>-->
-    <!--      Bitte geben Sie ebenfalls ein Limit für die Anzahl der zu speichernden (konsistentesten) Bündel an.-->
-    <!--      Dies ist notwendig da die Anzahl der Bündel und der Optionskombinationen pro Bündel speicherintensiv ist und der Browser ein Limit von ca. 2GB hat.-->
-    <!--      Beispiel: 10 Variablen je 5 Optionen = 45 Mio. Speichereinheiten. 45 Mio * 4 Byte = ca. 180 MB Rohspeicherplatz.-->
-    <!--      Empfohlen ist ein Limit auf ca. 4.000 Bündel um eine verzögerungsfreie Betrachtung zu gewährleisten.-->
-    <!--      <br>-->
-    <!--      Bitte geben Sie dazu noch eine Konsistenzgrenze an. Die beschreibt ab welchem Konsistenzwert einer Optionskombination das Bündel als konsistent angesehen wird.-->
-    <!--      Beispiel: Konsistenzgrenze=1 (empfohlen). Das heißt ab einem Konsistenzwert von größer 1 wird die Optionskombination eines Bündels als konsistent betrachtet.-->
-    <!--      <br>-->
-    <!--      Bitte geben Sie zusätzlich noch eine Strategie zum Umgang mit gleichem Konsistentwert an: Sollen bei vollem Bündelspeicher und gleichem Konsistenzwert eines Bündels ("neues Bündel")-->
-    <!--      mit einem Bündel im Bündelspeicher mit dem minimalsten Konsistenzwert ("altes Bündel") das neue Bündel aufgenommen und das alte Bündel gelöscht werden (default) oder das alte Bündel behalten werden?-->
-    <div style="padding: 50px">
-      <div style="text-align: center">
-        <h2 style="font-weight: normal">Generierung der Strategiebündel</h2>
-      </div>
-      <ul>
-        <li>Gehen Sie die folgenden notwendigen Fakten durch</li>
-        <ul>
-          <li>Die Bündelerstellung erstellt für jede mögliche Optionskombination ein mögliches Bündel</li>
-          <li>Mit Variablen (v) und Optionen (o) sind Schritte notwendig: o^v * (v/2) (v-1)</li>
-          <li>Schritte wachsen exponentiell mit Anzahl der Variablen und polynomiell mit Anzahl der Optionen</li>
-          <li>10 Mrd. Schritte = 10min</li>
-          <li>Laufzeit- und Speicher-Limitierungen großer Konsistenzmatrizen optional folgend möglich</li>
-        </ul>
-        <li>Spezifizieren Sie einige Parameter:</li>
-      </ul>
-
-    <div style="height: 25px"></div>
-    <div>
-      <ul>
-        <li>Limit der Iterationen (1 Iteration = 1 mögliches Bündel) - Empfehlung: 500000</li>
-        <ul *ngIf="consistencyMatrix">
-          <li>Für die aktuelle Konsistenzmatrix sind maximal: [{{getMaxIterations()}}] Bündel / Iterationen zu durchlaufen.</li>
-          <li>Die Gleiche Anzahl an Bündeln ist maximal speicherbar.</li>
-        </ul>
-      </ul>
-      <br>
-      <mat-form-field class="example-full-width" appearance="fill">
-        <mat-label>Maximale Iterationen</mat-label>
-        <input matInput type="number" value="{{maxIterations}}" (input)="setMaxIterations($event)"  />
-      </mat-form-field>
-    </div>
-
-    <div style="height: 20px"></div>
-    <div>
-      <ul>
-        <ul>
-          <li>Limit für die Anzahl der zu speichernden (konsistentesten) Bündel - Empfehlung: 4000</li>
-        </ul>
-      </ul>
-      <br>
-      <mat-form-field class="example-full-width" appearance="fill">
-        <mat-label>Größe Bündelspeicher</mat-label>
-        <input matInput type="number" value="{{maxStoredBundles}}" (input)="setMaxStoredBundles($event)"  />
-      </mat-form-field>
-    </div>
-
-    <div>
-      <ul>
-        <ul>
-          <li>Angabe einer Konsistenzgrenze - Empfehlung: 1</li>
-        </ul>
-      </ul>
-      <br>
-      <mat-form-field class="example-full-width" appearance="fill">
-        <mat-label>Konsistenzgrenze</mat-label>
-        <input matInput type="number" value="{{consistencyBoundary}}" (input)="setConsistencyBoundary($event)"  />
-      </mat-form-field>
-    </div>
-
-    <div>
-      <ul>
-        <ul>
-          <li>Angabe einer Konsistenzstrategie - Empfehlung: Setze neues Bündel</li>
-        </ul>
-      </ul>
-      <br>
-      <section class="example-section">
-        <label class="example-margin">Konsistenzstrategie</label>
-        <mat-radio-group [(ngModel)]="setNewBundleLabelPosition">
-          <mat-radio-button class="example-margin" [value]="true">Setze neues Bündel</mat-radio-button>
-          <mat-radio-button class="example-margin" [value]="false">Behalte altes Bündel</mat-radio-button>
-        </mat-radio-group>
-      </section>
-    </div>
-
-    <div style="height: 20px"></div>
-    <ul>
-      <li>Starten Sie die Bündelgeneration</li>
-    </ul>
-
-
-    <button mat-raised-button color="" (click)="createBundles($event)">Erstelle konsistente Strategiebündel</button>
-
-    <div style="height: 50px"></div>
-
-    <ng-container *ngIf="bundleMatrix">
-      <div>
-        Innerhalb von [{{bundleMatrix.iterations}}] Iterationen wurden [{{bundleMatrix.bundles.length}}] Bündel erstellt.
-      </div>
-    </ng-container>
-
-    <div style="height: 50px"></div>
-
-    <ul>
-      <li>Laden Sie die generierten Bündel bei Bedarf herunter</li>
-      <ul>
-        <li>Laufzeitbedarf und Speicherbedarf hängt von der Anzahl der gespeicherten Bündel und der Optionskombinationen pro Bündel ab</li>
-        <li>Beispiel: 4000 Bündel von einer Konsistenzmatrix mit 10 Variablen, je 5 Optionen: 200MB - 20 Sekunden</li>
-      </ul>
-    </ul>
-
-    <div style="height: 25px"></div>
-    <button mat-raised-button color="" (click)="downloadBundles($event)">Download konsistente Strategiebündel</button>
-
-
-
-</div>
-    <div style="padding-top: 50px">
-      <button mat-raised-button matStepperNext color="primary">Zum nächsten Schritt</button>
-    </div>
-  </mat-step>
-      <mat-step label="Clusteranalyse">
-    <div style="text-align: center">
-      <h2 style="font-weight: normal">Durchführen einer Clusteranalyse</h2>
-    </div>
-    <div style="height: 100px"></div>
-
-    <h5>
-      Clusteranalyse
-    </h5>
-    <div>
-      Für die Clusteranalyse gibt es einige Parameter. Bitten legen Sie diese nachfolgend fest.
-    </div>
-    <div>
-      Bitte geben Sie das Clusterverfahren an, mit dem die Clusteranalyse erfolgen soll.
-      <br>
-      <mat-form-field appearance="fill">
-        <mat-label>Clusterverfahren</mat-label>
-        <mat-select [(ngModel)]="selectedClusterAlgorithm">
-          <mat-option *ngFor="let clusterAlgorithm of clusterAlgorithms" [value]="clusterAlgorithm.value">
-            {{clusterAlgorithm.viewValue}}
-          </mat-option>
-        </mat-select>
-      </mat-form-field>
-    </div>
-    <div>
-      Bitte geben Sie zum Clusteralgorithmus das zu verwendende Distanzmaß an.
-      <br>
-      <mat-form-field appearance="fill">
-        <mat-label>Clusterverfahren</mat-label>
-        <mat-select [(ngModel)]="selectedDistanceAlgorithm">
-          <mat-option *ngFor="let distanceAlgorithm of distanceMeasurements" [value]="distanceAlgorithm.value">
-            {{distanceAlgorithm.viewValue}}
-          </mat-option>
-        </mat-select>
-      </mat-form-field>
-    </div>
-    <div>
-      Für die Clusteranalyse geben Sie bitte die zu betrachtete minimale Clusteranzahl und maximale Clusteranzahl an.
-      <br>
-      Empfohlen ist eine Clusteranalyse im Bereich 1-10.
-      <br>
-      <div style="height: 20px"></div>
-
-      Minimale Grenze: [1]
-      <div style="height: 20px"></div>
-
-      <div style="height: 10px"></div>
-      <mat-form-field class="example-full-width" appearance="fill">
-      <mat-label>Minimale Clusterzahl</mat-label>
-      <input matInput type="number" value="{{minConsideredClusters}}" (input)="setMinConsideredClusters($event)"  />
-      </mat-form-field>
-      <div style="height: 20px"></div>
-
-      Maximale Grenze: [{{this.bundleMatrix?.bundles?.length}}]
-      <div style="height: 20px"></div>
-
-      <mat-form-field class="example-full-width" appearance="fill">
-        <mat-label>Maximale Clusterzahl</mat-label>
-      <input matInput type="number" value="{{maxConsideredClusters}}" (input)="setMaxConsideredClusters($event)"  />
-      </mat-form-field>
-      <div style="height: 20px"></div>
-    </div>
-
-
-    <button mat-raised-button color="" (click)="startClusteranalysis($event)">Starte Clusteranalyse (Ellenbogen-Methode)</button>
-
-    <div style="height: 50px"></div>
-
-    <ng-container *ngIf="clusterAnalysisRunning">
-      <div>
-        Berechnungen der Clusteranalyse laufen...
-      </div>
-    </ng-container>
-
-    <ng-container *ngIf="!dictIsEmpty(clusterAnalysisResults)">
-      <div>
-        <app-basic-line-chart [data]="getScatterPlotInput(clusterAnalysisResults)"></app-basic-line-chart>
-      </div>
-
-      <div style="height: 50px"></div>
-      Bitte entnehmen Sie der Ellenbogenkurve eine angemessene Clusteranzahl und geben Sie diese für folgende Berechnungen an.
-      <br>
-      Die Anzahl muss zwischen [{{minConsideredClusters}}] und [{{getMaxClusterNumber()}}] liegen.
-      <br>
-      <div style="height: 10px"></div>
-      <mat-form-field class="example-full-width" appearance="fill">
-        <mat-label>Anzahl der Cluster</mat-label>
-      <input matInput type="number" min="{{minConsideredClusters}}" max="{{maxConsideredClusters}}" (keypress)="setSelectedNumberOfClusters($event)" value="{{selectedNumberOfClusters}}" (input)="setSelectedNumberOfClusters($event)"  />
-      </mat-form-field>
-      <div style="height: 25px"></div>
-      Aktuell wurde intern die Clusteranalyse für [{{selectedNumberOfClusters}}] Cluster registriert. Somit wird mit den Ergebnissen dieser Analyse nachfolgend weiter gearbeitet.
-    </ng-container>
-
-    <div style="height: 100px"></div>
-    Alternativ können Sie die Clusteranalyse in einem externen Werkzeug erstellen und die Ergebnisse hier hochladen.
-    <div style="height: 25px"></div>
-    <button mat-raised-button color="" (click)="clusterMembershipMatrixInput.click()">ClusterMembership-Matrix hochladen</button>
-    <input hidden type="file" (change)="uploadClusterMembershipMatrix($event)" #clusterMembershipMatrixInput id="uploadClusterMembershipMatrix">
-
-    <div style="height: 25px"></div>
-
-    <ng-container *ngIf="clusterMembershipMatrix">
-      <div>
-        Ihre ClusterMembershipMatrix wurde erfolgreich hochgeladen.
-      </div>
-    </ng-container>
-    <div style="padding-top: 50px">
-      <button mat-raised-button matStepperNext color="primary">Zum nächsten Schritt</button>
-    </div>
-  </mat-step>
-      <mat-step label="Ausprägungsmatrix">
+        <mat-step label="Ausprägungsmatrix">
           <div style="text-align: center">
             <h2 style="font-weight: normal">Erstellung einer Ausprägungsmatrix</h2>
           </div>
-      <div style="height: 25px"></div>
 
-    <button mat-raised-button color="" (click)="createBundleUsageMatrix($event)">Erstelle Ausprägungsmatrix</button>
+          <ul>
+            <li>Lassen Sie Ihre Ausprägungsmatrix berechnen</li>
+          </ul>
+          <button mat-raised-button color="" (click)="createBundleUsageMatrix($event)">Erstelle Ausprägungsmatrix</button>
 
-    <div style="height: 25px"></div>
+          <div style="height: 25px"></div>
 
-    <ng-container *ngIf="bundleUsageMatrix">
-      <div>
-        Die Ausprägungsmatrix wurde erstellt.
-      </div>
-    </ng-container>
+          <ng-container *ngIf="bundleUsageMatrix">
+            <div>
+              Die Ausprägungsmatrix wurde erstellt.
+            </div>
+          </ng-container>
 
-    <div style="height: 25px"></div>
+          <div style="height: 25px"></div>
 
-    <button mat-raised-button color="" (click)="downloadBundleUsageMatrix($event)">Ausprägungsmatrix herunterladen</button>
+          <ul>
+            <li>Laden die Ausprägungsmatrix herunter</li>
+          </ul>
+          <button mat-raised-button color="" (click)="downloadBundleUsageMatrix($event)">Ausprägungsmatrix herunterladen</button>
 
-    <div style="height: 25px"></div>
+          <div style="height: 50px"></div>
 
-  <div style="height: 25px"></div>
+          <ul>
+            <li>Visualisieren Sie das Ergebnis mit einer Multidimensionalen Skalierung</li>
+          </ul>
+          <button mat-raised-button color="" (click)="calculateMds($event)">Berechne Multidimensionale Skalierung zur Visualisierung</button>
 
-  <button mat-raised-button color="" (click)="calculateMds($event)">Berechne Multidimensionale Skalierung zur Visualisierung</button>
+          <div style="height: 25px"></div>
 
-  <div style="height: 25px"></div>
+          <!--  <ng-container *ngIf="mdsData && mdsData.length > 0">-->
+          <div>
+            <app-scatter-plot-mds [data]="mdsData"></app-scatter-plot-mds>
+          </div>
 
-<!--  <ng-container *ngIf="mdsData && mdsData.length > 0">-->
-    <div>
-      <app-scatter-plot-mds [data]="mdsData"></app-scatter-plot-mds>
+          <div style="padding-top: 50px">
+            <button mat-raised-button matStepperPrevious color="primary" style="margin-right: 20px">Zurück</button>
+            <button mat-raised-button color="primary" (click)="stepper.reset()">Prozess zurücksetzen</button>
+          </div>
+        </mat-step>
+      </mat-horizontal-stepper>
     </div>
-    <div>
-      Die Multidimensionale Skalierung wurde erfolgreich berechnet. Die Visualisierung der berechneten Koordinaten wird dargestellt.
-    </div>
-
-      <div style="padding-top: 50px">
-        <button mat-raised-button matStepperPrevious color="primary" style="margin-right: 20px">Zurück</button>
-        <button mat-raised-button color="primary" (click)="stepper.reset()">Prozess zurücksetzen</button>
-      </div>
-    </mat-step>
-    </mat-horizontal-stepper>
-  </div>
-</mat-drawer-container>
+  </mat-drawer-container>
+</div>
