@@ -66,7 +66,7 @@
             <div style="display: flex; justify-content: space-between">
               <div>
                 <button mat-raised-button color="" (click)="fileInput.click()">Konsistenzmatrix hochladen</button>
-                <input hidden type="file" (change)="uploadConsistencyMatrix($event)" #fileInput id="file">
+                <input hidden type="file" (input)="uploadConsistencyMatrix($event)" #fileInput id="file">
 
                 <div style="height: 25px"></div>
 
@@ -299,7 +299,7 @@
 
           <div style="height: 50px"></div>
 
-          <ng-container *ngIf="!dictIsEmpty(clusterAnalysisResults)">
+          <ng-container *ngIf="clusterAnalysisResults && !dictIsEmpty(clusterAnalysisResults)">
             <div>
               <app-basic-line-chart [data]="getScatterPlotInput(clusterAnalysisResults)"></app-basic-line-chart>
             </div>
@@ -329,7 +329,7 @@
 
           <div style="height: 25px"></div>
           <button mat-raised-button color="" (click)="clusterMembershipMatrixInput.click()">ClusterMembership-Matrix hochladen</button>
-          <input hidden type="file" (change)="uploadClusterMembershipMatrix($event)" #clusterMembershipMatrixInput id="uploadClusterMembershipMatrix">
+          <input hidden type="file" (input)="uploadClusterMembershipMatrix($event)" #clusterMembershipMatrixInput id="uploadClusterMembershipMatrix">
 
           <div style="height: 25px"></div>
 
@@ -378,7 +378,7 @@
           <div style="height: 25px"></div>
 
           <!--  <ng-container *ngIf="mdsData && mdsData.length > 0">-->
-          <div>
+          <div *ngIf="mdsData">
             <app-scatter-plot-mds [data]="mdsData"></app-scatter-plot-mds>
           </div>
 
@@ -395,7 +395,11 @@
           <div>
             <div style="height: 25px"></div>
           <ul>
-            <li>Verwendete Konsistenzmatrix</li>
+            <li>Eigenschaften Konsistenzmatrix</li>
+            <ul *ngIf="consistencyMatrix">
+              <li>Anzahl Variablen: [{{getNumberOfVariablesConsistencyMatrix()}}]</li>
+              <li>Anzahl Optionen: [{{getNumberOfOptionsConsistencyMatrix()}}]</li>
+            </ul>
           </ul>
           </div>
 
@@ -411,6 +415,14 @@
             <div style="height: 25px"></div>
           <ul>
             <li>Ergebnisse des Clusterings</li>
+            <ul *ngIf="!dictIsEmpty(clusterAnalysisResults)">
+              <li>Metadaten:</li>
+              <ul>
+                <li>Clusterverfahren: {{selectedClusterAlgorithm}}</li>
+                <li>Distanzmaß: {{returnCurrentDistanceMeasure()}}</li>
+              </ul>
+              <li>Festgelegte Clusterzahl: {{selectedNumberOfClusters}}</li>
+            </ul>
           </ul>
           </div>
 
@@ -425,7 +437,7 @@
 
           <div style="padding-top: 50px">
             <button mat-raised-button matStepperPrevious color="primary" style="margin-right: 20px">Zurück</button>
-            <button mat-raised-button color="primary" (click)="stepper.reset()">Prozess zurücksetzen</button>
+            <button mat-raised-button color="primary" (click)="resetProcess()">Prozess zurücksetzen</button>
           </div>
         </mat-step>
       </mat-horizontal-stepper>

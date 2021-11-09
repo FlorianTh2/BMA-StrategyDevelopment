@@ -66,6 +66,7 @@ export class StrategyDevelopmentComponent implements OnInit, OnDestroy {
   user: User = null;
 
   @ViewChild("drawer") sidenav: MatSidenav;
+  @ViewChild("stepper") stepper;
   showFiller = false;
   saveConsistencyMatrixFormControl = new FormControl();
 
@@ -226,6 +227,7 @@ export class StrategyDevelopmentComponent implements OnInit, OnDestroy {
   uploadConsistencyMatrix(event: Event) {
     const element = event.currentTarget as HTMLInputElement;
     let fileList: FileList | null = element.files;
+    console.log("hi");
     if (fileList) {
       if (fileList.length !== 1) {
         throw new Error("Cannot use multiple files");
@@ -511,7 +513,37 @@ export class StrategyDevelopmentComponent implements OnInit, OnDestroy {
     // });
   }
 
-  downloadExampleConsistencyMatrix($event: MouseEvent) {
-    
+  downloadExampleConsistencyMatrix($event: MouseEvent) {}
+
+  returnCurrentDistanceMeasure(): string {
+    let result = this.distanceMeasurements.filter(
+      (a) => a.value === this.selectedDistanceAlgorithm
+    )[0].viewValue;
+    return result;
+  }
+
+  resetProcess() {
+    this.consistencyMatrix_id = undefined;
+    this.consistencyMatrixStored = undefined;
+    this.workbookKonsistenzmatrix = undefined;
+    this.consistencyMatrixBlob = undefined;
+    this.consistencyMatrix = undefined;
+    this.clusterAnalysisResults = [];
+    this.selectedNumberOfClusters = 1;
+    this.minConsideredClusters = 1;
+    this.maxConsideredClusters = 10;
+    this.maxIterations = 500_000;
+    this.maxStoredBundles = 4_000;
+    this.consistencyBoundary = 1;
+    this.setNewBundleLabelPosition = true;
+    this.selectedClusterAlgorithm = this.clusterAlgorithms[0].value;
+    this.clusterMembershipMatrix = undefined;
+    this.workbookClusterMembershipMatrix = undefined;
+    this.bundleUsageMatrix = undefined;
+    this.mdsData = undefined;
+    this.bundleMatrix = undefined;
+
+    this.stepper.reset();
+    this.markForChangeCheck();
   }
 }
