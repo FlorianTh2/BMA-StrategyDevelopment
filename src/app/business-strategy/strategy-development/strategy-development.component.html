@@ -326,11 +326,16 @@
 
           <ul>
             <li>Alternativ können Sie die Clusteranalyse in einem externen Werkzeug erstellen und die Ergebnisse hier hochladen.</li>
+            <li>Diese muss zur Eingabe-Konsistenzmatrix passen</li>
+            <ul>
+              <li>Ein Beispiel für eine ClusterMembership-Matrix passend für die Vorlage-Konsistenzmatrix können Sie <a href="assets/blobs/cluster_zugehoerigkeit_3_cluster.csv" style="color: black">HIER</a> herunterladen</li>
+            </ul>
           </ul>
 
           <div style="height: 25px"></div>
           <button mat-raised-button color="" (click)="clusterMembershipMatrixInput.click()">ClusterMembership-Matrix hochladen</button>
           <input hidden type="file" (input)="uploadClusterMembershipMatrix($event)" #clusterMembershipMatrixInput id="uploadClusterMembershipMatrix">
+
 
           <div style="height: 25px"></div>
 
