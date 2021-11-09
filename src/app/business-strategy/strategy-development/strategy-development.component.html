@@ -218,9 +218,6 @@
               </ul>
             </ul>
 
-<!--            asdkjkhjasdkfkasdfkjasdfsdksdfkasdkbfjbjkffbhjkffsdkabjkdsfkjbfdjkbnsdjsfdajbdsabnjkdsfabkjdfsabjkfasdbjkasdbkjasdfbkjdsfabdjkfssdfbjkfdsbjkasdfbsdfdsbdbdsdjkfbjkdasbjkasdfbjkdsfabjkfsdbdsdfdsbjkfdfsbjk-->
-<!--            asfhashfhjkafshjfdshjkfdsahjkdfshjkfdfashjkdfashjkdsfahjkldfashjkldfsahjkdfsahjkldfashjkdfsahjkdfashjkdfashjklfdsahjklfdsahjkdsahjkdfsahjkfdshjkdjkfdshjkfdsdkfkhj-->
-
             <div style="height: 25px"></div>
             <button mat-raised-button color="" (click)="downloadBundles($event)">Download konsistente Strategiebündel</button>
 
@@ -271,8 +268,6 @@
               </mat-select>
             </mat-form-field>
           </div>
-
-
 
 
           <div>
@@ -386,6 +381,47 @@
           <div>
             <app-scatter-plot-mds [data]="mdsData"></app-scatter-plot-mds>
           </div>
+
+          <div style="padding-top: 50px">
+            <button mat-raised-button matStepperNext color="primary">Zum nächsten Schritt</button>
+          </div>
+        </mat-step>
+
+        <mat-step label="Ergebnis">
+          <div style="text-align: center">
+            <h2 style="font-weight: normal">Übersicht der Ergebnisse</h2>
+          </div>
+
+          <div>
+            <div style="height: 25px"></div>
+          <ul>
+            <li>Verwendete Konsistenzmatrix</li>
+          </ul>
+          </div>
+
+          <div>
+          <div style="height: 25px"></div>
+          <ul>
+            <li>Erstellte Strategiebündel</li>
+          </ul>
+          <button mat-raised-button color="" (click)="downloadBundles($event)">Konsistente Strategiebündel herunterladen</button>
+          </div>
+
+          <div>
+            <div style="height: 25px"></div>
+          <ul>
+            <li>Ergebnisse des Clusterings</li>
+          </ul>
+          </div>
+
+          <div>
+            <div style="height: 25px"></div>
+          <ul>
+            <li>Generierte Ausprägungsmatrix</li>
+          </ul>
+            <button mat-raised-button color="" (click)="downloadBundleUsageMatrix($event)">Ausprägungsmatrix herunterladen</button>
+          </div>
+
 
           <div style="padding-top: 50px">
             <button mat-raised-button matStepperPrevious color="primary" style="margin-right: 20px">Zurück</button>
